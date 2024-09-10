@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
 const BowlSchema = require("./bowl.model");
-const SideSchema = require("./side.model");
-const DrinkSchema = require("./drink.model");
-const DessertSchema = require("./dessert.model");
 
 const MenuItemSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+  },
+  type: {
+    type: String,
+    required: true,
+    enum: ["bowl", "side", "drink", "dessert", "custom"],
   },
   description: {
     type: String,
@@ -17,9 +19,9 @@ const MenuItemSchema = new mongoose.Schema({
     required: true,
   },
   bowlDetails: BowlSchema,
-  sideDetails: SideSchema,
-  drinkDetails: DrinkSchema,
-  dessertDetails: DessertSchema,
+  drinkSize: {
+    type: String,
+  }, // Only for drinks
   available: {
     type: Boolean,
     default: true,
