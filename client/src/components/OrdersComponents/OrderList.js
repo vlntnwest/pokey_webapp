@@ -1,9 +1,11 @@
 import { Box, Button, Modal, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
-import React from "react";
+import React, { useState } from "react";
 import OrderCard from "./OrderCard";
 import { useTheme } from "@mui/material/styles";
+import { useDispatch } from "react-redux";
+import { toggleArchive } from "../../actions/order.action";
 
 const OrderList = ({ order }) => {
   const theme = useTheme();
@@ -23,10 +25,21 @@ const OrderList = ({ order }) => {
     boxShadow: 24,
   };
 
-  const { archived, tableNumber } = order;
+  const { isArchived, tableNumber, _id } = order;
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const [archived, setArchived] = useState(isArchived);
+  const dispatch = useDispatch();
+
+  const handleOnChange = async () => {
+    try {
+      setArchived(!archived);
+      dispatch(toggleArchive({ id: _id, isArchived: !archived }));
+    } catch (error) {
+      console.error("Error while changing the state", error);
+    }
+  };
 
   if (archived === true)
     return (
@@ -40,7 +53,7 @@ const OrderList = ({ order }) => {
               <PrintIcon />
             </Button>
             <Button>
-              <UnarchiveIcon />
+              <UnarchiveIcon onClick={handleOnChange} />
             </Button>
           </Box>
         </Box>
@@ -51,7 +64,7 @@ const OrderList = ({ order }) => {
           aria-describedby="modal-modal-description"
         >
           <Box style={modalStyle}>
-            <OrderCard order={order} />
+            <OrderCard order={order} test={true} />
           </Box>
         </Modal>
       </>

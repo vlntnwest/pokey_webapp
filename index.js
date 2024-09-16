@@ -2,6 +2,7 @@ const express = require("express");
 const userRoutes = require("./routes/user.routes");
 const menuItemRoutes = require("./routes/menuItems.routes");
 const orderRoutes = require("./routes/order.routes");
+const tableRoutes = require("./routes/table.routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 require("dotenv").config({ path: "./config/.env" });
@@ -36,6 +37,7 @@ app.get("/jwtid", requireAuth, (req, res) => {
 app.use("/api/user", userRoutes);
 app.use("/api/item", menuItemRoutes);
 app.use("/api/order", orderRoutes);
+app.use("/api/table", tableRoutes);
 
 // server
 app.listen(process.env.PORT, () => {

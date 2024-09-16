@@ -7,7 +7,8 @@ router.get("/", orderController.getAllOrders);
 router.get("/:id", orderController.getOrder);
 router.post("/", orderController.createOrder);
 router.delete("/:id", orderController.deleteOrder);
+router.put("/:id/toggle", orderController.toggleOrder);
 
-router.get("/tables/:tableNumber", orderController.getTableOrders);
+router.get("tables/:tableNumber", orderController.getTableOrders);
 
 module.exports = router;

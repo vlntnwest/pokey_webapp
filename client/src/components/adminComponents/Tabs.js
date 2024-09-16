@@ -6,6 +6,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import OrdersContainer from "./OrdersContainer";
 import ArchivedOrders from "./ArchivedOrders";
+import TablesList from "./TablesList";
 
 const AdminTabs = () => {
   const [value, setValue] = React.useState("1");
@@ -30,7 +31,9 @@ const AdminTabs = () => {
         <TabPanel value="2">
           <ArchivedOrders />
         </TabPanel>
-        <TabPanel value="3">Tables</TabPanel>
+        <TabPanel value="3">
+          <TablesList />
+        </TabPanel>
       </TabContext>
     </Box>
   );

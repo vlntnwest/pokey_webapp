@@ -63,3 +63,14 @@ module.exports.getTableOrders = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+module.exports.toggleOrder = async (req, res) => {
+  try {
+    const order = await OrderModel.findById(req.params.id);
+    order.isArchived = !order.isArchived;
+    await order.save();
+    res.json({ message: "Order state updated", isArchived: order.isArchived });
+  } catch (error) {
+    res.status(500).json({ error: "Error toggling order state" });
+  }
+};

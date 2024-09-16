@@ -56,7 +56,7 @@ const OrderSchema = new mongoose.Schema({
   specialInstructions: {
     type: String,
   },
-  archived: {
+  isArchived: {
     type: Boolean,
     default: false,
   },
