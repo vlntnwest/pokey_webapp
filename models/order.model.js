@@ -56,6 +56,10 @@ const OrderSchema = new mongoose.Schema({
   specialInstructions: {
     type: String,
   },
+  archived: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const OrderModel = mongoose.model("Order", OrderSchema);

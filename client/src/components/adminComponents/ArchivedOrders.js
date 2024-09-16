@@ -1,14 +1,19 @@
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  List,
+  ListItem,
+  Stack,
+} from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { isEmpty } from "../../components/Utils";
-import { Alert, CircularProgress } from "@mui/material";
-import { UidContext } from "../../components/AppContext";
-import Box from "@mui/material/Box";
-import Masonry from "@mui/lab/Masonry";
-import OrderCard from "../OrdersComponents/OrderCard";
+import OrderList from "../OrdersComponents/OrderList";
+import { useDispatch, useSelector } from "react-redux";
+import { UidContext } from "../AppContext";
 import { getOrders } from "../../actions/order.action";
+import { isEmpty } from "../Utils";
 
-const OrdersContainer = () => {
+const ArchivedOrders = () => {
   const dispatch = useDispatch();
   const uid = useContext(UidContext);
 
@@ -36,13 +41,11 @@ const OrdersContainer = () => {
     fetchData();
   }, [dispatch, uid]);
 
-  const unarchivedOrders = !isEmpty(ordersData)
-    ? ordersData.filter((order) => !order.archived)
+  const sortedOrders = !isEmpty(ordersData)
+    ? [...ordersData].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      )
     : [];
-
-  const sortedOrders = unarchivedOrders.sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
 
   if (loading) {
     return <CircularProgress />;
@@ -54,13 +57,13 @@ const OrdersContainer = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Masonry columns={4} spacing={2}>
+      <Stack spacing={2}>
         {sortedOrders.map((order, index) => (
-          <OrderCard key={index} order={order} />
+          <OrderList key={index} order={order} />
         ))}
-      </Masonry>
+      </Stack>
     </Box>
   );
 };
 
-export default OrdersContainer;
+export default ArchivedOrders;

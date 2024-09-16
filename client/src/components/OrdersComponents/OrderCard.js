@@ -9,7 +9,7 @@ import { Divider } from "@mui/material";
 import { isEmpty } from "../Utils";
 
 const OrderCard = ({ order }) => {
-  const { items, tableNumber, specialInstructions } = order;
+  const { items, tableNumber, specialInstructions, archived } = order;
 
   return (
     <Card sx={{ minWidth: 275 }}>
@@ -34,9 +34,15 @@ const OrderCard = ({ order }) => {
           </Button>
         </Grid>
         <Grid item size={6}>
-          <Button fullWidth variant="text">
-            Archive
-          </Button>
+          {archived ? (
+            <Button fullWidth variant="text">
+              Unarchive
+            </Button>
+          ) : (
+            <Button fullWidth variant="text">
+              Archive
+            </Button>
+          )}
         </Grid>
       </Grid>
     </Card>
