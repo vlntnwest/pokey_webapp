@@ -1,5 +1,8 @@
 const OrderModel = require("../models/order.model");
 const ObjectID = require("mongoose").Types.ObjectId;
+const EscPosEncoder = require("esc-pos-encoder");
+const WebSocket = require("ws");
+const wss = new WebSocket.Server({ port: 8080 });
 
 module.exports.getAllOrders = async (req, res) => {
   const orders = await OrderModel.find();
@@ -72,5 +75,51 @@ module.exports.toggleOrder = async (req, res) => {
     res.json({ message: "Order state updated", isArchived: order.isArchived });
   } catch (error) {
     res.status(500).json({ error: "Error toggling order state" });
+  }
+};
+
+// WebSocket : Écoute des connexions
+wss.on("connection", (ws) => {
+  console.log("iPad connecté au WebSocket");
+
+  // Écouter les messages reçus du client WebSocket
+  ws.on("message", (message) => {
+    console.log(`Message reçu du client: ${message}`);
+    // Traiter les messages du client si nécessaire
+  });
+
+  // Gestion des erreurs
+  ws.on("error", (error) => {
+    console.error("Erreur WebSocket :", error);
+  });
+
+  // Déconnexion du client
+  ws.on("close", () => {
+    console.log("iPad déconnecté du WebSocket");
+  });
+});
+
+exports.printOrder = async (req, res) => {
+  const { order } = req.body;
+  const orders = [];
+
+  try {
+    // Générer les commandes ESC/POS pour l'impression
+    const encoder = new EscPosEncoder();
+    const escposData = encoder.initialize().text("Hello World!").encode();
+
+    // Envoyer les données à tous les clients connectés via WebSocket
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(Buffer.from(escposData).toString("base64"));
+      }
+    });
+
+    res.json({ message: "Commande envoyée à l'iPad pour impression" });
+  } catch (err) {
+    console.error("Erreur lors de l'impression de la commande :", err);
+    res
+      .status(500)
+      .json({ error: "Erreur lors de l'impression de la commande" });
   }
 };
