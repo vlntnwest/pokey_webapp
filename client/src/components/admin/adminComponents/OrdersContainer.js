@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { isEmpty } from "../../components/Utils";
+import { isEmpty } from "../../Utils";
 import { Alert, CircularProgress } from "@mui/material";
-import { UidContext } from "../../components/AppContext";
+import { UidContext } from "../../AppContext";
 import Box from "@mui/material/Box";
 import Masonry from "@mui/lab/Masonry";
 import OrderCard from "../OrdersComponents/OrderCard";
-import { getOrders } from "../../actions/order.action";
+import { getOrders } from "../../../actions/order.action";
 
 const OrdersContainer = () => {
   const dispatch = useDispatch();

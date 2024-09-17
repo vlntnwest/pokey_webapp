@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import OrderCard from "./OrderCard";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch } from "react-redux";
-import { toggleArchive } from "../../actions/order.action";
+import { toggleArchive } from "../../../actions/order.action";
 
 const OrderList = ({ order }) => {
   const theme = useTheme();
@@ -36,6 +36,7 @@ const OrderList = ({ order }) => {
     try {
       setArchived(!archived);
       dispatch(toggleArchive({ id: _id, isArchived: !archived }));
+      handleClose();
     } catch (error) {
       console.error("Error while changing the state", error);
     }
@@ -64,7 +65,11 @@ const OrderList = ({ order }) => {
           aria-describedby="modal-modal-description"
         >
           <Box style={modalStyle}>
-            <OrderCard order={order} test={true} />
+            <OrderCard
+              order={order}
+              modal={true}
+              handleOnChange={handleOnChange}
+            />
           </Box>
         </Modal>
       </>

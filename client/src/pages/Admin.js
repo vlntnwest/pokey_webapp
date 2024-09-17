@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from "react";
-import LogModal from "../components/Modal/LogModal";
+import LogModal from "../components/admin/Modal/LogModal";
 import { UidContext } from "../components/AppContext";
-import AdminHeader from "../components/adminComponents/AdminHeader";
+import AdminHeader from "../components/admin/adminComponents/AdminHeader";
 import { useDispatch } from "react-redux";
 import { getOrders } from "../actions/order.action";
-import Tabs from "../components/adminComponents/Tabs";
+import Tabs from "../components/admin/adminComponents/Tabs";
 
 const Admin = () => {
   const uid = useContext(UidContext);

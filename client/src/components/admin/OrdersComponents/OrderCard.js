@@ -6,27 +6,28 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
 import ItemsList from "./ItemList";
 import { Divider } from "@mui/material";
-import { isEmpty } from "../Utils";
+import { isEmpty } from "../../Utils";
 import { useDispatch } from "react-redux";
-import { toggleArchive } from "../../actions/order.action";
+import { toggleArchive } from "../../../actions/order.action";
 
-const OrderCard = ({ order, test }) => {
+const OrderCard = ({ order, modal, handleOnChange }) => {
   const { items, tableNumber, specialInstructions, isArchived, _id } = order;
 
   const dispatch = useDispatch();
 
   const [archived, setArchived] = useState(isArchived);
 
-  const handleOnChange = async () => {
+  const handleLocalChange = async () => {
     try {
       setArchived(!archived);
       dispatch(toggleArchive({ id: _id, isArchived: !archived }));
+      handleOnChange();
     } catch (error) {
       console.error("Error while changing the state", error);
     }
   };
 
-  if (archived === false || test === true)
+  if (archived === false || modal === true)
     return (
       <Card sx={{ minWidth: 275 }}>
         <CardContent>
@@ -50,7 +51,7 @@ const OrderCard = ({ order, test }) => {
             </Button>
           </Grid>
           <Grid item size={6}>
-            <Button fullWidth variant="text" onClick={handleOnChange}>
+            <Button fullWidth variant="text" onClick={handleLocalChange}>
               {archived ? "Unarchive" : "Archive"}
             </Button>
           </Grid>
