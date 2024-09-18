@@ -1,8 +1,8 @@
 const OrderModel = require("../models/order.model");
 const ObjectID = require("mongoose").Types.ObjectId;
 const EscPosEncoder = require("esc-pos-encoder");
-const WebSocket = require("ws");
-const wss = new WebSocket.Server({ port: 8080 });
+const net = require("net");
+const NetworkReceiptPrinter = require("esc-pos-encoder");
 
 module.exports.getAllOrders = async (req, res) => {
   const orders = await OrderModel.find();
@@ -78,48 +78,61 @@ module.exports.toggleOrder = async (req, res) => {
   }
 };
 
-// WebSocket : Écoute des connexions
-wss.on("connection", (ws) => {
-  console.log("iPad connecté au WebSocket");
+// Fonction pour générer les données ESC/POS
+function generateEscPosData(order) {
+  if (!order || typeof order !== "string") {
+    throw new Error("La commande doit être une chaîne de caractères");
+  }
 
-  // Écouter les messages reçus du client WebSocket
-  ws.on("message", (message) => {
-    console.log(`Message reçu du client: ${message}`);
-    // Traiter les messages du client si nécessaire
-  });
-
-  // Gestion des erreurs
-  ws.on("error", (error) => {
-    console.error("Erreur WebSocket :", error);
-  });
-
-  // Déconnexion du client
-  ws.on("close", () => {
-    console.log("iPad déconnecté du WebSocket");
-  });
-});
-
-exports.printOrder = async (req, res) => {
-  const { order } = req.body;
-  const orders = [];
+  const encoder = new EscPosEncoder();
 
   try {
-    // Générer les commandes ESC/POS pour l'impression
-    const encoder = new EscPosEncoder();
-    const escposData = encoder.initialize().text("Hello World!").encode();
+    // Initialiser l'imprimante
+    encoder.initialize();
 
-    // Envoyer les données à tous les clients connectés via WebSocket
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(Buffer.from(escposData).toString("base64"));
-      }
+    // Vérifiez que 'order' est une chaîne de caractères valide
+    encoder.align("center").text(order).newline();
+
+    // Couper le papier
+    encoder.cut();
+
+    // Retourner les données encodées
+    return encoder.encode();
+  } catch (err) {
+    console.error("Erreur lors de l'encodage ESC/POS :", err);
+    throw err;
+  }
+}
+
+// Fonction pour envoyer les données à l'imprimante
+async function sendToPrinter(escposData) {
+  return new Promise((resolve, reject) => {
+    const receiptPrinter = new NetworkReceiptPrinter({
+      host: "86.243.245.213",
+      port: 9100,
     });
 
-    res.json({ message: "Commande envoyée à l'iPad pour impression" });
+    receiptPrinter.addEventListener("connected", (device) => {
+      console.log(`Connected to printer`);
+    });
+  });
+}
+
+// Fonction de gestion des commandes
+exports.printOrder = async (req, res) => {
+  const { order } = req.body;
+
+  try {
+    // Générer les données ESC/POS à partir de la commande
+    const escposData = generateEscPosData(order);
+    console.log("Données ESC/POS générées :", escposData);
+
+    // Envoyer les données à l'imprimante
+    await sendToPrinter(escposData);
+
+    res.json({ message: "Commande envoyée pour impression" });
   } catch (err) {
-    console.error("Erreur lors de l'impression de la commande :", err);
-    res
-      .status(500)
-      .json({ error: "Erreur lors de l'impression de la commande" });
+    console.error("Erreur lors de l'impression :", err);
+    res.status(500).json({ error: "Erreur lors de l'impression" });
   }
 };
