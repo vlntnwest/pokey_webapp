@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Switch, Typography, Box } from "@mui/material";
+import { Switch, Typography, TableRow, TableCell } from "@mui/material";
 import axios from "axios";
 
 const TableItem = ({ table }) => {
@@ -19,21 +19,18 @@ const TableItem = ({ table }) => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        width: "50%",
-      }}
-    >
-      <Typography variant="h6">Table {tableNumber}</Typography>
-      <Switch
-        checked={open}
-        onChange={handleOnChange}
-        inputProps={{ "aria-label": `Table ${tableNumber}` }}
-      />
-    </Box>
+    <TableRow>
+      <TableCell>
+        <Typography>Table {tableNumber}</Typography>
+      </TableCell>
+      <TableCell width={1}>
+        <Switch
+          checked={open}
+          onChange={handleOnChange}
+          inputProps={{ "aria-label": `Table ${tableNumber}` }}
+        />
+      </TableCell>
+    </TableRow>
   );
 };
 

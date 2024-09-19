@@ -1,4 +1,10 @@
-import { Alert, Box, CircularProgress, Stack } from "@mui/material";
+import {
+  Alert,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableContainer,
+} from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import OrderList from "../OrdersComponents/OrderList";
 import { useDispatch, useSelector } from "react-redux";
@@ -49,13 +55,15 @@ const ArchivedOrders = () => {
   }
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Stack spacing={2}>
-        {sortedOrders.map((order, index) => (
-          <OrderList key={index} order={order} />
-        ))}
-      </Stack>
-    </Box>
+    <TableContainer>
+      <Table size="small">
+        <TableBody>
+          {sortedOrders.map((order, index) => (
+            <OrderList key={index} order={order} />
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

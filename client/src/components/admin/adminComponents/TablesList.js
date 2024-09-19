@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { UidContext } from "../../AppContext";
 import { getTables } from "../../../actions/table.action";
-import { Alert, Box } from "@mui/material";
+import { Alert, Table, TableBody, TableContainer } from "@mui/material";
 import TableItem from "./TableItem";
 
 const TablesList = () => {
@@ -37,11 +37,15 @@ const TablesList = () => {
     ? [...tablesData].sort((a, b) => a.tableNumber - b.tableNumber)
     : [];
   return (
-    <Box>
-      {sortedTables.map((table, index) => (
-        <TableItem key={index} table={table} />
-      ))}
-    </Box>
+    <TableContainer>
+      <Table size="small">
+        <TableBody>
+          {sortedTables.map((table, index) => (
+            <TableItem key={index} table={table} />
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 
