@@ -41,7 +41,7 @@ const OrdersContainer = () => {
     : [];
 
   const sortedOrders = unarchivedOrders.sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
   );
 
   if (loading) {
@@ -54,7 +54,7 @@ const OrdersContainer = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Masonry columns={4} spacing={2}>
+      <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 4 }} spacing={2} sequential>
         {sortedOrders.map((order, index) => (
           <OrderCard key={index} order={order} />
         ))}

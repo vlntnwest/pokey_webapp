@@ -21,7 +21,6 @@ const SignInForm = () => {
       },
     })
       .then((res) => {
-        console.log(res);
         if (res.data.errors) {
           usernameError.innerHTML = res.data.errors.username;
           passwordError.innerHTML = res.data.errors.password;

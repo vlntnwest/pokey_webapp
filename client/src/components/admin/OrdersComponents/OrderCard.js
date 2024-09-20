@@ -21,7 +21,7 @@ const OrderCard = ({ order, modal, handleOnChange }) => {
     try {
       setArchived(!archived);
       dispatch(toggleArchive({ id: _id, isArchived: !archived }));
-      handleOnChange();
+      if (modal === true) handleOnChange();
     } catch (error) {
       console.error("Error while changing the state", error);
     }
@@ -45,12 +45,12 @@ const OrderCard = ({ order, modal, handleOnChange }) => {
           )}
         </CardContent>
         <Grid container spacing={0}>
-          <Grid item size={6}>
+          <Grid size={6}>
             <Button fullWidth variant="text">
               Print
             </Button>
           </Grid>
-          <Grid item size={6}>
+          <Grid size={6}>
             <Button fullWidth variant="text" onClick={handleLocalChange}>
               {archived ? "Unarchive" : "Archive"}
             </Button>

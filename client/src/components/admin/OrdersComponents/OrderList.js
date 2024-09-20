@@ -1,22 +1,20 @@
-import { Box, Button, Modal, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Modal,
+  TableCell,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import React, { useState } from "react";
 import OrderCard from "./OrderCard";
-import { useTheme } from "@mui/material/styles";
 import { useDispatch } from "react-redux";
 import { toggleArchive } from "../../../actions/order.action";
 
 const OrderList = ({ order }) => {
-  const theme = useTheme();
-  const style = {
-    width: "100%",
-    borderRadius: 50,
-    border: `1px solid ${theme.palette.primary.main}`,
-    padding: 1,
-    display: "flex",
-    justifyContent: "space-between",
-  };
   const modalStyle = {
     position: "absolute",
     top: "50%",
@@ -45,19 +43,23 @@ const OrderList = ({ order }) => {
   if (archived === true)
     return (
       <>
-        <Box sx={style}>
-          <Button onClick={handleOpen}>
-            <Typography variant="h5">Table: {tableNumber}</Typography>
-          </Button>
-          <Box sx={{ alignItems: "center", display: "flex", gap: "8px" }}>
-            <Button>
+        <TableRow>
+          <TableCell component="th" scope="row">
+            <Button variant="text" onClick={handleOpen}>
+              <Typography>Table: {tableNumber}</Typography>
+            </Button>
+          </TableCell>
+          <TableCell width={1}>
+            <IconButton aria-label="print">
               <PrintIcon />
-            </Button>
-            <Button>
-              <UnarchiveIcon onClick={handleOnChange} />
-            </Button>
-          </Box>
-        </Box>
+            </IconButton>
+          </TableCell>
+          <TableCell width={1}>
+            <IconButton aria-label="unarchive" onClick={handleOnChange}>
+              <UnarchiveIcon />
+            </IconButton>
+          </TableCell>
+        </TableRow>
         <Modal
           open={open}
           onClose={handleClose}

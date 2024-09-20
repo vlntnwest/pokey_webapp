@@ -1,4 +1,5 @@
 const OrderModel = require("../models/order.model");
+const { printText } = require("../utils/printer.utils");
 const ObjectID = require("mongoose").Types.ObjectId;
 
 module.exports.getAllOrders = async (req, res) => {
@@ -72,5 +73,22 @@ module.exports.toggleOrder = async (req, res) => {
     res.json({ message: "Order state updated", isArchived: order.isArchived });
   } catch (error) {
     res.status(500).json({ error: "Error toggling order state" });
+  }
+};
+
+module.exports.printOrder = async (req, res) => {
+  const { orderData } = req.body;
+  console.log(orderData);
+
+  if (!orderData) {
+    return res.status(400).json({ error: "No text provided for printing" });
+  }
+
+  try {
+    const result = await printText(orderData);
+    res.status(200).json({ message: result });
+  } catch (error) {
+    console.error("[🧾 THERMAL] Error:", error);
+    res.status(500).json({ error: "Error printing order" });
   }
 };
