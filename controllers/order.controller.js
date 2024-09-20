@@ -1,8 +1,6 @@
 const OrderModel = require("../models/order.model");
+const { printText } = require("../utils/printer.utils");
 const ObjectID = require("mongoose").Types.ObjectId;
-const EscPosEncoder = require("esc-pos-encoder");
-const net = require("net");
-const NetworkReceiptPrinter = require("esc-pos-encoder");
 
 module.exports.getAllOrders = async (req, res) => {
   const orders = await OrderModel.find();
@@ -78,61 +76,18 @@ module.exports.toggleOrder = async (req, res) => {
   }
 };
 
-// Fonction pour générer les données ESC/POS
-function generateEscPosData(order) {
-  if (!order || typeof order !== "string") {
-    throw new Error("La commande doit être une chaîne de caractères");
+module.exports.printOrder = async (req, res) => {
+  const { text } = req.body;
+
+  if (!text) {
+    return res.status(400).json({ error: "No text provided for printing" });
   }
 
-  const encoder = new EscPosEncoder();
-
   try {
-    // Initialiser l'imprimante
-    encoder.initialize();
-
-    // Vérifiez que 'order' est une chaîne de caractères valide
-    encoder.align("center").text(order).newline();
-
-    // Couper le papier
-    encoder.cut();
-
-    // Retourner les données encodées
-    return encoder.encode();
-  } catch (err) {
-    console.error("Erreur lors de l'encodage ESC/POS :", err);
-    throw err;
-  }
-}
-
-// Fonction pour envoyer les données à l'imprimante
-async function sendToPrinter(escposData) {
-  return new Promise((resolve, reject) => {
-    const receiptPrinter = new NetworkReceiptPrinter({
-      host: "86.243.245.213",
-      port: 9100,
-    });
-
-    receiptPrinter.addEventListener("connected", (device) => {
-      console.log(`Connected to printer`);
-    });
-  });
-}
-
-// Fonction de gestion des commandes
-exports.printOrder = async (req, res) => {
-  const { order } = req.body;
-
-  try {
-    // Générer les données ESC/POS à partir de la commande
-    const escposData = generateEscPosData(order);
-    console.log("Données ESC/POS générées :", escposData);
-
-    // Envoyer les données à l'imprimante
-    await sendToPrinter(escposData);
-
-    res.json({ message: "Commande envoyée pour impression" });
-  } catch (err) {
-    console.error("Erreur lors de l'impression :", err);
-    res.status(500).json({ error: "Erreur lors de l'impression" });
+    const result = await printText(text);
+    res.status(200).json({ message: result });
+  } catch (error) {
+    console.error("[🧾 THERMAL] Error:", error);
+    res.status(500).json({ error: "Error printing order" });
   }
 };

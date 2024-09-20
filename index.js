@@ -12,6 +12,7 @@ const cors = require("cors");
 
 const app = express();
 
+// CORS
 const corsOption = {
   origin: process.env.CLIENT_URL,
   credentials: true,
@@ -23,6 +24,7 @@ const corsOption = {
 
 app.use(cors(corsOption));
 
+//Body Parseer
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
