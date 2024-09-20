@@ -77,14 +77,15 @@ module.exports.toggleOrder = async (req, res) => {
 };
 
 module.exports.printOrder = async (req, res) => {
-  const { text } = req.body;
+  const { orderData } = req.body;
+  console.log(orderData);
 
-  if (!text) {
+  if (!orderData) {
     return res.status(400).json({ error: "No text provided for printing" });
   }
 
   try {
-    const result = await printText(text);
+    const result = await printText(orderData);
     res.status(200).json({ message: result });
   } catch (error) {
     console.error("[🧾 THERMAL] Error:", error);
