@@ -1,12 +1,10 @@
 const net = require("net");
 const EscPosEncoder = require("esc-pos-encoder");
 
-// Fonction pour créer un nouveau client d'imprimante
 const createPrinterClient = () => {
   console.log("[🧾 THERMAL] Creating new socket...");
   const client = new net.Socket();
 
-  // Gestion des événements de socket
   client.on("data", (data) => {
     console.log("[🧾 THERMAL] Received:", data.toString("hex"));
   });
@@ -73,7 +71,6 @@ const printText = (orderData) => {
           printData.newline();
         });
 
-        // Ajout des commentaires et de la coupe
         printData
           .text("------------------------------\n")
           .text("Comments\n")
@@ -85,10 +82,8 @@ const printText = (orderData) => {
           .newline()
           .cut();
 
-        // Encoder les données à envoyer au format ESC/POS
         const encodedData = printData.encode();
 
-        // Envoyer les données encodées à l'imprimante
         client.write(Buffer.from(encodedData), () => {
           console.log("[🧾 THERMAL] Sent data to printer");
           client.end();

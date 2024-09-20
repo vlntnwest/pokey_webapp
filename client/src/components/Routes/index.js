@@ -10,7 +10,7 @@ const Index = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/table" element={<Table />} />
+        <Route path="/table/:tableNumber" element={<Table />} />
         <Route path="/*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
