@@ -35,9 +35,10 @@ const theme = createTheme({
       fontFamily: "sans-serif",
     },
     body2: {
-      fontSize: 12,
+      fontSize: 14,
       fontWeight: 400,
       fontFamily: "sans-serif",
+      lineHeight: "19px",
     },
   },
   components: {
@@ -53,6 +54,14 @@ const theme = createTheme({
     MuiButton: {
       defaultProps: {
         variant: "contained",
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          border: "1px solid #0000000a",
+          boxShadow: "none",
+        },
       },
     },
   },

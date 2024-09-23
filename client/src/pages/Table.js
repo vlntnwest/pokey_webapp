@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getTable } from "../actions/table.action";
 import { Alert, Box, Container } from "@mui/material";
 import Popular from "../components/user/Popular";
+import MealCategory from "../components/user/MealCategory";
 
 const Table = () => {
   const dispatch = useDispatch();
@@ -51,8 +52,9 @@ const Table = () => {
   return (
     <>
       <Header />
-      <Box component="main" sx={{ p: 2, height: "200vh" }}>
+      <Box component="main" sx={{ height: "200vh" }}>
         <Popular />
+        <MealCategory />
       </Box>
     </>
   );

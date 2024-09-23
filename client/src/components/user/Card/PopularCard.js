@@ -40,7 +40,7 @@ const PopularCard = ({ meal }) => {
         </Typography>
       </CardContent>
       <CardActions sx={{ paddingTop: 0 }}>
-        <Button variant="outlined" fullWidth sx={{ borderRadius: "4px" }}>
+        <Button variant="outlined" fullWidth>
           <AddIcon />
         </Button>
       </CardActions>

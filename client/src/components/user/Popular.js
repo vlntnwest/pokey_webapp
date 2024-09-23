@@ -35,13 +35,15 @@ const Popular = () => {
   }
 
   return (
-    <>
-      <Typography variant="h2">Populaire</Typography>
+    <Box>
+      <Typography variant="h2" m={2} mt={0}>
+        Populaire
+      </Typography>
       <Box
         sx={{
           display: "flex",
           gap: 1,
-          py: 1,
+          ml: 2,
           overflow: "auto",
           width: "100%",
           scrollSnapType: "x mandatory",
@@ -55,7 +57,7 @@ const Popular = () => {
           <PopularCard key={index} meal={meal} />
         ))}
       </Box>
-    </>
+    </Box>
   );
 };
 
