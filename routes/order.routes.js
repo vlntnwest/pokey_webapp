@@ -12,5 +12,6 @@ router.put("/:id/toggle", orderController.toggleOrder);
 router.get("tables/:tableNumber", orderController.getTableOrders);
 
 router.post("/print-order", orderController.printOrder);
+router.post("/print-pic", orderController.printPic);
 
 module.exports = router;
