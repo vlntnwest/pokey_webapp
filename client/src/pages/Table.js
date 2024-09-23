@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import Header from "../components/user/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { getTable } from "../actions/table.action";
-import { Alert, Container } from "@mui/material";
+import { Alert, Box, Container } from "@mui/material";
+import Popular from "../components/user/Popular";
 
 const Table = () => {
   const dispatch = useDispatch();
@@ -32,7 +33,6 @@ const Table = () => {
   useEffect(() => {
     setIsTableOpen(tableData.isOpen);
   }, [tableData]);
-  console.log(isTableOpen);
 
   if (error) {
     return <Alert severity="error">Error: {error}</Alert>;
@@ -48,7 +48,14 @@ const Table = () => {
       </Container>
     );
 
-  return <Header />;
+  return (
+    <>
+      <Header />
+      <Box component="main" sx={{ p: 2, height: "200vh" }}>
+        <Popular />
+      </Box>
+    </>
+  );
 };
 
 export default Table;

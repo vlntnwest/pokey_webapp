@@ -56,45 +56,42 @@ const CartModal = ({ btnTxt }) => {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={modalVariants}
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-              }}
-            >
-              <Box sx={style}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    id="modal-modal-title"
-                    variant="h6"
-                    component="h2"
+        <Box sx={{ position: "absolute", bottom: 0, left: 0, width: "100%" }}>
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={modalVariants}
+                style={{ width: "100%" }}
+              >
+                <Box sx={style}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
                   >
-                    Text in a modal
+                    <Typography
+                      id="modal-modal-title"
+                      variant="h6"
+                      component="h2"
+                    >
+                      Text in a modal
+                    </Typography>
+                    <IconButton onClick={handleClose}>
+                      <CloseRoundedIcon />
+                    </IconButton>
+                  </Box>
+                  <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                    Duis mollis, est non commodo luctus, nisi erat porttitor
+                    ligula.
                   </Typography>
-                  <IconButton onClick={handleClose}>
-                    <CloseRoundedIcon />
-                  </IconButton>
                 </Box>
-                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                  Duis mollis, est non commodo luctus, nisi erat porttitor
-                  ligula.
-                </Typography>
-              </Box>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Box>
       </Modal>
     </>
   );

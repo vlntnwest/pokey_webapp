@@ -5,8 +5,21 @@ import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 
 const Header = () => {
   return (
-    <>
-      <AppBar style={{ background: "#fff", boxShadow: "none" }}>
+    <Box
+      style={{
+        position: "sticky",
+        top: "0",
+      }}
+    >
+      <AppBar
+        component="nav"
+        style={{
+          background: "#fff",
+          boxShadow: "none",
+          position: "sticky",
+          top: "0",
+        }}
+      >
         <Toolbar>
           <Box sx={{ flexGrow: 1 }}>
             <div
@@ -24,7 +37,7 @@ const Header = () => {
           <CartModal btnTxt={<ShoppingBagOutlinedIcon />} />
         </Toolbar>
       </AppBar>
-    </>
+    </Box>
   );
 };
 
