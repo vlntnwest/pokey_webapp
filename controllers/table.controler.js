@@ -5,6 +5,18 @@ module.exports.getTables = async (req, res) => {
   res.status(200).json(tables);
 };
 
+module.exports.getTable = async (req, res) => {
+  const tableNumber = req.params.tableNumber;
+
+  try {
+    const table = await TableModel.findOne({ tableNumber });
+    res.status(201).json(table);
+  } catch (err) {
+    console.error("Can't find table :", err);
+    res.status(400).send({ err });
+  }
+};
+
 module.exports.createTable = async (req, res) => {
   const { tableNumber } = req.body;
 
@@ -12,7 +24,7 @@ module.exports.createTable = async (req, res) => {
     const table = await TableModel.create({ tableNumber });
     res.status(201).json({ table: table._id });
   } catch (err) {
-    console.error("Erreur lors de la création de la table :", err);
+    console.error("Error while creating table :", err);
     res.status(400).send({ err });
   }
 };
