@@ -26,6 +26,10 @@ const MenuItemSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  picture: {
+    type: String,
+    default: "undefined",
+  },
 });
 
 const MenuItemModel = mongoose.model("MenuItem", MenuItemSchema);

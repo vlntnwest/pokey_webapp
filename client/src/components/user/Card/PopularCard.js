@@ -10,7 +10,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 
 const PopularCard = ({ meal }) => {
-  const { name, price } = meal;
+  const { name, price, picture } = meal;
 
   return (
     <Card
@@ -22,8 +22,8 @@ const PopularCard = ({ meal }) => {
     >
       <CardMedia
         component="img"
-        image="/img/PokebowlCalifornia.webp"
-        alt="Pokey Signature California"
+        image={`/img/${picture}.webp`}
+        alt={name}
         sx={{ aspectRatio: "1/1" }}
       />
       <CardContent
@@ -34,8 +34,10 @@ const PopularCard = ({ meal }) => {
           p: 1,
         }}
       >
-        <Typography variant="h6">{name}</Typography>
-        <Typography sx={{ marginTop: "auto" }}>{price}€</Typography>
+        <Typography variant="body1">{name}</Typography>
+        <Typography variant="body2" sx={{ marginTop: "auto" }}>
+          {price}€
+        </Typography>
       </CardContent>
       <CardActions sx={{ paddingTop: 0 }}>
         <Button variant="outlined" fullWidth sx={{ borderRadius: "4px" }}>
