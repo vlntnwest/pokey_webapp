@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { Switch, Typography, TableRow, TableCell } from "@mui/material";
-import axios from "axios";
+import { useDispatch } from "react-redux";
+import { toggleTables } from "../../../actions/table.action";
 
 const TableItem = ({ table }) => {
+  const dispatch = useDispatch();
   const { tableNumber, isOpen, _id } = table;
 
   const [open, setOpen] = useState(isOpen);
 
   const handleOnChange = async () => {
-    setOpen(!open);
     try {
-      await axios.put(
-        `${process.env.REACT_APP_API_URL}api/table/${_id}/toggle`
-      );
+      setOpen(!open);
+      dispatch(toggleTables({ _id: _id, isOpen: !isOpen }));
     } catch (error) {
       console.error("Error while changing the state", error);
     }
