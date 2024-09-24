@@ -28,7 +28,6 @@ const MenuItemSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
-    default: "undefined",
   },
 });
 

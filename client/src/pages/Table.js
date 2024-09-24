@@ -65,7 +65,7 @@ const Table = () => {
     );
 
   return (
-    <>
+    <Box sx={{ maxWidth: "100%", overflow: "hidden" }}>
       <Header />
       <Box component="main">
         <Popular />
@@ -73,7 +73,7 @@ const Table = () => {
           <MealCategory type={type} key={index} />
         ))}
       </Box>
-    </>
+    </Box>
   );
 };
 

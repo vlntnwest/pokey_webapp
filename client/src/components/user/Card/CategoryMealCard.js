@@ -42,7 +42,7 @@ const CategoryMealCard = ({ meal }) => {
               maxWidth: 100,
             }}
             image={`/img/${picture}.webp`}
-            alt="California"
+            alt={name}
           />
           <Box
             sx={{

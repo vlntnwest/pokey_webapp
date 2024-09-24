@@ -17,7 +17,7 @@ const PopularCard = ({ meal }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        width: 125,
+        minWidth: 125,
       }}
     >
       <CardMedia

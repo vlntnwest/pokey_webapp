@@ -20,7 +20,8 @@ const Popular = () => {
         sx={{
           display: "flex",
           gap: 1,
-          ml: 2,
+          pl: 2,
+          pr: 2,
           overflow: "auto",
           width: "100%",
           scrollSnapType: "x mandatory",

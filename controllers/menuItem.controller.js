@@ -27,7 +27,7 @@ module.exports.getOneItem = async (req, res) => {
 };
 
 module.exports.createItem = async (req, res) => {
-  const { type, name, description, price, bowlDetails } = req.body;
+  const { type, name, description, price, bowlDetails, picture } = req.body;
 
   try {
     const item = await MenuItemModel.create({
@@ -36,6 +36,7 @@ module.exports.createItem = async (req, res) => {
       description,
       price,
       bowlDetails,
+      picture,
     });
     res.status(201).json({ item: item._id });
   } catch (err) {
