@@ -8,12 +8,12 @@ const Popular = () => {
   const mealsData = useSelector((state) => state.mealReducer);
 
   const popularMeal = !isEmpty(mealsData)
-    ? mealsData.filter((meal) => meal.__v === 0)
+    ? mealsData.filter((meal) => meal.isPopular === true)
     : [];
 
   return (
     <Box>
-      <Typography variant="h2" m={2} mt={0}>
+      <Typography variant="h2" m={2}>
         Populaire
       </Typography>
       <Box

@@ -30,7 +30,7 @@ module.exports.printText = (orderData) => {
 
       try {
         const encoder = new EscPosEncoder();
-        // Construire l'ordre d'impression
+
         let printData = encoder
           .initialize()
           .codepage("cp850")

@@ -10,7 +10,7 @@ import React from "react";
 import AddIcon from "@mui/icons-material/Add";
 
 const CategoryMealCard = ({ meal }) => {
-  const { name, description, price, picture } = meal;
+  const { name, description, price, picture, isPopular } = meal;
 
   return (
     <Card>
@@ -26,11 +26,17 @@ const CategoryMealCard = ({ meal }) => {
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
                 overflow: "hidden",
+                pt: 0.5,
               }}
             >
               {description}
             </Typography>
-            <Typography variant="body2">{price}€</Typography>
+            <Typography variant="body2" sx={{ pt: 0.5 }}>
+              {price}€
+              <span style={{ color: "#e67400" }}>
+                {isPopular ? " · Populaire" : null}
+              </span>
+            </Typography>
           </Box>
           <CardMedia
             component="img"

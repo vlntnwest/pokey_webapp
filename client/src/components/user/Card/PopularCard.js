@@ -1,8 +1,8 @@
 import React from "react";
 import {
-  Button,
+  Box,
   Card,
-  CardActions,
+  CardActionArea,
   CardContent,
   CardMedia,
   Typography,
@@ -18,32 +18,54 @@ const PopularCard = ({ meal }) => {
         display: "flex",
         flexDirection: "column",
         minWidth: 125,
+        maxWidth: 125,
       }}
     >
-      <CardMedia
-        component="img"
-        image={`/img/${picture}.webp`}
-        alt={name}
-        sx={{ aspectRatio: "1/1" }}
-      />
-      <CardContent
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          p: 1,
-        }}
+      <CardActionArea
+        sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}
       >
-        <Typography variant="body1">{name}</Typography>
-        <Typography variant="body2" sx={{ marginTop: "auto" }}>
-          {price}€
-        </Typography>
-      </CardContent>
-      <CardActions sx={{ paddingTop: 0 }}>
-        <Button variant="outlined" fullWidth>
-          <AddIcon />
-        </Button>
-      </CardActions>
+        <CardMedia
+          component="img"
+          image={`/img/${picture}.webp`}
+          alt={name}
+          sx={{ aspectRatio: "1/1" }}
+        />
+        <CardContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flexGrow: 1,
+            p: 1,
+            width: "100%",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              flexGrow: 1,
+            }}
+          >
+            {name}
+          </Typography>
+          <Typography variant="body2" sx={{ marginTop: "auto" }}>
+            {price}€
+          </Typography>
+          <Box
+            sx={{
+              border: "1px solid rgba(0, 0, 0, 0.12)",
+              borderRadius: "4px",
+              color: "rgba(0, 0, 0, 0.26)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mt: 1,
+            }}
+            fullWidth
+          >
+            <AddIcon />
+          </Box>
+        </CardContent>
+      </CardActionArea>
     </Card>
   );
 };

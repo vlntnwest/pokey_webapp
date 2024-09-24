@@ -9,6 +9,8 @@ const Header = () => {
       style={{
         position: "sticky",
         top: "0",
+        borderBottom: "1px solid rgba(0,0,0,.08)",
+        zIndex: 10,
       }}
     >
       <AppBar

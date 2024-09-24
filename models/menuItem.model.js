@@ -15,12 +15,17 @@ const MenuItemSchema = new mongoose.Schema({
     type: String,
   },
   price: {
-    type: Number,
+    type: String,
     required: true,
   },
   bowlDetails: BowlSchema,
-  drinkSize: {
-    type: String,
+  drinkInfo: {
+    variant: {
+      type: [String],
+    },
+    size: {
+      type: Number,
+    },
   }, // Only for drinks
   available: {
     type: Boolean,
@@ -28,6 +33,10 @@ const MenuItemSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
+  },
+  isPopular: {
+    type: Boolean,
+    default: false,
   },
 });
 

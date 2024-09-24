@@ -8,18 +8,14 @@ import { Alert, Box, Container } from "@mui/material";
 import Popular from "../components/user/Popular";
 import MealCategory from "../components/user/MealCategory";
 import { getMeals } from "../actions/meal.action";
-import { isEmpty } from "../components/Utils";
 
 const Table = () => {
   const dispatch = useDispatch();
   const { tableNumber } = useParams();
   const tableData = useSelector((state) => state.tableReducer);
-  const detailsData = useSelector((state) => state.detailsReducer);
   const [isTableOpen, setIsTableOpen] = useState(false);
 
-  const types = !isEmpty(detailsData)
-    ? detailsData.map((detail) => detail.type)
-    : [];
+  const types = ["bowl", "custom", "side", "dessert", "drink"];
 
   const [error, setError] = useState(null);
 
@@ -65,7 +61,7 @@ const Table = () => {
     );
 
   return (
-    <Box sx={{ maxWidth: "100%", overflow: "hidden" }}>
+    <Box>
       <Header />
       <Box component="main">
         <Popular />

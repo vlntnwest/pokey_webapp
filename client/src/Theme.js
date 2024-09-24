@@ -10,6 +10,9 @@ const theme = createTheme({
     secondary: {
       main: "#cbdaf1",
     },
+    background: {
+      default: "rgba(208, 208, 208, 0.12)",
+    },
   },
   typography: {
     fontFamily: "Roboto Condensed",
@@ -49,6 +52,10 @@ const theme = createTheme({
           src: local('Roboto Condesed'), local('Roboto-Condesed-Regular'), url(${RobotoCondensed}) format('ttf');
           unicodeRange: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF;
         }
+          html,
+          body {
+            overscroll-behavior: none; 
+          }
       `,
     },
     MuiButton: {
