@@ -5,8 +5,10 @@ const menuItemController = require("../controllers/menuItem.controller");
 const router = express.Router();
 
 router.get("/", menuItemController.getAllItems);
+router.get("/details", menuItemController.getItemsDetails);
 router.get("/:id", menuItemController.getOneItem);
 router.post("/", menuItemController.createItem);
+router.post("/details", menuItemController.createItemDeatils);
 router.put("/:id", menuItemController.updateItem);
 router.delete("/:id", menuItemController.deleteItem);
 

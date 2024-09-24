@@ -1,38 +1,15 @@
-import { Alert, Box, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Typography } from "@mui/material";
+import React from "react";
 import PopularCard from "./Card/PopularCard";
-import { useDispatch, useSelector } from "react-redux";
-import { getMeals } from "../../actions/meal.action";
+import { useSelector } from "react-redux";
 import { isEmpty } from "../Utils";
 
 const Popular = () => {
   const mealsData = useSelector((state) => state.mealReducer);
-  const dispatch = useDispatch();
-  const [error, setError] = useState();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await dispatch(getMeals());
-      } catch (error) {
-        setError(
-          error.response
-            ? error.response.data.error
-            : "Error fetching tables data"
-        );
-      }
-    };
-
-    fetchData();
-  }, [dispatch]);
 
   const popularMeal = !isEmpty(mealsData)
     ? mealsData.filter((meal) => meal.__v === 0)
     : [];
-
-  if (error) {
-    return <Alert severity="error">Error: {error}</Alert>;
-  }
 
   return (
     <Box>

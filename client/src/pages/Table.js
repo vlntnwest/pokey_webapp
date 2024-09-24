@@ -3,15 +3,23 @@ import { useParams } from "react-router-dom";
 import Header from "../components/user/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { getTable } from "../actions/table.action";
+import { getDetails } from "../actions/details.action";
 import { Alert, Box, Container } from "@mui/material";
 import Popular from "../components/user/Popular";
 import MealCategory from "../components/user/MealCategory";
+import { getMeals } from "../actions/meal.action";
+import { isEmpty } from "../components/Utils";
 
 const Table = () => {
   const dispatch = useDispatch();
   const { tableNumber } = useParams();
   const tableData = useSelector((state) => state.tableReducer);
+  const detailsData = useSelector((state) => state.detailsReducer);
   const [isTableOpen, setIsTableOpen] = useState(false);
+
+  const types = !isEmpty(detailsData)
+    ? detailsData.map((detail) => detail.type)
+    : [];
 
   const [error, setError] = useState(null);
 
@@ -19,6 +27,8 @@ const Table = () => {
     const fetchData = async () => {
       try {
         await dispatch(getTable(tableNumber));
+        await dispatch(getMeals());
+        await dispatch(getDetails());
       } catch (error) {
         setError(
           error.response
@@ -36,7 +46,12 @@ const Table = () => {
   }, [tableData]);
 
   if (error) {
-    return <Alert severity="error">Error: {error}</Alert>;
+    return (
+      <Container sx={{ alignContent: "center", height: "100vh" }}>
+        <img src="../img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
+        <Alert severity="error">Error: {error}</Alert>
+      </Container>
+    );
   }
 
   if (isTableOpen === false)
@@ -52,9 +67,11 @@ const Table = () => {
   return (
     <>
       <Header />
-      <Box component="main" sx={{ height: "200vh" }}>
+      <Box component="main">
         <Popular />
-        <MealCategory />
+        {types.map((type, index) => (
+          <MealCategory type={type} key={index} />
+        ))}
       </Box>
     </>
   );

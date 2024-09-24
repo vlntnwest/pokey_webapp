@@ -1,9 +1,15 @@
 const MenuItemModel = require("../models/menuItem.model");
+const MenuTypeModel = require("../models/menuType.model");
 const ObjectID = require("mongoose").Types.ObjectId;
 
 module.exports.getAllItems = async (req, res) => {
   const items = await MenuItemModel.find();
   res.status(200).json(items);
+};
+
+module.exports.getItemsDetails = async (req, res) => {
+  const details = await MenuTypeModel.find();
+  res.status(200).json(details);
 };
 
 module.exports.getOneItem = async (req, res) => {
@@ -34,6 +40,21 @@ module.exports.createItem = async (req, res) => {
     res.status(201).json({ item: item._id });
   } catch (err) {
     res.status(400).json({ error: "Impossible de créer le plat." });
+  }
+};
+
+module.exports.createItemDeatils = async (req, res) => {
+  const { type, title, description } = req.body;
+
+  try {
+    const item = await MenuTypeModel.create({
+      type,
+      title,
+      description,
+    });
+    res.status(201).json({ item: item._id });
+  } catch (err) {
+    res.status(400).json({ error: "Impossible de créer la description." });
   }
 };
 
