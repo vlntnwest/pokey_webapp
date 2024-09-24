@@ -61,7 +61,15 @@ const Table = () => {
     );
 
   return (
-    <Box>
+    <Box
+      style={{
+        "&::-webkit-scrollbar": {
+          display: "none",
+        },
+        "-msOverflowStyle": "none",
+        scrollbarWidth: "none",
+      }}
+    >
       <Header />
       <Box component="main">
         <Popular />

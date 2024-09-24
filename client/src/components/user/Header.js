@@ -1,9 +1,11 @@
-import React from "react";
-import { AppBar, Box, Toolbar } from "@mui/material";
-import CartModal from "./Modal/CartModal";
+import React, { useState } from "react";
+import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import BottomDrawer from "./Modal/BottomDrawer";
 
 const Header = () => {
+  const [open, setOpen] = useState(false);
+
   return (
     <Box
       style={{
@@ -36,7 +38,10 @@ const Header = () => {
               Pokey bar
             </div>
           </Box>
-          <CartModal btnTxt={<ShoppingBagOutlinedIcon />} />
+          <IconButton onClick={() => setOpen(true)}>
+            <ShoppingBagOutlinedIcon />
+          </IconButton>
+          <BottomDrawer open={open} setOpen={setOpen}></BottomDrawer>
         </Toolbar>
       </AppBar>
     </Box>

@@ -56,6 +56,18 @@ const theme = createTheme({
           body {
             overscroll-behavior: none; 
           }
+          html::-webkit-scrollbar,
+          body::-webkit-scrollbar {
+            display: none;
+          }
+          html {
+            -ms-overflow-style: none; 
+            scrollbar-width: none;  /* Firefox */
+           }
+           body {
+            -ms-overflow-style: none; 
+            scrollbar-width: none;
+          }
       `,
     },
     MuiButton: {
