@@ -20,10 +20,10 @@ const childrenStyle = {
   position: "relative",
   zIndex: 0,
   height: "100%",
-  "&::-webkit-scrollbar": {
+  "&::WebkitScrollbar": {
     display: "none",
   },
-  "-msOverflowStyle": "none",
+  MsOverflowStyle: "none",
   scrollbarWidth: "none",
   display: "flex",
   flexDirection: "column",

@@ -63,10 +63,10 @@ const Table = () => {
   return (
     <Box
       style={{
-        "&::-webkit-scrollbar": {
+        "&::WebkitScrollbar": {
           display: "none",
         },
-        "-msOverflowStyle": "none",
+        MsOverflowStyle: "none",
         scrollbarWidth: "none",
       }}
     >

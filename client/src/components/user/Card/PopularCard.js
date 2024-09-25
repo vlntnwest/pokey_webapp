@@ -6,24 +6,24 @@ import {
   CardActionArea,
   CardContent,
   CardMedia,
-  Checkbox,
+  CircularProgress,
   Divider,
-  FormGroup,
-  List,
-  ListItemButton,
-  ListItemText,
-  Radio,
-  RadioGroup,
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import BottomDrawer from "../Modal/BottomDrawer";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import BaseForm from "./Form/BaseForm";
+import SaucesForm from "./Form/SaucesForm";
+import SideForm from "./Form/SideForm";
+import SupProtForm from "./Form/SupProtForm";
 
 const PopularCard = ({ meal }) => {
   const [open, setOpen] = useState(false);
-  const { name, price, picture, description } = meal;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { name, price, picture, description, type } = meal;
 
   const [selectedBase, setSelectedBase] = useState();
   const [selectedSauces, setSelectedSauces] = useState([]);
@@ -34,20 +34,18 @@ const PopularCard = ({ meal }) => {
   const [addSideCounts, setAddSideCounts] = useState({});
 
   const sidePrices = {
-    Fallafels: 3.5,
-    SaladeEdamame: 3.5,
+    "Fallafels x5": 3.5,
+    "Salade d'edamame": 3.5,
   };
 
   const proteinPrices = {
     Saumon: 3.5,
     Thon: 3.5,
+    "Poulet croustillant": 3.5,
+    Gyoza: 3.5,
   };
 
-  const handleChange = (e) => {
-    setSelectedBase(e.target.value);
-  };
-
-  const handleListItemClick = (value) => {
+  const handleBaseChange = (value) => {
     setSelectedBase(value);
   };
 
@@ -73,6 +71,7 @@ const PopularCard = ({ meal }) => {
       setselectedProtSup([]);
       setCount(1);
       setAddSideCounts({});
+      setIsLoading(false);
     }
   }, [open]);
 
@@ -114,6 +113,38 @@ const PopularCard = ({ meal }) => {
   };
 
   const isAddButtonDisabled = !selectedBase || selectedSauces.length === 0;
+
+  const sendToCart = () => {
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const items = {
+        type,
+        name,
+        base: selectedBase,
+        sauces: selectedSauces,
+        extraProtein: selectedProtSup,
+        sides: Object.keys(addSideCounts).filter(
+          (side) => addSideCounts[side] > 0
+        ),
+        count,
+        totalPrice: calculateTotalPrice(),
+      };
+
+      const storedMeals = sessionStorage.getItem("Cart");
+      let meals = [];
+
+      if (storedMeals) {
+        meals = JSON.parse(storedMeals);
+      }
+
+      meals.push(items);
+
+      sessionStorage.setItem("Cart", JSON.stringify(meals));
+
+      setOpen(false);
+    }, 1000);
+  };
 
   return (
     <>
@@ -166,7 +197,6 @@ const PopularCard = ({ meal }) => {
                 mt: 1,
                 minHeight: "34px",
               }}
-              fullWidth
             >
               <AddIcon />
             </Box>
@@ -185,7 +215,6 @@ const PopularCard = ({ meal }) => {
             component="img"
             image={`/img/${picture}.webp`}
             alt={name}
-            fullWidth
             sx={{ height: "40%" }}
           />
           <Box p={2}>
@@ -197,227 +226,24 @@ const PopularCard = ({ meal }) => {
             </Typography>
             <Divider sx={{ mt: 2 }} />
 
-            <RadioGroup sx={{ pt: 3 }}>
-              <Typography variant="p" sx={{ fontSize: 20 }}>
-                Choisissez votre base
-              </Typography>
-              <Typography variant="body2" sx={{ color: "rgb(88, 92, 92)" }}>
-                Obligatoire
-              </Typography>
-              <List sx={{ p: 0, pt: 1 }}>
-                <ListItemButton
-                  onClick={() => handleListItemClick("Riz")}
-                  sx={{ p: 0 }}
-                >
-                  <ListItemText
-                    primary="Riz"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <Radio
-                    checked={selectedBase === "Riz"}
-                    onChange={handleChange}
-                    value="Riz"
-                    name="radio-buttons"
-                  />
-                </ListItemButton>
-
-                <ListItemButton
-                  onClick={() => handleListItemClick("Quinoa")}
-                  sx={{ p: 0 }}
-                >
-                  <ListItemText
-                    primary="Quinoa"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <Radio
-                    checked={selectedBase === "Quinoa"}
-                    onChange={handleChange}
-                    value="Quinoa"
-                    name="radio-buttons"
-                  />
-                </ListItemButton>
-              </List>
-            </RadioGroup>
-            <FormGroup sx={{ pt: 3 }}>
-              <Typography variant="p" sx={{ fontSize: 20 }}>
-                Choisissez vos sauces
-              </Typography>
-              <Typography variant="body2" sx={{ color: "rgb(88, 92, 92)" }}>
-                Obligatoire
-              </Typography>
-              <List sx={{ p: 0, pt: 1 }}>
-                <ListItemButton
-                  onClick={() => handleSauceChange("Soja salé")}
-                  sx={{ p: 0 }}
-                  disabled={
-                    isSauceDisabled && !selectedSauces.includes("Soja salé")
-                  }
-                >
-                  <ListItemText
-                    primary="Soja salé"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <Checkbox
-                    checked={selectedSauces.includes("Soja salé")}
-                    onChange={() => handleSauceChange("Soja salé")}
-                    value={"Soja salé"}
-                  />
-                </ListItemButton>
-                <ListItemButton
-                  onClick={() => handleSauceChange("Soja sucré")}
-                  sx={{ p: 0 }}
-                  disabled={
-                    isSauceDisabled && !selectedSauces.includes("Soja sucré")
-                  }
-                >
-                  <ListItemText
-                    primary="Soja sucré"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <Checkbox
-                    checked={selectedSauces.includes("Soja sucré")}
-                    onChange={() => handleSauceChange("Soja sucré")}
-                    value={"Soja sucré"}
-                  />
-                </ListItemButton>
-                <ListItemButton
-                  onClick={() => handleSauceChange("Spicy Mayo")}
-                  sx={{ p: 0 }}
-                  disabled={
-                    isSauceDisabled && !selectedSauces.includes("Spicy Mayo")
-                  }
-                >
-                  <ListItemText
-                    primary="Spicy Mayo"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <Checkbox
-                    checked={selectedSauces.includes("Spicy Mayo")}
-                    onChange={() => handleSauceChange("Spicy Mayo")}
-                    value={"Spicy Mayo"}
-                  />
-                </ListItemButton>
-              </List>
-            </FormGroup>
-            <FormGroup sx={{ pt: 3 }}>
-              <Typography variant="p" sx={{ fontSize: 20 }}>
-                Envie d'accompagnements pour compléter ton pokey ?
-              </Typography>
-              <List sx={{ p: 0, pt: 1 }}>
-                <ListItemButton
-                  onClick={() => handleSideChange("Fallafels")}
-                  sx={{ p: 0 }}
-                >
-                  <ListItemText
-                    primary="Fallafels x5"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <span style={{ fontSize: 16, fontWeight: "400" }}>
-                    +3,50€
-                  </span>
-                  {addSideCounts["Fallafels"] > 0 ? (
-                    <>
-                      <RemoveCircleOutlineIcon
-                        color="primary"
-                        sx={{ margin: "11px" }}
-                      />
-                      <span>{addSideCounts["Fallafels"]}</span>
-                      <AddCircleOutlineIcon
-                        color="disabled"
-                        sx={{ margin: "11px" }}
-                      />
-                    </>
-                  ) : (
-                    <AddCircleOutlineIcon sx={{ margin: "11px" }} />
-                  )}
-                </ListItemButton>
-
-                <ListItemButton
-                  onClick={() => handleSideChange("SaladeEdamame")}
-                  sx={{ p: 0 }}
-                >
-                  <ListItemText
-                    primary="Salade d'edamame"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <span style={{ fontSize: 16, fontWeight: "400" }}>
-                    +3,50€
-                  </span>
-                  {addSideCounts["SaladeEdamame"] > 0 ? (
-                    <>
-                      <RemoveCircleOutlineIcon
-                        color="primary"
-                        sx={{ margin: "11px" }}
-                      />
-                      <span>{addSideCounts["SaladeEdamame"]}</span>
-                      <AddCircleOutlineIcon
-                        color="disabled"
-                        sx={{ margin: "11px" }}
-                      />
-                    </>
-                  ) : (
-                    <AddCircleOutlineIcon sx={{ margin: "11px" }} />
-                  )}
-                </ListItemButton>
-              </List>
-            </FormGroup>
-            <FormGroup sx={{ pt: 3 }}>
-              <Typography variant="p" sx={{ fontSize: 20 }}>
-                Protéines supplémentaires
-              </Typography>
-              <Typography variant="body2" sx={{ color: "rgb(88, 92, 92)" }}>
-                Voulez-vous des protéines en supplément?
-              </Typography>
-              <List sx={{ p: 0, pt: 1 }}>
-                <ListItemButton
-                  onClick={() => handleProtSupChange("Saumon")}
-                  sx={{ p: 0 }}
-                  disabled={
-                    isProtDisabled && !selectedProtSup.includes("Saumon")
-                  }
-                >
-                  <ListItemText
-                    primary="Saumon"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <span style={{ fontSize: 16, fontWeight: "400" }}>
-                    +3,50€
-                  </span>
-                  <Checkbox
-                    checked={selectedProtSup.includes("Saumon")}
-                    onChange={() => handleProtSupChange("Saumon")}
-                    value={"Saumon"}
-                  />
-                </ListItemButton>
-                <ListItemButton
-                  onClick={() => handleProtSupChange("Thon")}
-                  sx={{ p: 0 }}
-                  disabled={isProtDisabled && !selectedProtSup.includes("Thon")}
-                >
-                  <ListItemText
-                    primary="Thon"
-                    disableTypography
-                    sx={{ fontSize: 16, fontWeight: "400" }}
-                  />
-                  <span style={{ fontSize: 16, fontWeight: "400" }}>
-                    +3,50€
-                  </span>
-                  <Checkbox
-                    checked={selectedProtSup.includes("Thon")}
-                    onChange={() => handleProtSupChange("Thon")}
-                    value={"Thon"}
-                  />
-                </ListItemButton>
-              </List>
-            </FormGroup>
+            <BaseForm
+              selectedBase={selectedBase}
+              handleBaseChange={handleBaseChange}
+            />
+            <SaucesForm
+              selectedSauces={selectedSauces}
+              handleSauceChange={handleSauceChange}
+              isSauceDisabled={isSauceDisabled}
+            />
+            <SideForm
+              handleSideChange={handleSideChange}
+              addSideCounts={addSideCounts}
+            />
+            <SupProtForm
+              handleProtSupChange={handleProtSupChange}
+              isProtDisabled={isProtDisabled}
+              selectedProtSup={selectedProtSup}
+            />
           </Box>
         </Box>
         <Box
@@ -464,8 +290,13 @@ const PopularCard = ({ meal }) => {
             fullWidth
             sx={{ py: 1.5 }}
             disabled={isAddButtonDisabled}
+            onClick={sendToCart}
           >
-            Ajouter pour {calculateTotalPrice().replace(".", ",")}€
+            {isLoading ? (
+              <CircularProgress color="secondary" size={24.5} />
+            ) : (
+              `Ajouter pour ${calculateTotalPrice().replace(".", ",")} €`
+            )}
           </Button>
         </Box>
       </BottomDrawer>
