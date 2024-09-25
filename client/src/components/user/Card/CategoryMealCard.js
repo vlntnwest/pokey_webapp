@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import BottomDrawer from "../Modal/BottomDrawer";
+import MealDetails from "../MealDetails";
 
 const CategoryMealCard = ({ meal }) => {
   const [open, setOpen] = useState(false);
@@ -71,7 +71,7 @@ const CategoryMealCard = ({ meal }) => {
           </CardContent>
         </CardActionArea>
       </Card>
-      <BottomDrawer open={open} setOpen={setOpen}></BottomDrawer>
+      <MealDetails meal={meal} open={open} setOpen={setOpen} />
     </>
   );
 };
