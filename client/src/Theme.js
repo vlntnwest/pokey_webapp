@@ -25,7 +25,7 @@ const theme = createTheme({
       fontWeight: 700,
     },
     h3: {
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: 700,
     },
     h4: {
@@ -42,6 +42,10 @@ const theme = createTheme({
       fontWeight: 400,
       fontFamily: "sans-serif",
       lineHeight: "19px",
+    },
+    p: {
+      fontSize: 16,
+      fontFamily: "Roboto Condensed",
     },
   },
   components: {

@@ -20,15 +20,13 @@ const childrenStyle = {
   position: "relative",
   zIndex: 0,
   height: "100%",
-  overflowY: "scroll",
-  padding: 10,
-  paddingTop: 40,
   "&::-webkit-scrollbar": {
     display: "none",
   },
-
   "-msOverflowStyle": "none",
   scrollbarWidth: "none",
+  display: "flex",
+  flexDirection: "column",
 };
 
 const btnContainerStyle = {
@@ -38,20 +36,9 @@ const btnContainerStyle = {
   zIndex: 10,
   display: "flex",
   justifyContent: "center",
-  backgroundColor: "#fff",
   padding: "8px",
-  height: "24px",
+  height: "30vh",
   touchAction: "none",
-};
-
-const btnStyle = {
-  height: "4px",
-  width: "100px",
-  touchAction: "none",
-  borderRadius: 50,
-  backgroundColor: "rgba(0,0,0,0.2)",
-  cursor: "grab",
-  border: "none",
 };
 
 const BottomDrawer = ({ open, setOpen, children }) => {
@@ -124,9 +111,7 @@ const BottomDrawer = ({ open, setOpen, children }) => {
                 controls.start(e);
               }}
               style={btnContainerStyle}
-            >
-              <button style={btnStyle} />
-            </div>
+            ></div>
             <div style={childrenStyle}>{children}</div>
           </motion.div>
         </motion.div>
