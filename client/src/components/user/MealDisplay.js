@@ -1,8 +1,9 @@
 import React from "react";
-import { Box, CardMedia, Typography, Divider } from "@mui/material";
+import { Box, CardMedia, Typography, Divider, Fab } from "@mui/material";
 import FormRenderer from "./Form/FormRenderer";
+import CloseIcon from "@mui/icons-material/Close";
 
-const MealDisplay = ({ meal, options, handlers }) => {
+const MealDisplay = ({ meal, options, handlers, setOpen }) => {
   const { name, picture, description, type } = meal;
   return (
     <Box sx={{ flexGrow: "1", overflowY: "auto", overflowX: "hidden" }}>
@@ -12,6 +13,16 @@ const MealDisplay = ({ meal, options, handlers }) => {
         alt={name}
         sx={{ height: "40%" }}
       />
+      <Fab
+        color="primary"
+        aria-label="close"
+        onClick={() => {
+          setOpen(false);
+        }}
+        sx={{ position: "absolute", top: 0, right: 0, m: 2 }}
+      >
+        <CloseIcon />
+      </Fab>
       <Box p={2}>
         <Typography variant="h3" sx={{ fontSize: 26 }}>
           {name}

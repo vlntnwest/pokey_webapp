@@ -10,7 +10,7 @@ import {
 
 const SupProtForm = ({
   handleProtSupChange,
-  isProtDisabled,
+  isSupProtDisabled,
   selectedProtSup,
 }) => {
   const supProts = [
@@ -33,7 +33,9 @@ const SupProtForm = ({
             key={supProt.name}
             onClick={() => handleProtSupChange(supProt.name)}
             sx={{ p: 0 }}
-            disabled={isProtDisabled && !selectedProtSup.includes(supProt.name)}
+            disabled={
+              isSupProtDisabled && !selectedProtSup.includes(supProt.name)
+            }
           >
             <ListItemText
               primary={supProt.name}

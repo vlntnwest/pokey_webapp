@@ -29,17 +29,17 @@ const childrenStyle = {
   flexDirection: "column",
 };
 
-const btnContainerStyle = {
-  position: "absolute",
-  left: 0,
-  right: 0,
-  zIndex: 10,
-  display: "flex",
-  justifyContent: "center",
-  padding: "8px",
-  height: "30vh",
-  touchAction: "none",
-};
+// const btnContainerStyle = {
+//   position: "absolute",
+//   left: 0,
+//   right: 0,
+//   zIndex: 10,
+//   display: "flex",
+//   justifyContent: "center",
+//   padding: "8px",
+//   height: "10%",
+//   touchAction: "none",
+// };
 
 const BottomDrawer = ({ open, setOpen, children }) => {
   const [scope, animate] = useAnimate();
@@ -98,20 +98,20 @@ const BottomDrawer = ({ open, setOpen, children }) => {
               bottom: 0,
               left: 0,
               width: "100%",
-              height: "95vh",
+              height: "100vh",
               overflow: "hidden",
               backgroundColor: "#fff",
-              borderTopLeftRadius: 10,
-              borderTopRightRadius: 10,
+              // borderTopLeftRadius: 10,
+              // borderTopRightRadius: 10,
               y,
             }}
           >
-            <div
+            {/* <div
               onPointerDown={(e) => {
                 controls.start(e);
               }}
               style={btnContainerStyle}
-            ></div>
+            ></div> */}
             <div style={childrenStyle}>{children}</div>
           </motion.div>
         </motion.div>

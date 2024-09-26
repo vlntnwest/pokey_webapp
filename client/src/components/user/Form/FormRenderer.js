@@ -4,21 +4,32 @@ import BaseForm from "./BaseForm";
 import SaucesForm from "./SaucesForm";
 import SideForm from "./SideForm";
 import SupProtForm from "./SupProtForm";
+import ProtForm from "./ProtForm";
+import GarnishesForm from "./GarnishesForm";
+import ToppingsForm from "./ToppingsForm";
 
 const FormRenderer = ({ type, options, handlers }) => {
   const {
     selectedBase,
+    selectedProt,
+    selectedGarnishes,
+    selectedToppings,
     selectedSauces,
     selectedProtSup,
     addSideCounts,
+    isGarnisheDisabled,
     isSauceDisabled,
-    isProtDisabled,
+    isSupProtDisabled,
+    isToppingsDisabled,
   } = options;
   const {
     handleBaseChange,
+    handleProtChange,
+    handleGarnishesChange,
+    handleToppingsChange,
     handleSauceChange,
-    handleProtSupChange,
     handleSideChange,
+    handleProtSupChange,
   } = handlers;
   return (
     <>
@@ -27,6 +38,24 @@ const FormRenderer = ({ type, options, handlers }) => {
           selectedBase={selectedBase}
           handleBaseChange={handleBaseChange}
         />
+      )}
+      {type === "custom" && (
+        <>
+          <ProtForm
+            selectedProt={selectedProt}
+            handleProtChange={handleProtChange}
+          />
+          <GarnishesForm
+            selectedGarnishes={selectedGarnishes}
+            handleGarnishesChange={handleGarnishesChange}
+            isGarnisheDisabled={isGarnisheDisabled}
+          />
+          <ToppingsForm
+            selectedToppings={selectedToppings}
+            handleToppingsChange={handleToppingsChange}
+            isToppingsDisabled={isToppingsDisabled}
+          />
+        </>
       )}
       {(type === "bowl" || type === "custom" || type === "side") && (
         <SaucesForm
@@ -44,7 +73,7 @@ const FormRenderer = ({ type, options, handlers }) => {
       {(type === "bowl" || type === "custom") && (
         <SupProtForm
           handleProtSupChange={handleProtSupChange}
-          isProtDisabled={isProtDisabled}
+          isSupProtDisabled={isSupProtDisabled}
           selectedProtSup={selectedProtSup}
         />
       )}

@@ -4,7 +4,7 @@ import Header from "../components/user/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { getTable } from "../actions/table.action";
 import { getDetails } from "../actions/details.action";
-import { Alert, Box, Container } from "@mui/material";
+import { Alert, Box, CircularProgress, Container } from "@mui/material";
 import Popular from "../components/user/Popular";
 import MealCategory from "../components/user/MealCategory";
 import { getMeals } from "../actions/meal.action";
@@ -17,10 +17,12 @@ const Table = () => {
 
   const types = ["bowl", "custom", "side", "dessert", "drink"];
 
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         await dispatch(getTable(tableNumber));
         await dispatch(getMeals());
@@ -31,6 +33,8 @@ const Table = () => {
             ? error.response.data.error
             : "Error fetching tables data"
         );
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -41,11 +45,38 @@ const Table = () => {
     setIsTableOpen(tableData.isOpen);
   }, [tableData]);
 
+  if (isLoading) {
+    return (
+      <Container
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "100vh",
+          justifyContent: "center",
+        }}
+      >
+        <img src="../img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
+        <CircularProgress />
+      </Container>
+    );
+  }
+
   if (error) {
     return (
-      <Container sx={{ alignContent: "center", height: "100vh" }}>
+      <Container
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "100vh",
+          justifyContent: "center",
+        }}
+      >
         <img src="../img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
-        <Alert severity="error">Error: {error}</Alert>
+        <Alert severity="error" sx={{ width: "100%" }}>
+          Error: {error}
+        </Alert>
       </Container>
     );
   }

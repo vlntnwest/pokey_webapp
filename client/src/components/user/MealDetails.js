@@ -20,6 +20,9 @@ const MealDetails = ({ meal, open, setOpen }) => {
 
   const { name, price, type } = meal;
   const [selectedBase, setSelectedBase] = useState();
+  const [selectedProt, setSelectedProt] = useState([]);
+  const [selectedGarnishes, setSelectedGarnishes] = useState([]);
+  const [selectedToppings, setSelectedToppings] = useState([]);
   const [selectedSauces, setSelectedSauces] = useState([]);
   const [selectedProtSup, setSelectedProtSup] = useState([]);
   const [count, setCount] = useState(1);
@@ -33,6 +36,9 @@ const MealDetails = ({ meal, open, setOpen }) => {
 
   const resetState = () => {
     setSelectedBase(null);
+    setSelectedProt([]);
+    setSelectedGarnishes([]);
+    setSelectedToppings([]);
     setSelectedSauces([]);
     setSelectedProtSup([]);
     setCount(1);
@@ -41,15 +47,23 @@ const MealDetails = ({ meal, open, setOpen }) => {
   };
 
   const isSauceDisabled = selectedSauces.length >= 2;
-  const isProtDisabled = selectedProtSup.length >= 1;
+  const isGarnisheDisabled = selectedGarnishes.length >= 4;
+  const isToppingsDisabled = selectedToppings.length >= 2;
+  const isSupProtDisabled = selectedProtSup.length >= 1;
 
   const isAddButtonDisabled = () => {
-    if (type === "bowl" || type === "custom") {
+    if (type === "bowl") {
       return !selectedBase || selectedSauces.length === 0;
     } else if (type === "side") {
       return selectedSauces.length === 0;
-    }
-    return false;
+    } else if (type === "custom") {
+      return (
+        !selectedBase ||
+        selectedSauces.length === 0 ||
+        selectedGarnishes === 0 ||
+        selectedToppings === 0
+      );
+    } else return false;
   };
 
   const calculateTotalPrice = () => {
@@ -78,6 +92,9 @@ const MealDetails = ({ meal, open, setOpen }) => {
         type,
         name,
         base: selectedBase,
+        Protein: selectedProt,
+        Garnishes: selectedGarnishes,
+        Toppings: selectedToppings,
         sauces: selectedSauces,
         extraProtein: selectedProtSup,
         sides: Object.keys(addSideCounts).filter(
@@ -104,11 +121,26 @@ const MealDetails = ({ meal, open, setOpen }) => {
 
   const handlers = {
     handleBaseChange: (value) => setSelectedBase(value),
+    handleProtChange: (value) => setSelectedProt(value),
     handleSauceChange: (sauce) => {
       if (selectedSauces.includes(sauce)) {
         setSelectedSauces(selectedSauces.filter((s) => s !== sauce));
       } else if (selectedSauces.length < 2) {
         setSelectedSauces([...selectedSauces, sauce]);
+      }
+    },
+    handleGarnishesChange: (garnishe) => {
+      if (selectedGarnishes.includes(garnishe)) {
+        setSelectedGarnishes(selectedGarnishes.filter((s) => s !== garnishe));
+      } else if (selectedGarnishes.length < 4) {
+        setSelectedGarnishes([...selectedGarnishes, garnishe]);
+      }
+    },
+    handleToppingsChange: (topping) => {
+      if (selectedToppings.includes(topping)) {
+        setSelectedToppings(selectedToppings.filter((s) => s !== topping));
+      } else if (selectedToppings.length < 4) {
+        setSelectedToppings([...selectedToppings, topping]);
       }
     },
     handleProtSupChange: (prot) => {
@@ -130,16 +162,26 @@ const MealDetails = ({ meal, open, setOpen }) => {
 
   const options = {
     selectedBase,
+    selectedProt,
+    selectedGarnishes,
+    selectedToppings,
     selectedSauces,
     selectedProtSup,
     addSideCounts,
+    isGarnisheDisabled,
+    isToppingsDisabled,
     isSauceDisabled,
-    isProtDisabled,
+    isSupProtDisabled,
   };
 
   return (
     <BottomDrawer open={open} setOpen={setOpen}>
-      <MealDisplay meal={meal} options={options} handlers={handlers} />
+      <MealDisplay
+        meal={meal}
+        options={options}
+        handlers={handlers}
+        setOpen={setOpen}
+      />
       <CompositionValidator
         count={count}
         handleIncrement={handlers.handleIncrement}
