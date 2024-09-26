@@ -9,7 +9,7 @@ import {
 import React from "react";
 
 const SaucesForm = ({ selectedSauces, handleSauceChange, isSauceDisabled }) => {
-  const sauces = ["Soja salé", "Soja sucré", "Spicy"];
+  const sauces = ["Soja salé", "Soja sucré", "Spicy mayo"];
 
   return (
     <FormGroup sx={{ pt: 3 }}>

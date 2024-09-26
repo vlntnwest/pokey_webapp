@@ -25,6 +25,7 @@ const MealDetails = ({ meal, open, setOpen }) => {
   const [selectedToppings, setSelectedToppings] = useState([]);
   const [selectedSauces, setSelectedSauces] = useState([]);
   const [selectedProtSup, setSelectedProtSup] = useState([]);
+  const [selectedSide, setSelectedSide] = useState([]);
   const [count, setCount] = useState(1);
   const [addSideCounts, setAddSideCounts] = useState({});
 
@@ -97,9 +98,7 @@ const MealDetails = ({ meal, open, setOpen }) => {
         Toppings: selectedToppings,
         sauces: selectedSauces,
         extraProtein: selectedProtSup,
-        sides: Object.keys(addSideCounts).filter(
-          (side) => addSideCounts[side] > 0
-        ),
+        sides: selectedSide,
         count,
         totalPrice: calculateTotalPrice(),
       };
@@ -150,11 +149,27 @@ const MealDetails = ({ meal, open, setOpen }) => {
         setSelectedProtSup([...selectedProtSup, prot]);
       }
     },
-    handleSideChange: (side) => {
+    handleSideChange: (side, count, sauce) => {
+      // Met à jour le compteur
       setAddSideCounts((prevCounts) => ({
         ...prevCounts,
-        [side]: prevCounts[side] === 1 ? 0 : 1,
+        [side]: count,
       }));
+
+      // Met à jour le tableau selectedSide
+      setSelectedSide((prev) => {
+        const existingSideIndex = prev.findIndex((s) => s[0] === side);
+
+        if (existingSideIndex !== -1) {
+          // Si le side existe déjà, le remplacer
+          const updatedSides = [...prev];
+          updatedSides[existingSideIndex] = [side, sauce, count]; // Remplace l'ancienne entrée
+          return updatedSides; // Retourne le tableau mis à jour
+        } else {
+          // Si le side n'existe pas, on l'ajoute
+          return [...prev, [side, sauce, count]];
+        }
+      });
     },
     handleIncrement: () => setCount((prev) => prev + 1),
     handleDecrement: () => setCount((prev) => (prev > 1 ? prev - 1 : prev)),
