@@ -93,12 +93,12 @@ const MealDetails = ({ meal, open, setOpen }) => {
         type,
         name,
         base: selectedBase,
-        Protein: selectedProt,
-        Garnishes: selectedGarnishes,
-        Toppings: selectedToppings,
-        sauces: selectedSauces,
+        proteins: [selectedProt],
+        garnishes: selectedGarnishes,
+        toppings: selectedToppings,
+        sauces: selectedSauces || [],
         extraProtein: selectedProtSup,
-        count,
+        quantity: count,
       };
 
       const sides = []; // Créez un tableau pour stocker les objets side
@@ -107,8 +107,8 @@ const MealDetails = ({ meal, open, setOpen }) => {
         const side = {
           type: "side",
           name: sideArray[0], // Premier élément comme nom
-          sauce: sideArray[1], // Deuxième élément comme sauce
-          count: sideArray[2], // Troisième élément comme count
+          sauces: sideArray[1] ? [sideArray[1]] : [], // Deuxième élément comme sauce
+          quantity: sideArray[2], // Troisième élément comme count
         };
         sides.push(side); // Ajoutez chaque side au tableau
       });

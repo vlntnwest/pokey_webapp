@@ -19,7 +19,7 @@ const CartSummary = () => {
 
   const updateItemCount = (itemName, newCount) => {
     const updatedCart = cartData.map((item) =>
-      item.name === itemName ? { ...item, count: newCount } : item
+      item.name === itemName ? { ...item, quantity: newCount } : item
     );
     setCartData(updatedCart);
     sessionStorage.setItem("Cart", JSON.stringify(updatedCart));

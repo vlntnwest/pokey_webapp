@@ -23,16 +23,12 @@ const OrderSchema = new mongoose.Schema(
             default: "",
           },
           proteins: {
-            type: String,
+            type: [String],
             // Only for custom
           },
           extraProtein: {
-            name: {
-              type: String, // Only for bowl and custom
-            },
-            quantity: {
-              type: Number,
-            },
+            type: [String],
+            default: [],
           },
           garnishes: {
             type: [String],

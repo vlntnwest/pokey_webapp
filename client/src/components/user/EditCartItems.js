@@ -13,7 +13,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
 const EditCartItems = ({ toggleDrawer, item, updateItemCount }) => {
-  const [counter, setCounter] = useState(item.count);
+  const [counter, setCounter] = useState(item.quantity);
 
   const increaseCounter = () => {
     setCounter(counter + 1);

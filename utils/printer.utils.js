@@ -2,7 +2,7 @@ const net = require("net");
 const EscPosEncoder = require("esc-pos-encoder");
 const { createCanvas, loadImage } = require("canvas");
 
-module.exports.createPrinterClient = () => {
+const createPrinterClient = () => {
   console.log("[🧾 THERMAL] Creating new socket...");
   const client = new net.Socket();
 
@@ -47,35 +47,48 @@ module.exports.printText = (orderData) => {
             printData.text(`Base: ${item.base}\n`);
           }
 
-          if (item.proteins) {
-            printData.text(`Proteins: ${item.proteins}\n`);
+          // Vérifiez si 'proteins' est défini et est un tableau
+          if (Array.isArray(item.proteins) && item.proteins.length > 0) {
+            printData.text(`Proteins: ${item.proteins.join(", ")}\n`);
           }
 
-          if (item.garnishes && item.garnishes.length > 0) {
+          // Vérifiez si 'garnishes' est défini et est un tableau
+          if (Array.isArray(item.garnishes) && item.garnishes.length > 0) {
             printData.text(`Garnishes: ${item.garnishes.join(", ")}\n`);
           }
 
-          if (item.toppings && item.toppings.length > 0) {
+          // Vérifiez si 'toppings' est défini et est un tableau
+          if (Array.isArray(item.toppings) && item.toppings.length > 0) {
             printData.text(`Toppings: ${item.toppings.join(", ")}\n`);
           }
 
-          if (item.sauces && item.sauces.length > 0) {
+          // Vérifiez si 'sauces' est défini et est un tableau
+          if (Array.isArray(item.sauces) && item.sauces.length > 0) {
             printData.text(`Sauces: ${item.sauces.join(", ")}\n`);
           }
 
-          if (item.extraProtein) {
+          if (
+            Array.isArray(item.extraProteins) &&
+            item.extraProteins.length > 0
+          ) {
             printData.text(
-              `Extra Protein: ${item.extraProtein.name} x${item.extraProtein.quantity}\n`
+              `Extra proteins: ${item.extraProteins.join(", ")}\n`
             );
           }
 
           printData.newline();
         });
 
+        if (
+          orderData.specialInstructions &&
+          orderData.specialInstructions.trim() !== ""
+        ) {
+          printData.text("------------------------------\n").text("Comments\n");
+          printData.text(`${orderData.specialInstructions}\n`);
+          printData.text("------------------------------\n");
+        }
+
         printData
-          .text("------------------------------\n")
-          .text("Comments\n")
-          .text(`${orderData.specialInstructions}\n`)
           .text("------------------------------\n")
           .newline()
           .newline()
