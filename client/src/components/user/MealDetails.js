@@ -89,7 +89,7 @@ const MealDetails = ({ meal, open, setOpen }) => {
     setIsLoading(true);
 
     setTimeout(() => {
-      const items = {
+      const item = {
         type,
         name,
         base: selectedBase,
@@ -98,10 +98,20 @@ const MealDetails = ({ meal, open, setOpen }) => {
         Toppings: selectedToppings,
         sauces: selectedSauces,
         extraProtein: selectedProtSup,
-        sides: selectedSide,
         count,
-        totalPrice: calculateTotalPrice(),
       };
+
+      const sides = []; // Créez un tableau pour stocker les objets side
+
+      selectedSide.forEach((sideArray) => {
+        const side = {
+          type: "side",
+          name: sideArray[0], // Premier élément comme nom
+          sauce: sideArray[1], // Deuxième élément comme sauce
+          count: sideArray[2], // Troisième élément comme count
+        };
+        sides.push(side); // Ajoutez chaque side au tableau
+      });
 
       const storedMeals = sessionStorage.getItem("Cart");
       let meals = [];
@@ -110,10 +120,10 @@ const MealDetails = ({ meal, open, setOpen }) => {
         meals = JSON.parse(storedMeals);
       }
 
-      meals.push(items);
+      meals.push(item); // Ajoutez l'item principal
+      meals.push(...sides); // Dépliez le tableau sides et ajoutez tous les sides
 
       sessionStorage.setItem("Cart", JSON.stringify(meals));
-
       setOpen(false);
     }, 1000);
   };
