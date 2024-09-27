@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import EditCartItems from "./EditCartItems";
 
-const RecapLine = () => {
+const RecapLine = ({ item, updateItemCount }) => {
   const [open, setOpen] = useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -30,8 +30,8 @@ const RecapLine = () => {
           }}
         >
           <Box sx={{ mr: 1.5, pl: 2, py: 1.5 }}>
-            <Typography sx={{ fontWeight: "400", textTransform: "capitalize" }}>
-              1x
+            <Typography sx={{ fontWeight: "400", textTransform: "lowercase" }}>
+              {item.count}x
             </Typography>
           </Box>
           <Box
@@ -45,7 +45,7 @@ const RecapLine = () => {
             }}
           >
             <Typography sx={{ textAlign: "left", fontWeight: "400" }}>
-              California
+              {item.name}
             </Typography>
           </Box>
           <Box sx={{ ml: 1.5 }}>
@@ -58,7 +58,11 @@ const RecapLine = () => {
       </Button>
       <Divider variant="middle" sx={{ borderColor: "#0000000a" }} />
       <Drawer open={open} onClose={toggleDrawer(false)} anchor="bottom">
-        <EditCartItems toggleDrawer={toggleDrawer} />
+        <EditCartItems
+          toggleDrawer={toggleDrawer}
+          item={item}
+          updateItemCount={updateItemCount}
+        />
       </Drawer>
     </>
   );
