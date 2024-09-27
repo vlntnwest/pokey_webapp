@@ -8,7 +8,7 @@ const theme = createTheme({
       main: "#1f4493",
     },
     secondary: {
-      main: "#cbdaf1",
+      main: "#fff",
     },
     background: {
       default: "rgba(208, 208, 208, 0.12)",

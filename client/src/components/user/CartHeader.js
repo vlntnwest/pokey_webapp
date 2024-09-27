@@ -1,18 +1,15 @@
-import React, { useState } from "react";
 import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
-import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
-import BottomDrawer from "./Modal/BottomDrawer";
-import Cart from "./Cart";
+import React from "react";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
-const Header = () => {
-  const [open, setOpen] = useState(false);
-
+const CartHeader = ({ setOpen }) => {
   return (
     <Box
       style={{
         position: "sticky",
         top: "0",
-        borderBottom: "1px solid rgba(0,0,0,.08)",
+        filter: "drop-shadow(0 1px 4px rgba(0, 0, 0, .08))",
         zIndex: 10,
       }}
     >
@@ -25,8 +22,11 @@ const Header = () => {
           top: "0",
         }}
       >
-        <Toolbar>
-          <Box sx={{ flexGrow: 1 }}>
+        <Toolbar style={{ padding: "0 8px" }}>
+          <IconButton onClick={() => setOpen(false)}>
+            <CloseRoundedIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
             <div
               style={{
                 width: "100px",
@@ -39,16 +39,13 @@ const Header = () => {
               Pokey bar
             </div>
           </Box>
-          <IconButton onClick={() => setOpen(true)}>
-            <ShoppingBagOutlinedIcon />
+          <IconButton>
+            <DeleteOutlineRoundedIcon />
           </IconButton>
-          <BottomDrawer open={open} setOpen={setOpen}>
-            <Cart setOpen={setOpen} />
-          </BottomDrawer>
         </Toolbar>
       </AppBar>
     </Box>
   );
 };
 
-export default Header;
+export default CartHeader;
