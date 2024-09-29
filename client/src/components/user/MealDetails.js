@@ -93,7 +93,7 @@ const MealDetails = ({ meal, open, setOpen }) => {
         type,
         name,
         base: selectedBase,
-        proteins: [selectedProt],
+        proteins: selectedProt,
         garnishes: selectedGarnishes,
         toppings: selectedToppings,
         sauces: selectedSauces || [],
@@ -101,16 +101,16 @@ const MealDetails = ({ meal, open, setOpen }) => {
         quantity: count,
       };
 
-      const sides = []; // Créez un tableau pour stocker les objets side
+      const sides = [];
 
       selectedSide.forEach((sideArray) => {
         const side = {
           type: "side",
-          name: sideArray[0], // Premier élément comme nom
-          sauces: sideArray[1] ? [sideArray[1]] : [], // Deuxième élément comme sauce
-          quantity: sideArray[2], // Troisième élément comme count
+          name: sideArray[0],
+          sauces: sideArray[1] ? [sideArray[1]] : [],
+          quantity: count,
         };
-        sides.push(side); // Ajoutez chaque side au tableau
+        sides.push(side);
       });
 
       const storedMeals = sessionStorage.getItem("Cart");

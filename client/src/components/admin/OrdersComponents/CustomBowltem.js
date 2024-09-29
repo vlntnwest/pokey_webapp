@@ -9,7 +9,7 @@ const CustomBowlItem = ({
   garnishes,
   toppings,
   sauces,
-  extraProtein,
+  extraProteins,
 }) => {
   return (
     <>
@@ -27,10 +27,7 @@ const CustomBowlItem = ({
         <br />
         Sauces: {sauces.join(", ")}
         <br />
-        Extra Protein:{" "}
-        {extraProtein
-          ? `${extraProtein.name} x${extraProtein.quantity}`
-          : "None"}
+        {extraProteins ? `Extra Proteine : ${extraProteins.join(", ")}` : null}
       </Typography>
     </>
   );

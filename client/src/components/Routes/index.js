@@ -11,6 +11,7 @@ const Index = () => {
         <Route path="/" element={<Home />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/table/:tableNumber" element={<Table />} />
+        <Route path="/table/*" element={<Navigate to="/" />} />
         <Route path="/*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import Header from "../components/user/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { getTable } from "../actions/table.action";
@@ -60,6 +60,10 @@ const Table = () => {
         <CircularProgress />
       </Container>
     );
+  }
+
+  if (tableData.error) {
+    return <Navigate to="/" />;
   }
 
   if (error) {

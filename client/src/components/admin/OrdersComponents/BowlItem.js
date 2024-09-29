@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "@mui/material";
 
-const BowlItem = ({ name, quantity, base, garnishes, toppings, sauces }) => {
+const BowlItem = ({ name, quantity, base, sauces, extraProteins }) => {
   return (
     <>
       <Typography variant="h6">
@@ -11,6 +11,8 @@ const BowlItem = ({ name, quantity, base, garnishes, toppings, sauces }) => {
         Base: {base}
         <br />
         Sauces: {sauces.join(", ")}
+        <br />
+        {extraProteins ? `Extra Proteine : ${extraProteins.join(", ")}` : null}
       </Typography>{" "}
     </>
   );

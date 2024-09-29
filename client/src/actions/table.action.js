@@ -2,6 +2,7 @@ import axios from "axios";
 
 export const GET_TABLES = "GET_TABLES";
 export const GET_TABLE = "GET_TABLE";
+export const GET_TABLE_FAILURE = "GET_TABLE_FAILURE";
 export const TOGGLE_TABLES = "TOGGLE_TABLES";
 
 export const getTables = () => {
@@ -19,7 +20,18 @@ export const getTable = (tableNumber) => {
     return axios
       .get(`${process.env.REACT_APP_API_URL}api/table/${tableNumber}`)
       .then((res) => {
-        dispatch({ type: GET_TABLE, payload: res.data });
+        if (res.data && Object.keys(res.data).length > 0) {
+          dispatch({ type: GET_TABLE, payload: res.data });
+        } else {
+          dispatch({ type: GET_TABLE_FAILURE, payload: "Table not found" });
+        }
+      })
+      .catch((error) => {
+        // Si la table n'existe pas ou autre erreur serveur
+        const errorMessage = error.response
+          ? error.response.data.error || "Table not found"
+          : "Server error";
+        dispatch({ type: GET_TABLE_FAILURE, payload: errorMessage });
       });
   };
 };
