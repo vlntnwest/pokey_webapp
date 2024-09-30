@@ -1,3 +1,4 @@
+const CustomDetailsModel = require("../models/custom.model");
 const MenuItemModel = require("../models/menuItem.model");
 const MenuTypeModel = require("../models/menuType.model");
 const ObjectID = require("mongoose").Types.ObjectId;
@@ -111,5 +112,33 @@ module.exports.deleteItem = async (req, res) => {
     return res.send(deleteItem);
   } catch (err) {
     return res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports.getCustomInfos = async (req, res) => {
+  const category = req.params.category;
+
+  try {
+    const items = await CustomDetailsModel.find({ category: category });
+    res.status(200).json(items);
+  } catch (err) {
+    console.error("Error while fetching items:", err);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+module.exports.createCustomItem = async (req, res) => {
+  const { category, name, hasSauce, price } = req.body;
+
+  try {
+    const item = await CustomDetailsModel.create({
+      category,
+      name,
+      hasSauce,
+      price,
+    });
+    res.status(201).json({ item: item._id });
+  } catch (err) {
+    res.status(400).json({ error: "Impossible de créer l'item." });
   }
 };

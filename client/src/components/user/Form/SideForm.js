@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
+  Alert,
   Box,
+  CircularProgress,
   FormControl,
   FormGroup,
   InputLabel,
@@ -15,14 +18,45 @@ import {
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
-const sides = [
-  { name: "Fallafels x5", price: "3,50", isSauce: true },
-  { name: "Salade d'edamame", price: "3,50", isSauce: false },
-];
-
 const SideForm = ({ handleSideChange }) => {
+  const [sides, setSides] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [sauceSelections, setSauceSelections] = useState({});
   const [addSideCounts, setAddSideCounts] = useState({});
+
+  useEffect(() => {
+    const fetchCustomItems = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}api/item/custom/side`
+        );
+        setSides(response.data);
+      } catch (err) {
+        console.error("Error fetching custom items:", err);
+        setError(
+          "Une erreur s'est produite lors de la récupération des éléments."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCustomItems();
+  }, []);
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ width: "100%" }}>
+        Error: {error}
+      </Alert>
+    );
+  }
 
   const handleSideAdd = (side) => {
     const currentCount = addSideCounts[side.name] || 0;
@@ -34,7 +68,7 @@ const SideForm = ({ handleSideChange }) => {
     }));
 
     const selectedSauce = sauceSelections[side.name] || null;
-    if (side.isSauce === false)
+    if (side.hasSauce === false)
       handleSideChange(side.name, newCount, selectedSauce);
   };
 
@@ -83,7 +117,7 @@ const SideForm = ({ handleSideChange }) => {
               )}
             </ListItemButton>
 
-            {side.isSauce && addSideCounts[side.name] > 0 && (
+            {side.hasSauce && addSideCounts[side.name] > 0 && (
               <Box>
                 <FormControl fullWidth>
                   <InputLabel id="sideSauceSelectLabel">
