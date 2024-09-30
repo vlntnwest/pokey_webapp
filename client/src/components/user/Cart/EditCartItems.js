@@ -11,8 +11,10 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import { useShoppingCart } from "../../Context/ShoppingCartContext";
 
-const EditCartItems = ({ toggleDrawer, item, updateItemCount }) => {
+const EditCartItems = ({ toggleDrawer, item }) => {
+  const { removeFromCart, updateItemCount } = useShoppingCart();
   const [counter, setCounter] = useState(item.quantity);
 
   const increaseCounter = () => {
@@ -26,8 +28,13 @@ const EditCartItems = ({ toggleDrawer, item, updateItemCount }) => {
   };
 
   const handleUpdate = () => {
-    updateItemCount(item.name, counter); // Update the count in the cart on button click
+    updateItemCount(item.id, counter); // Update the count in the cart on button click
     toggleDrawer(false)(); // Close the drawer after updating
+  };
+
+  const deleteItem = (item) => {
+    removeFromCart(item.id);
+    toggleDrawer(false);
   };
 
   return (
@@ -50,7 +57,7 @@ const EditCartItems = ({ toggleDrawer, item, updateItemCount }) => {
           }}
         >
           <Toolbar style={{ padding: "0 8px" }}>
-            <IconButton>
+            <IconButton onClick={() => deleteItem(item)}>
               <DeleteOutlineRoundedIcon />
             </IconButton>
             <Box

@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import BottomDrawer from "./Modal/BottomDrawer";
-import Cart from "./Cart";
+import Cart from "./Cart/Cart";
+import { useShoppingCart } from "../Context/ShoppingCartContext";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
+  const { cartItems } = useShoppingCart();
 
   return (
     <Box
@@ -39,9 +41,11 @@ const Header = () => {
               Pokey bar
             </div>
           </Box>
-          <IconButton onClick={() => setOpen(true)}>
-            <ShoppingBagOutlinedIcon />
-          </IconButton>
+          {cartItems.length > 0 ? (
+            <IconButton onClick={() => setOpen(true)}>
+              <ShoppingBagOutlinedIcon />
+            </IconButton>
+          ) : null}
           <BottomDrawer open={open} setOpen={setOpen}>
             <Cart setOpen={setOpen} />
           </BottomDrawer>

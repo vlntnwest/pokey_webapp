@@ -2,24 +2,33 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useShoppingCart } from "../../Context/ShoppingCartContext";
 
 const CartValidator = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { tableNumber } = useParams();
+  const { cartItems } = useShoppingCart();
+
+  const calculateTotalPrice = () => {
+    return cartItems
+      .reduce((total, item) => {
+        const price = parseFloat(item.price.replace(",", "."));
+        return total + price * item.quantity;
+      }, 0)
+      .toFixed(2);
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    // Récupérer les données du sessionStorage
-    const cartData = JSON.parse(sessionStorage.getItem("Cart"));
-
-    if (!cartData) {
-      console.error("Aucune donnée dans le sessionStorage");
+    if (!cartItems.length) {
+      // Vérifier si le panier est vide
+      console.error("Aucune donnée dans le panier");
       setIsSubmitting(false);
       return;
     }
 
-    const items = cartData.map((item) => {
+    const items = cartItems.map((item) => {
       const meal = {
         type: item.type,
         name: item.name,
@@ -95,7 +104,9 @@ const CartValidator = () => {
           </Typography>
         </Box>
         <Box>
-          <Typography color="textPrimary">32,90€</Typography>
+          <Typography color="textPrimary">
+            {calculateTotalPrice().replace(".", ",")}€
+          </Typography>
         </Box>
       </Box>
       <Button

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { UidContext } from "../../AppContext";
+import { UidContext } from "../../Context/AppContext";
 import { getTables } from "../../../actions/table.action";
 import { Alert, Table, TableBody, TableContainer } from "@mui/material";
 import TableItem from "./TableItem";

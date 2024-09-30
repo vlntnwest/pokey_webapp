@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DeleteCart from "./DeleteCart";
+import { useShoppingCart } from "../../Context/ShoppingCartContext";
 
 const CartHeader = ({ setOpen }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
+  const { cartItems } = useShoppingCart();
 
   const toggleDrawer = (newOpen) => () => {
     setOpenDrawer(newOpen);
@@ -49,9 +51,15 @@ const CartHeader = ({ setOpen }) => {
                 Pokey bar
               </div>
             </Box>
-            <IconButton onClick={() => setOpenDrawer(true)}>
-              <DeleteOutlineRoundedIcon />
-            </IconButton>
+            {cartItems.length > 0 ? (
+              <IconButton onClick={() => setOpenDrawer(true)}>
+                <DeleteOutlineRoundedIcon />
+              </IconButton>
+            ) : (
+              <IconButton onClick={() => setOpenDrawer(true)} disabled>
+                <DeleteOutlineRoundedIcon />
+              </IconButton>
+            )}
           </Toolbar>
         </AppBar>
       </Box>

@@ -8,6 +8,7 @@ import { Alert, Box, CircularProgress, Container } from "@mui/material";
 import Popular from "../components/user/Popular";
 import MealCategory from "../components/user/MealCategory";
 import { getMeals } from "../actions/meal.action";
+import ShoppingCartProvider from "../components/Context/ShoppingCartContext";
 
 const Table = () => {
   const dispatch = useDispatch();
@@ -96,23 +97,25 @@ const Table = () => {
     );
 
   return (
-    <Box
-      style={{
-        "&::WebkitScrollbar": {
-          display: "none",
-        },
-        MsOverflowStyle: "none",
-        scrollbarWidth: "none",
-      }}
-    >
-      <Header />
-      <Box component="main">
-        <Popular />
-        {types.map((type, index) => (
-          <MealCategory type={type} key={index} />
-        ))}
+    <ShoppingCartProvider>
+      <Box
+        style={{
+          "&::WebkitScrollbar": {
+            display: "none",
+          },
+          MsOverflowStyle: "none",
+          scrollbarWidth: "none",
+        }}
+      >
+        <Header />
+        <Box component="main">
+          <Popular />
+          {types.map((type, index) => (
+            <MealCategory type={type} key={index} />
+          ))}
+        </Box>
       </Box>
-    </Box>
+    </ShoppingCartProvider>
   );
 };
 

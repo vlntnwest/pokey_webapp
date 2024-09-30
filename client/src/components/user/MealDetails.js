@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import BottomDrawer from "./Modal/BottomDrawer";
 import MealDisplay from "./MealDisplay";
 import CompositionValidator from "./CompositionValidator";
+import { useShoppingCart } from "../Context/ShoppingCartContext";
 
 const sidePrices = {
   "Fallafels x5": 3.5,
@@ -17,8 +18,11 @@ const proteinPrices = {
 
 const MealDetails = ({ meal, open, setOpen }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { addToCart } = useShoppingCart();
 
-  const { name, price, type } = meal;
+  const { name, price, type, _id } = meal;
+  const currentDate = new Date();
+  const timestamp = currentDate.getTime();
   const [selectedBase, setSelectedBase] = useState();
   const [selectedProt, setSelectedProt] = useState([]);
   const [selectedGarnishes, setSelectedGarnishes] = useState([]);
@@ -90,6 +94,7 @@ const MealDetails = ({ meal, open, setOpen }) => {
 
     setTimeout(() => {
       const item = {
+        id: `${_id}-${timestamp}`,
         type,
         name,
         base: selectedBase,
@@ -99,31 +104,26 @@ const MealDetails = ({ meal, open, setOpen }) => {
         sauces: selectedSauces || [],
         extraProtein: selectedProtSup,
         quantity: count,
+        price,
       };
 
       const sides = [];
 
       selectedSide.forEach((sideArray) => {
         const side = {
+          id: `${_id}-${timestamp}-side`,
           type: "side",
           name: sideArray[0],
           sauces: sideArray[1] ? [sideArray[1]] : [],
           quantity: count,
+          price,
         };
         sides.push(side);
       });
 
-      const storedMeals = sessionStorage.getItem("Cart");
-      let meals = [];
+      addToCart(item); // Ajout du plat principal au panier
+      sides.forEach((side) => addToCart(side));
 
-      if (storedMeals) {
-        meals = JSON.parse(storedMeals);
-      }
-
-      meals.push(item); // Ajoutez l'item principal
-      meals.push(...sides); // Dépliez le tableau sides et ajoutez tous les sides
-
-      sessionStorage.setItem("Cart", JSON.stringify(meals));
       setOpen(false);
     }, 1000);
   };

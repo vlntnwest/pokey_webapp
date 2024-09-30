@@ -8,7 +8,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import OrderList from "../OrdersComponents/OrderList";
 import { useDispatch, useSelector } from "react-redux";
-import { UidContext } from "../../AppContext";
+import { UidContext } from "../../Context/AppContext";
 import { getOrders } from "../../../actions/order.action";
 import { isEmpty } from "../../Utils";
 

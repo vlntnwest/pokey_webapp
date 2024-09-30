@@ -10,6 +10,14 @@ const RecapLine = ({ item, updateItemCount }) => {
     setOpen(newOpen);
   };
 
+  const calculateTotalPrice = () => {
+    let totalPrice = parseFloat(item.price.replace(",", "."));
+
+    totalPrice *= item.quantity;
+
+    return totalPrice.toFixed(2);
+  };
+
   return (
     <>
       <Button
@@ -50,7 +58,9 @@ const RecapLine = ({ item, updateItemCount }) => {
           </Box>
           <Box sx={{ ml: 1.5 }}>
             <Box sx={{ display: "flex", px: 2, py: 1.5, alignItems: "center" }}>
-              <Typography sx={{ fontWeight: "400" }}>12.90€</Typography>
+              <Typography sx={{ fontWeight: "400" }}>
+                {calculateTotalPrice().replace(".", ",")}€
+              </Typography>
               <ArrowForwardIosRoundedIcon sx={{ ml: 1, maxHeight: "21px" }} />
             </Box>
           </Box>
