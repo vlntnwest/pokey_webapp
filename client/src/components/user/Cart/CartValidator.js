@@ -48,8 +48,6 @@ const CartValidator = () => {
       items: items,
     };
 
-    console.log(dataToPrint);
-
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}api/order`,

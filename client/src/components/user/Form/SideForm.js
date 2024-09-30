@@ -30,7 +30,7 @@ const SideForm = ({ handleSideChange }) => {
       setIsLoading(true);
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}api/item/custom/side`
+          `${process.env.REACT_APP_API_URL}api/item/custom/sides`
         );
         setSides(response.data);
       } catch (err) {

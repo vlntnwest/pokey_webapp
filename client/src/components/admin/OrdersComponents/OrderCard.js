@@ -5,10 +5,11 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
 import ItemsList from "./ItemList";
-import { Divider } from "@mui/material";
+import { CircularProgress, Divider } from "@mui/material";
 import { isEmpty } from "../../Utils";
 import { useDispatch } from "react-redux";
 import { toggleArchive } from "../../../actions/order.action";
+import axios from "axios";
 
 const OrderCard = ({ order, modal, handleOnChange }) => {
   const { items, tableNumber, specialInstructions, isArchived, _id } = order;
@@ -16,6 +17,8 @@ const OrderCard = ({ order, modal, handleOnChange }) => {
   const dispatch = useDispatch();
 
   const [archived, setArchived] = useState(isArchived);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLocalChange = async () => {
     try {
@@ -25,6 +28,45 @@ const OrderCard = ({ order, modal, handleOnChange }) => {
     } catch (error) {
       console.error("Error while changing the state", error);
     }
+  };
+
+  const handlePrint = async () => {
+    setIsSubmitting(true);
+
+    const items = order.items.map((item) => {
+      const meal = {
+        type: item.type,
+        name: item.name,
+        base: item.base,
+        proteins: item.proteins,
+        extraProteins: item.extraProtein,
+        garnishes: item.garnishes,
+        toppings: item.toppings,
+        sauces: item.sauces,
+        quantity: item.quantity,
+      };
+      return meal;
+    });
+
+    const dataToPrint = {
+      tableNumber,
+      items: items,
+    };
+
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}api/order/print-order`,
+        { orderData: dataToPrint }
+      );
+      console.log("Commande envoyée avec succès:", response.data);
+    } catch (error) {
+      console.error(
+        "Erreur lors de l'envoi des données à l'API:",
+        error.response?.data || error.message
+      );
+    }
+
+    setIsSubmitting(false);
   };
 
   if (archived === false || modal === true)
@@ -46,9 +88,13 @@ const OrderCard = ({ order, modal, handleOnChange }) => {
         </CardContent>
         <Grid container spacing={0}>
           <Grid size={6}>
-            <Button fullWidth variant="text">
-              Print
-            </Button>
+            {isSubmitting ? (
+              <CircularProgress />
+            ) : (
+              <Button fullWidth variant="text" onClick={handlePrint}>
+                Print
+              </Button>
+            )}
           </Grid>
           <Grid size={6}>
             <Button fullWidth variant="text" onClick={handleLocalChange}>
