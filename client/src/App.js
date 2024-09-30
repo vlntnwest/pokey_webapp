@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Routes from "./components/Routes";
-import { UidContext } from "./components/AppContext";
+import { UidContext } from "./components/Context/AppContext";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { getUser } from "./actions/user.action";

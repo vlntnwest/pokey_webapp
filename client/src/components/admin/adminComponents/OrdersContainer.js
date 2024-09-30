@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { isEmpty } from "../../Utils";
 import { Alert, CircularProgress } from "@mui/material";
-import { UidContext } from "../../AppContext";
+import { UidContext } from "../../Context/AppContext";
 import Box from "@mui/material/Box";
 import Masonry from "@mui/lab/Masonry";
 import OrderCard from "../OrdersComponents/OrderCard";

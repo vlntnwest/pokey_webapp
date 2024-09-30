@@ -8,10 +8,14 @@ import {
 } from "@mui/material";
 import React from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { useShoppingCart } from "../../Context/ShoppingCartContext";
 
 const DeleteCart = ({ toggleDrawer }) => {
+  const { clearCart } = useShoppingCart();
+
   const deleteCart = () => {
-    sessionStorage.removeItem("Cart");
+    clearCart();
+    toggleDrawer(false)();
   };
 
   return (
