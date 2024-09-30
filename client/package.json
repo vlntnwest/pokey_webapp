@@ -1,5 +1,9 @@
 {
-  "name": "client",
+  "name": "pokey_webapp",
+  "vercel": {
+    "buildCommand": "npm run build",
+    "outputDirectory": "build"
+  },
   "version": "0.1.0",
   "private": true,
   "dependencies": {
