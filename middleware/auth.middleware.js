@@ -22,20 +22,19 @@ module.exports.checkUser = (req, res, next) => {
 
 module.exports.requireAuth = (req, res, next) => {
   const token = req.cookies.jwt;
+  console.log("Token:", token); // Log du token pour vérifier sa présence
   if (token) {
     jwt.verify(token, process.env.TOKEN_SECRET, async (err, decodedToken) => {
       if (err) {
-        console.log(err);
-        return res.status(401).json({ error: "Unauthorized" }); // Retourne une erreur si le token est invalide
+        console.log("Token verification error:", err); // Log de l'erreur
+        return res.status(401).json({ error: "Unauthorized" });
       } else {
-        console.log(decodedToken.id);
-        // Vous pouvez ajouter une logique supplémentaire ici pour récupérer l'utilisateur
-        // const user = await UserModel.findById(decodedToken.id);
-        // req.user = user; // Ajoutez l'utilisateur à la requête pour l'utiliser dans les routes
-        return next(); // Appelle le middleware suivant si tout est bon
+        console.log("Decoded Token:", decodedToken); // Log du token décodé
+        return next();
       }
     });
   } else {
-    return res.status(401).json({ error: "No token provided" }); // Retourne une erreur si aucun token n'est présent
+    console.log("No token provided"); // Log si aucun token n'est trouvé
+    return res.status(401).json({ error: "No token provided" });
   }
 };
