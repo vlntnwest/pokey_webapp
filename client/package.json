@@ -1,5 +1,6 @@
 {
   "name": "pokey_webapp",
+  "homepage": "app.pokey-bar.fr",
   "vercel": {
     "buildCommand": "npm run build",
     "outputDirectory": "build"
