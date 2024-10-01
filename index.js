@@ -16,10 +16,10 @@ const app = express();
 const corsOption = {
   origin: process.env.CLIENT_URL,
   credentials: true,
-  // allowedHeaders: ["sessionId", "Content-Type"],
-  // exposedHeaders: ["sessionId"],
-  // methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
-  // preflightContinue: false,
+  allowedHeaders: ["sessionId", "Content-Type"],
+  exposedHeaders: ["sessionId"],
+  methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
+  preflightContinue: false,
 };
 
 app.use(cors(corsOption));
