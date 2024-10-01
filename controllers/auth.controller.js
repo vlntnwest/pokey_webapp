@@ -35,8 +35,6 @@ module.exports.signIn = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       maxAge,
-      domain: "app.pokey-bar.fr",
-      path: "/",
     });
     res.status(200).json({ user: user._id });
   } catch (err) {

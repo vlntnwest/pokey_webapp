@@ -3,7 +3,6 @@ import LogModal from "../components/admin/Modal/LogModal";
 import { UidContext } from "../components/Context/AppContext";
 import AdminHeader from "../components/admin/adminComponents/AdminHeader";
 import { useDispatch } from "react-redux";
-import { getOrders } from "../actions/order.action";
 import Tabs from "../components/admin/adminComponents/Tabs";
 import axios from "axios";
 import { getUser } from "../actions/user.action";
@@ -32,18 +31,6 @@ const Admin = () => {
       dispatch(getUser(uid));
     }
   }, [uid, dispatch]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await dispatch(getOrders());
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchData();
-  }, [dispatch]);
 
   if (uid) {
     return (
