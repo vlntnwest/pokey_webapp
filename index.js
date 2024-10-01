@@ -14,7 +14,7 @@ const app = express();
 
 // CORS
 const corsOption = {
-  origin: "https://app.pokey-bar.fr",
+  origin: process.env.CLIENT_URL,
   credentials: true,
   allowedHeaders: ["sessionId", "Content-Type"],
   exposedHeaders: ["sessionId"],
@@ -23,6 +23,8 @@ const corsOption = {
 };
 
 app.use(cors(corsOption));
+
+app.use(express.json());
 
 //Body Parseer
 app.use(bodyParser.json({ limit: "10mb" }));
