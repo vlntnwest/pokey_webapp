@@ -8,22 +8,22 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config({ path: "./config/.env" });
 require("./config/db");
 const { checkUser, requireAuth } = require("./middleware/auth.middleware");
-// const cors = require("cors");
+const cors = require("cors");
 
 const app = express();
 
-// // CORS
-// const corsOption = {
-//   origin: process.env.CLIENT_URL,
-//   credentials: true,
-//   allowedHeaders: ["sessionId", "Content-Type"],
-//   exposedHeaders: ["sessionId"],
-//   methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
-//   preflightContinue: false,
-// };
+// CORS
+const corsOption = {
+  origin: process.env.CLIENT_URL,
+  credentials: true,
+  allowedHeaders: ["sessionId", "Content-Type"],
+  exposedHeaders: ["sessionId"],
+  methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
+  preflightContinue: false,
+};
 
-// app.use(cors(corsOption));
-// app.options("*", cors(corsOption));
+app.use(cors(corsOption));
+app.options("*", cors(corsOption));
 
 //Body Parseer
 app.use(bodyParser.json({ limit: "10mb" }));
