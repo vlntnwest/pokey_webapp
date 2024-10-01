@@ -6,8 +6,8 @@ module.exports.checkUser = (req, res, next) => {
   if (token) {
     jwt.verify(token, process.env.TOKEN_SECRET, async (err, decodedToken) => {
       if (err) {
-        console.log("Token verification error:", err);
-        res.status(401).json({ error: "Unauthorized" }); // Réponse d'erreur appropriée
+        res.locals.user = null;
+        // res.cookie("jwt", "", { maxAge: 1 }); // Delete cookie if err
       } else {
         let user = await UserModel.findById(decodedToken.id);
         res.locals.user = user;
@@ -16,7 +16,7 @@ module.exports.checkUser = (req, res, next) => {
     });
   } else {
     res.locals.user = null;
-    next(); // Vous pourriez envisager de retourner une réponse d'erreur ici également
+    next();
   }
 };
 
