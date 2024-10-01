@@ -14,7 +14,7 @@ const app = express();
 
 // CORS
 const corsOption = {
-  origin: "*",
+  origin: "https://app.pokey-bar.fr",
   credentials: true,
   allowedHeaders: ["sessionId", "Content-Type"],
   exposedHeaders: ["sessionId"],
