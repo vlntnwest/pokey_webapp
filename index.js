@@ -23,6 +23,7 @@ const corsOption = {
 };
 
 app.use(cors(corsOption));
+app.options("*", cors(corsOption));
 
 //Body Parseer
 app.use(bodyParser.json({ limit: "10mb" }));
