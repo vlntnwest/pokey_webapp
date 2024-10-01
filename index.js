@@ -8,9 +8,21 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config({ path: "./config/.env" });
 require("./config/db");
 const { checkUser, requireAuth } = require("./middleware/auth.middleware");
-const allowCors = require("./middleware/cors.middleware");
+const cors = require("cors");
 
 const app = express();
+
+// CORS
+const corsOption = {
+  origin: process.env.CLIENT_URL,
+  credentials: true,
+  allowedHeaders: ["sessionId", "Content-Type"],
+  exposedHeaders: ["sessionId"],
+  methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
+  preflightContinue: false,
+};
+
+app.use(cors());
 
 //Body Parseer
 app.use(bodyParser.json({ limit: "10mb" }));
@@ -24,10 +36,10 @@ app.get("/jwtid", requireAuth, (req, res) => {
 });
 
 //routes
-app.use("/api/user", allowCors(userRoutes));
-app.use("/api/item", allowCors(menuItemRoutes));
-app.use("/api/order", allowCors(orderRoutes));
-app.use("/api/table", allowCors(tableRoutes));
+app.use("/api/user", userRoutes);
+app.use("/api/item", menuItemRoutes);
+app.use("/api/order", orderRoutes);
+app.use("/api/table", tableRoutes);
 
 // server
 app.listen(process.env.PORT, () => {
