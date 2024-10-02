@@ -19,7 +19,7 @@ const backgroundStyle = {
 const childrenStyle = {
   position: "relative",
   zIndex: 0,
-  height: "100%",
+  height: "100dvh",
   "&::WebkitScrollbar": {
     display: "none",
   },
