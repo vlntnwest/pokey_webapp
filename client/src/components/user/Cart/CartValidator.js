@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useShoppingCart } from "../../Context/ShoppingCartContext";
 
-const CartValidator = () => {
+const CartValidator = ({ setOpen }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { tableNumber } = useParams();
-  const { cartItems } = useShoppingCart();
+  const { cartItems, clearCart } = useShoppingCart();
 
   const calculateTotalPrice = () => {
     return cartItems
@@ -72,7 +72,8 @@ const CartValidator = () => {
         error.response?.data || error.message
       );
     }
-
+    clearCart();
+    setOpen(false);
     setIsSubmitting(false);
   };
 

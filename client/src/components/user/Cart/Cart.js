@@ -8,7 +8,7 @@ const Cart = ({ setOpen }) => {
     <>
       <CartHeader setOpen={setOpen} />
       <CartSummary />
-      <CartValidator />
+      <CartValidator setOpen={setOpen} />
     </>
   );
 };
