@@ -57,7 +57,7 @@ const Table = () => {
           justifyContent: "center",
         }}
       >
-        <img src="../img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
+        <img src="./img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
         <CircularProgress />
       </Container>
     );
@@ -78,7 +78,7 @@ const Table = () => {
           justifyContent: "center",
         }}
       >
-        <img src="../img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
+        <img src="./img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
         <Alert severity="error" sx={{ width: "100%" }}>
           Error: {error}
         </Alert>
@@ -89,7 +89,7 @@ const Table = () => {
   if (isTableOpen === false)
     return (
       <Container sx={{ alignContent: "center", height: "100vh" }}>
-        <img src="../img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
+        <img src="./img/1Fichier-21.svg" alt="" style={{ width: "100%" }} />
         <Alert severity="info">
           La table est fermé, demandez à Flo de l'ouvrir
         </Alert>
