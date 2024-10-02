@@ -1,12 +1,25 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "source": "/table/:tableNumber",
+      "destination": "/table/index.html"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/table/:tableNumber/manifest.json",
+      "destination": "/table/manifest.json"
+    },
+    {
+      "source": "/table/:tableNumber/favicon.ico",
+      "destination": "/table/favicon.ico"
+    },
+    {
+      "source": "/table/:tableNumber/logo192.png",
+      "destination": "/table/logo192.png"
+    },
+
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
