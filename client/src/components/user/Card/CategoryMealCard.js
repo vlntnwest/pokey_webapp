@@ -51,7 +51,7 @@ const CategoryMealCard = ({ meal }) => {
                 borderRadius: "4px",
                 maxWidth: 100,
               }}
-              image={`/img/${picture}.webp`}
+              image={`https://g10afdaataaj4tkl.public.blob.vercel-storage.com/img/${picture}.webp`}
               alt={name}
             />
             <Box

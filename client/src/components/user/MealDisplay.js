@@ -9,7 +9,7 @@ const MealDisplay = ({ meal, options, handlers, setOpen }) => {
     <Box sx={{ flexGrow: "1", overflowY: "auto", overflowX: "hidden" }}>
       <CardMedia
         component="img"
-        image={`/img/${picture}.webp`}
+        image={`https://g10afdaataaj4tkl.public.blob.vercel-storage.com/img/${picture}.webp`}
         alt={name}
         sx={{ height: "40%" }}
       />

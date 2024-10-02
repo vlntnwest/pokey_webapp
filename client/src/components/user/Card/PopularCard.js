@@ -30,7 +30,7 @@ const PopularCard = ({ meal }) => {
         >
           <CardMedia
             component="img"
-            image={`/img/${meal.picture}.webp`}
+            image={`https://g10afdaataaj4tkl.public.blob.vercel-storage.com/img/${meal.picture}.webp`}
             alt={meal.name}
             sx={{ aspectRatio: "1/1" }}
           />
