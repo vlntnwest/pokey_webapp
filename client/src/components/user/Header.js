@@ -32,7 +32,7 @@ const Header = () => {
             <div
               style={{
                 width: "100px",
-                backgroundImage: "url(./img/1Fichier-21.svg)",
+                backgroundImage: "url(../img/1Fichier-21.svg)",
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
                 textIndent: "-9999px",
