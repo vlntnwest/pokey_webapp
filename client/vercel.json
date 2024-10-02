@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/table/:tableNumber",
-      "destination": "/index.html"
+      "destination": "/table/index.html"
     },
     {
       "source": "/(.*)",
