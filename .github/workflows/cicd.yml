@@ -1,4 +1,4 @@
-name: Deploy node Application
+name: Deploy Node Application
 
 on:
   push:
@@ -12,21 +12,30 @@ jobs:
       - name: CHECKOUT SOURCE
         uses: actions/checkout@v4
 
-      - name: Login to Docker hub
+      - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
         run: docker build -t vlntnwest/pokey-app-node .
 
-      - name: Publish Image to docker hub
+      - name: Publish Image to Docker Hub
         run: docker push vlntnwest/pokey-app-node:latest
 
   deploy:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: Pull image from docker hub
+      - name: Pull Image from Docker Hub
         run: docker pull vlntnwest/pokey-app-node:latest
 
       - name: Run Docker Container
-        run: docker run -d -p 5001:5001 --name nodejs-app-container -e MONGO_PASSWORD=${{ secrets.DB_USER_PASS }} vlntnwest/pokey-app-node:latest
+        run: |
+          docker run -d -p 5001:5001 \
+            --name nodejs-app-container \
+            -e PORT=${{ secrets.PORT }} \
+            -e CLIENT_URL=${{ secrets.CLIENT_URL }} \
+            -e DB_USER_PASS=${{ secrets.DB_USER_PASS }} \
+            -e TOKEN_SECRET=${{ secrets.TOKEN_SECRET }} \
+            -e PRINTER_PORT=${{ secrets.PRINTER_PORT }} \
+            -e PRINTER_HOST=${{ secrets.PRINTER_HOST }} \
+            vlntnwest/pokey-app-node:latest
