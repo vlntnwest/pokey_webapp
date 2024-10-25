@@ -1,0 +1,32 @@
+name: Deploy node Application
+
+on:
+  push:
+    branches:
+      - mern-ec2-docker
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CHECKOUT SOURCE
+        uses: actions/checkout@v4
+
+      - name: Login to Docker hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: docker build -t vlntnwest/pokey-app-node .
+
+      - name: Publish Image to docker hub
+        run: docker push vlntnwest/pokey-app-node:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull image from docker hub
+        run: docker pull vlntnwest/pokey-app-node:latest
+
+      - name: Run Docker Container
+        run: docker run -d -p 5001:5001 --name nodejs-app-container -e MONGO_PASSWORD=${{ secrets.DB_USER_PASS }} vlntnwest/pokey-app-node:latest
