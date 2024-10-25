@@ -28,6 +28,11 @@ jobs:
       - name: Pull Image from Docker Hub
         run: docker pull vlntnwest/pokey-app-node:latest
 
+      - name: Stop and Remove Existing Container
+        run: |
+          docker stop nodejs-app-container || true
+          docker rm nodejs-app-container || true
+
       - name: Run Docker Container
         run: |
           docker run -d -p 5001:5001 \
