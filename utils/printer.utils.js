@@ -48,8 +48,8 @@ module.exports.printText = (orderData) => {
           }
 
           // Vérifiez si 'proteins' est défini et est un tableau
-          if (Array.isArray(item.proteins) && item.proteins.length > 0) {
-            printData.text(`Proteins: ${item.proteins.join(", ")}\n`);
+          if (item.proteins) {
+            printData.text(`Proteins: ${item.proteins}\n`);
           }
 
           // Vérifiez si 'garnishes' est défini et est un tableau
