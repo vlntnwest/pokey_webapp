@@ -48,7 +48,7 @@ module.exports.printText = (orderData) => {
           }
 
           // Vérifiez si 'proteins' est défini et est un tableau
-          if (item.proteins) {
+          if (item.proteins.trim() !== "") {
             printData.text(`Proteins: ${item.proteins}\n`);
           }
 
