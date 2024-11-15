@@ -85,7 +85,6 @@ module.exports.printText = (orderData) => {
         ) {
           printData.text("------------------------------\n").text("Comments\n");
           printData.text(`${orderData.specialInstructions}\n`);
-          printData.text("------------------------------\n");
         }
 
         printData
