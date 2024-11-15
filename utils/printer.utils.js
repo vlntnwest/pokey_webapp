@@ -47,22 +47,22 @@ module.exports.printText = (orderData) => {
             printData.text(`Base: ${item.base}\n`);
           }
 
-          // Vérifiez si 'proteins' est défini et est un tableau
-          if (item.proteins.trim() !== "") {
+          // Check if protein is a string
+          if (
+            typeof item.proteins === "string" &&
+            item.proteins.trim() !== ""
+          ) {
             printData.text(`Proteins: ${item.proteins}\n`);
           }
 
-          // Vérifiez si 'garnishes' est défini et est un tableau
           if (Array.isArray(item.garnishes) && item.garnishes.length > 0) {
             printData.text(`Garnishes: ${item.garnishes.join(", ")}\n`);
           }
 
-          // Vérifiez si 'toppings' est défini et est un tableau
           if (Array.isArray(item.toppings) && item.toppings.length > 0) {
             printData.text(`Toppings: ${item.toppings.join(", ")}\n`);
           }
 
-          // Vérifiez si 'sauces' est défini et est un tableau
           if (Array.isArray(item.sauces) && item.sauces.length > 0) {
             printData.text(`Sauces: ${item.sauces.join(", ")}\n`);
           }
