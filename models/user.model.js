@@ -75,6 +75,6 @@ UserSchema.statics.getUserByUsername = function (username) {
   return this.findOne({ username }).select("-password").exec();
 };
 
-const UserModel = mongoose.model("user", UserSchema);
+const UserModel = mongoose.model("admins", UserSchema);
 
 module.exports = UserModel;
