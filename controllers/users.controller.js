@@ -1,6 +1,11 @@
 const UsersModel = require("../models/users.model");
 const ObjectID = require("mongoose").Types.ObjectId;
 
+module.exports.getAllUsers = async (req, res) => {
+  const users = await UsersModel.find();
+  res.status(200).json(users);
+};
+
 module.exports.create = async (req, res) => {
   const { email } = req.body;
 
@@ -59,5 +64,21 @@ module.exports.updateUser = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Internal Server Error", error: err.message });
+  }
+};
+
+module.exports.deleteUser = async (req, res) => {
+  const id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(400).send("ID unknown : " + id);
+  }
+
+  try {
+    const deleteUser = await UsersModel.deleteOne({ _id: id }).exec();
+
+    return res.send(deleteUser);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
