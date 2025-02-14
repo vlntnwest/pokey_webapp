@@ -8,8 +8,8 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 require("dotenv").config({ path: "./config/.env" });
 require("./config/db");
-const { checkUser, requireAuth } = require("./middleware/auth.middleware");
 const cors = require("cors");
+const checkJwt = require("./middleware/auth.middleware");
 
 const app = express();
 
@@ -33,14 +33,13 @@ app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 
 // jwt
-app.get("*", checkUser);
-app.get("/jwtid", requireAuth, (req, res) => {
-  res.status(200).send(res.locals.user._id);
-});
+app.use("/api/private", checkJwt);
 
-//routes
+//privates routes
+app.use("/api/private/users", usersRoutes);
+
+//public routes
 app.use("/api/user", userRoutes);
-app.use("/api/users", usersRoutes);
 app.use("/api/item", menuItemRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/table", tableRoutes);
