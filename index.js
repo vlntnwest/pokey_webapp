@@ -9,7 +9,8 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config({ path: "./config/.env" });
 require("./config/db");
 const cors = require("cors");
-const checkJwt = require("./middleware/auth.middleware");
+const authConfig = require("./middleware/auth.middleware");
+const { requiresAuth } = require("express-openid-connect");
 
 const app = express();
 
@@ -38,7 +39,13 @@ app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 
 // jwt
-app.use("/api/private", checkJwt);
+app.use(authConfig);
+app.get("/", (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
+});
+app.get("/profile", requiresAuth(), (req, res) => {
+  res.send(JSON.stringify(req.oidc.user));
+});
 
 //privates routes
 app.use("/api/private/users", usersRoutes);
