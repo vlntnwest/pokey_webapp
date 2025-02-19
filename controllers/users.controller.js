@@ -20,6 +20,7 @@ module.exports.create = async (req, res) => {
 
 module.exports.userInfo = async (req, res) => {
   const email = req.params.email;
+  const userId = req.auth.sub;
 
   try {
     const user = await UsersModel.findOne({ email });
