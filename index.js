@@ -1,5 +1,4 @@
 const express = require("express");
-const userRoutes = require("./routes/user.routes");
 const usersRoutes = require("./routes/users.routes");
 const menuItemRoutes = require("./routes/menuItems.routes");
 const orderRoutes = require("./routes/order.routes");
@@ -36,7 +35,6 @@ app.use(cookieParser());
 app.use("/api/users", checkJwt, usersRoutes);
 
 //public routes
-app.use("/api/user", userRoutes);
 app.use("/api/item", menuItemRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/table", tableRoutes);
