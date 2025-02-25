@@ -1,11 +1,17 @@
+const { default: axios } = require("axios");
 const UsersModel = require("../models/users.model");
 const ObjectID = require("mongoose").Types.ObjectId;
 
+module.exports.getAllUsers = async (req, res) => {
+  const users = await UsersModel.find();
+  res.status(200).json(users);
+};
+
 module.exports.create = async (req, res) => {
-  const { email } = req.body;
+  const { email, firstName, lastName } = req.body;
 
   try {
-    const user = await UsersModel.create({ email });
+    const user = await UsersModel.create({ email, firstName, lastName });
     res.status(201).json({ user: user._id });
   } catch (err) {
     console.error("Erreur lors de la création de l'utilisateur :", err);
@@ -59,5 +65,51 @@ module.exports.updateUser = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Internal Server Error", error: err.message });
+  }
+};
+
+module.exports.deleteUser = async (req, res) => {
+  const id = req.params.id;
+  const auth0Id = req.params.auth0Id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(400).send("ID unknown : " + id);
+  }
+
+  try {
+    var options = {
+      method: "POST",
+      url: `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      data: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: process.env.AUTH0_CLIENT_ID,
+        client_secret: process.env.AUTH0_CLIENT_SECRET,
+        audience: process.env.AUTH0_AUDIENCE,
+      }),
+    };
+
+    const tokenResponse = await axios.request(options);
+    const managementToken = tokenResponse.data.access_token;
+
+    let config = {
+      method: "delete",
+      maxBodyLength: Infinity,
+      url: `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${auth0Id}`,
+
+      headers: {
+        Authorization: `Bearer ${managementToken}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    await axios.request(config);
+
+    const deleteUser = await UsersModel.findByIdAndDelete(id);
+
+    return res.send(deleteUser);
+  } catch (err) {
+    console.error("Erreur serveur :", err.response?.data || err.message);
+    return res.status(500).json({ message: err.message });
   }
 };
