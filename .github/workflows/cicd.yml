@@ -40,7 +40,6 @@ jobs:
             -e PORT=${{ secrets.PORT }} \
             -e CLIENT_URL=${{ secrets.CLIENT_URL }} \
             -e DB_USER_PASS=${{ secrets.DB_USER_PASS }} \
-            -e TOKEN_SECRET=${{ secrets.TOKEN_SECRET }} \
             -e PRINTER_PORT=${{ secrets.PRINTER_PORT }} \
             -e PRINTER_HOST=${{ secrets.PRINTER_HOST }} \
             vlntnwest/pokey-app-node:latest
