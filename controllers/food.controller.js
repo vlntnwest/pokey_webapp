@@ -75,15 +75,21 @@ module.exports.updateFood = async (req, res) => {
   }
 };
 
-module.exports.deleteFood = async (req, res) => {
-  const { id } = req.params;
+module.exports.deleteFoods = async (req, res) => {
+  const { ids } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "Aucun ID fourni pour la suppression." });
+  }
 
   try {
-    await FoodModel.findByIdAndDelete(id);
-    res.status(200).json({ message: "Alliment supprimé " });
+    await FoodModel.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({ message: "Aliments supprimés avec succès." });
   } catch (err) {
     return res
       .status(500)
-      .json({ error: "Impossibble de supprimer l'aliment. " + err.message });
+      .json({ error: "Impossible de supprimer les aliments. " + err.message });
   }
 };
