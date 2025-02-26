@@ -51,9 +51,9 @@ module.exports.updateFood = async (req, res) => {
 
   try {
     const updatedFood = await FoodModel.findOneAndUpdate(
-      { _id: id, "allergens.allergen_id": allergen_id },
+      { _id: id, "allergens._id": allergen_id },
       { $set: { "allergens.$.level": level } },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!updatedFood) {
@@ -62,13 +62,16 @@ module.exports.updateFood = async (req, res) => {
         .json({ error: "Aliment ou allergène introuvable." });
     }
 
-    res
-      .status(200)
-      .json({ message: "Allergène mis à jour.", food: updatedFood });
+    res.status(200).json({
+      success: true,
+      message: "Allergène mis à jour.",
+      food: updatedFood,
+    });
   } catch (err) {
-    res
-      .status(400)
-      .json({ error: "Impossible de modifier l'allergène. " + err.message });
+    res.status(400).json({
+      success: false,
+      error: "Impossible de modifier l'allergène. " + err.message,
+    });
   }
 };
 
