@@ -2,9 +2,16 @@ const mongoose = require("mongoose");
 
 const OrderSchema = new mongoose.Schema(
   {
+    orderType: {
+      type: String,
+      enum: ["dine-in", "clickandcollect"],
+      required: true,
+    },
     tableNumber: {
       type: Number,
-      required: true,
+      required: function () {
+        return this.orderType === "dine-in";
+      },
     },
     items: {
       type: [

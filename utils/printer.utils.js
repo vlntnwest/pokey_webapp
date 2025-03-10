@@ -35,10 +35,13 @@ module.exports.printText = (orderData) => {
           .initialize()
           .codepage("cp850")
           .newline()
-          .text("Mon Restaurant\n")
-          .text(`Table: ${orderData.tableNumber}\n`)
-          .newline()
-          .text("------------------------------\n");
+          .text("Mon Restaurant\n");
+        if (orderData.orderType === "clickandcollect") {
+          printData.text(`Click and Collect\n`);
+        } else {
+          printData.text(`Table: ${orderData.tableNumber}\n`);
+        }
+        printData.newline().text("------------------------------\n");
 
         orderData.items.forEach((item) => {
           printData.text(`${item.name} x${item.quantity}\n`);

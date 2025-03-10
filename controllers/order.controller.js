@@ -22,10 +22,12 @@ module.exports.getOrder = async (req, res) => {
 };
 
 module.exports.createOrder = async (req, res) => {
-  const { tableNumber, items, specialInstructions, archived } = req.body;
+  const { items, specialInstructions, archived, orderType, tableNumber } =
+    req.body;
 
   try {
     const order = await OrderModel.create({
+      orderType,
       tableNumber,
       items,
       archived,
