@@ -22,8 +22,14 @@ module.exports.getOrder = async (req, res) => {
 };
 
 module.exports.createOrder = async (req, res) => {
-  const { items, specialInstructions, archived, orderType, tableNumber } =
-    req.body;
+  const {
+    items,
+    specialInstructions,
+    archived,
+    orderType,
+    tableNumber,
+    orderDate,
+  } = req.body;
 
   try {
     const order = await OrderModel.create({
@@ -32,6 +38,7 @@ module.exports.createOrder = async (req, res) => {
       items,
       archived,
       specialInstructions,
+      orderDate,
     });
     res.status(201).json({ order: order._id });
   } catch (err) {

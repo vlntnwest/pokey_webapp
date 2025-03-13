@@ -57,6 +57,19 @@ const OrderSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    orderDate: {
+      type: {
+        date: {
+          type: String,
+        },
+        time: {
+          type: String,
+        },
+      },
+      required: function () {
+        return this.orderType === "clickandcollect";
+      },
+    },
     specialInstructions: {
       type: String,
     },
