@@ -5,21 +5,10 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
 });
 
 module.exports.createCheckoutSession = async (req, res) => {
-  const { email } = req.body;
+  const { email, items } = req.body;
 
   const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: "T-shirt",
-          },
-          unit_amount: 2000,
-        },
-        quantity: 1,
-      },
-    ],
+    line_items: items,
     customer_email: email,
     mode: "payment",
     payment_method_types: ["card"],
