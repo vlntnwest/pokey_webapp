@@ -37,6 +37,10 @@ const OrderSchema = new mongoose.Schema(
             type: [String],
             default: [],
           },
+          extraProteinPrice: {
+            type: Number,
+            default: 0,
+          },
           garnishes: {
             type: [String],
             // Only for custom

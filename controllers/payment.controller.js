@@ -25,7 +25,7 @@ module.exports.createCheckoutSession = async (req, res) => {
     payment_method_types: ["card"],
     ui_mode: "custom",
     // The URL of your payment completion page
-    return_url: "http://localhost:3000/",
+    return_url: process.env.CLIENT_URL,
   });
 
   res.json({ checkoutSessionClientSecret: session.client_secret });
