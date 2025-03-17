@@ -5,9 +5,10 @@ const orderRoutes = require("./routes/order.routes");
 const tableRoutes = require("./routes/table.routes");
 const allergenRoutes = require("./routes/allergen.routes");
 const foodRoutes = require("./routes/food.routes");
+const paymentRoutes = require("./routes/payment.routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-require("dotenv").config({ path: "./config/.env" });
+require("dotenv").config({ path: "./.env" });
 require("./config/db");
 const cors = require("cors");
 const checkJwt = require("./middleware/auth.middleware");
@@ -42,6 +43,8 @@ app.use("/api/order", orderRoutes);
 app.use("/api/table", tableRoutes);
 app.use("/api/allergen", allergenRoutes);
 app.use("/api/food", foodRoutes);
+
+app.use("/api/checkout", paymentRoutes);
 
 // server
 app.listen(process.env.PORT, () => {
