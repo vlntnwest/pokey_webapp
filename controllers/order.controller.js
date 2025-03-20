@@ -40,6 +40,9 @@ module.exports.createOrder = async (req, res) => {
       specialInstructions,
       orderDate,
     });
+
+    // await printOrder({ body: { orderData: order } });
+
     res.status(201).json({ order: order._id });
   } catch (err) {
     res.status(400).json({ error: err });
