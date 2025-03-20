@@ -29,6 +29,7 @@ module.exports.createOrder = async (req, res) => {
     orderType,
     tableNumber,
     orderDate,
+    isSuccess,
   } = req.body;
 
   try {
@@ -39,6 +40,7 @@ module.exports.createOrder = async (req, res) => {
       archived,
       specialInstructions,
       orderDate,
+      isSuccess,
     });
 
     // await printOrder({ body: { orderData: order } });

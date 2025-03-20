@@ -38,6 +38,10 @@ module.exports.printText = (orderData) => {
           .text("Mon Restaurant\n");
         if (orderData.orderType === "clickandcollect") {
           printData.text(`Click and Collect\n`);
+          printData.text(`${orderData.orderNumber}\n`);
+          if (orderData.isSuccess) {
+            printData.text(`Payé\n`);
+          }
         } else {
           printData.text(`Table: ${orderData.tableNumber}\n`);
         }

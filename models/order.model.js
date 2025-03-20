@@ -82,6 +82,9 @@ const OrderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isSuccess: {
+      type: Boolean,
+    },
   },
   {
     timestamps: true,
