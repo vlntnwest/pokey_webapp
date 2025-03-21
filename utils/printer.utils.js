@@ -94,6 +94,12 @@ module.exports.printText = (orderData) => {
           printData.text(`${orderData.specialInstructions}\n`);
         }
 
+        printData.text("------------------------------\n");
+        if (orderData.clientData) {
+          printData.text(`${orderData.clientData.name}\n`);
+          printData.text(`${orderData.clientData.phone}\n`);
+        }
+
         printData
           .text("------------------------------\n")
           .newline()

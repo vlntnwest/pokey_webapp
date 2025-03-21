@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get("/", orderController.getAllOrders);
 router.get("/:id", orderController.getOrder);
+router.get("/history/:userId", orderController.getUserOrders);
 router.post("/", orderController.createOrder);
 router.delete("/:id", orderController.deleteOrder);
 router.put("/:id/toggle", orderController.toggleOrder);

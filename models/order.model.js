@@ -3,6 +3,9 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const OrderSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+    },
     orderType: {
       type: String,
       enum: ["dine-in", "clickandcollect"],
@@ -77,6 +80,17 @@ const OrderSchema = new mongoose.Schema(
     },
     specialInstructions: {
       type: String,
+    },
+    clientData: {
+      name: {
+        type: String,
+      },
+      email: {
+        type: String,
+      },
+      phone: {
+        type: String,
+      },
     },
     isArchived: {
       type: Boolean,

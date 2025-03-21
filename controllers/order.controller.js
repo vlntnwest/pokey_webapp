@@ -30,22 +30,28 @@ module.exports.createOrder = async (req, res) => {
     tableNumber,
     orderDate,
     isSuccess,
+    clientData,
+    userId,
   } = req.body;
 
   try {
     const order = await OrderModel.create({
+      userId,
+      items,
+      specialInstructions,
+      archived,
       orderType,
       tableNumber,
-      items,
-      archived,
-      specialInstructions,
       orderDate,
       isSuccess,
+      clientData,
     });
 
     // await printOrder({ body: { orderData: order } });
 
-    res.status(201).json({ order: order._id });
+    res
+      .status(201)
+      .json({ orderDate: order.orderDate, orderNumber: order.orderNumber });
   } catch (err) {
     res.status(400).json({ error: err });
   }
@@ -125,5 +131,23 @@ module.exports.printPic = async (req, res) => {
       status: "error",
       message: "Error encoding the image",
     });
+  }
+};
+
+module.exports.getUserOrders = async (req, res) => {
+  const userId = req.params.userId;
+
+  if (!ObjectID.isValid(userId))
+    return res.status(400).send("ID unknown : " + userId);
+
+  try {
+    const order = await OrderModel.find({ userId });
+    if (!order) {
+      return res.status(404).send("No order found");
+    }
+    res.send(order);
+  } catch (err) {
+    console.error("Error while fetching user:", err);
+    res.status(500).send("Internal Server Error");
   }
 };
