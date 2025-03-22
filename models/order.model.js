@@ -61,6 +61,9 @@ const OrderSchema = new mongoose.Schema(
             type: Number,
             required: true,
           },
+          price: {
+            type: Number,
+          },
         },
       ],
       required: true,
@@ -80,6 +83,9 @@ const OrderSchema = new mongoose.Schema(
     },
     specialInstructions: {
       type: String,
+    },
+    totalPrice: {
+      type: Number,
     },
     clientData: {
       name: {

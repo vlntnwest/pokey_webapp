@@ -32,6 +32,7 @@ module.exports.createOrder = async (req, res) => {
     isSuccess,
     clientData,
     userId,
+    totalPrice,
   } = req.body;
 
   try {
@@ -45,6 +46,7 @@ module.exports.createOrder = async (req, res) => {
       orderDate,
       isSuccess,
       clientData,
+      totalPrice,
     });
 
     // await printOrder({ body: { orderData: order } });
