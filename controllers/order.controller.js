@@ -1,6 +1,17 @@
 const OrderModel = require("../models/order.model");
 const { printText, printImage } = require("../utils/printer.utils");
 const ObjectID = require("mongoose").Types.ObjectId;
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.GMAIL_ACCOUNT,
+    pass: process.env.GMAIL_NODEMAILER_PASSWORD,
+  },
+});
 
 module.exports.getAllOrders = async (req, res) => {
   const orders = await OrderModel.find();
@@ -15,8 +26,8 @@ module.exports.getOrder = async (req, res) => {
   try {
     const order = await OrderModel.findById(req.params.id);
     res.status(200).json(order);
-  } catch (err) {
-    console.error("Error while fetching order:", err);
+  } catch (error) {
+    console.error("Error while fetching order:", error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -50,12 +61,13 @@ module.exports.createOrder = async (req, res) => {
     });
 
     // await printOrder({ body: { orderData: order } });
+    await this.sendOrderConfirmation({ body: { orderData: order } });
 
     res
       .status(201)
       .json({ orderDate: order.orderDate, orderNumber: order.orderNumber });
-  } catch (err) {
-    res.status(400).json({ error: err });
+  } catch (error) {
+    res.status(400).json({ error: error });
   }
 };
 
@@ -70,8 +82,8 @@ module.exports.deleteOrder = async (req, res) => {
     const deleteOrder = await OrderModel.deleteOne({ _id: id }).exec();
 
     return res.send(deleteOrder);
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -81,8 +93,8 @@ module.exports.getTableOrders = async (req, res) => {
   try {
     const order = await OrderModel.find({ tableNumber });
     res.status(200).json(order);
-  } catch (err) {
-    console.error("Error while fetching order:", err);
+  } catch (error) {
+    console.error("Error while fetching order:", error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -100,7 +112,6 @@ module.exports.toggleOrder = async (req, res) => {
 
 module.exports.printOrder = async (req, res) => {
   const { orderData } = req.body;
-  console.log(orderData);
 
   if (!orderData) {
     return res.status(400).json({ error: "No text provided for printing" });
@@ -127,8 +138,8 @@ module.exports.printPic = async (req, res) => {
   try {
     const result = await printImage(image);
     res.status(200).json({ message: result });
-  } catch (err) {
-    console.error("[🧾 THERMAL] Error processing the image:", err);
+  } catch (error) {
+    console.error("[🧾 THERMAL] Error processing the image:", error);
     res.status(500).json({
       status: "error",
       message: "Error encoding the image",
@@ -148,8 +159,31 @@ module.exports.getUserOrders = async (req, res) => {
       return res.status(404).send("No order found");
     }
     res.send(order);
-  } catch (err) {
-    console.error("Error while fetching user:", err);
+  } catch (error) {
+    console.error("Error while fetching user:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+module.exports.sendOrderConfirmation = async (req, res) => {
+  const { orderData } = req.body;
+  console.log(orderData);
+
+  if (!orderData) {
+    return res.status(400).json({ error: "No text provided for email" });
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Pokey Bar" <${process.env.GMAIL_ACCOUNT}>`,
+      to: orderData.clientData.email,
+      subject: `Votre commande #${orderData.orderNumber}`,
+      text: "Hello world?",
+      html: "<b>Hello world?</b>",
+    });
+    res.send(info);
+  } catch (error) {
+    console.error("Error while sending email:", error);
     res.status(500).send("Internal Server Error");
   }
 };
