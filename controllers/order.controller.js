@@ -173,7 +173,13 @@ module.exports.sendOrderConfirmation = async (orderData) => {
   const html = template({
     orderNumber: orderData.orderNumber,
     clientName: orderData.clientData.name,
-    items: orderData.items.map((item) => item.name),
+    orderDate: orderData.orderDate.date,
+    orderTime: orderData.orderDate.time,
+    totalPrice: orderData.totalPrice.toLocaleString("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+    }),
   });
 
   try {
