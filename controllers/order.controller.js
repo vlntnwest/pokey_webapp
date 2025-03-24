@@ -2,6 +2,10 @@ const OrderModel = require("../models/order.model");
 const { printText, printImage } = require("../utils/printer.utils");
 const ObjectID = require("mongoose").Types.ObjectId;
 const nodemailer = require("nodemailer");
+require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
+const Handlebars = require("handlebars");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -32,7 +36,7 @@ module.exports.getOrder = async (req, res) => {
   }
 };
 
-module.exports.createOrder = async (req, res) => {
+module.exports.createOrder = async (req) => {
   const {
     items,
     specialInstructions,
@@ -60,14 +64,9 @@ module.exports.createOrder = async (req, res) => {
       totalPrice,
     });
 
-    // await printOrder({ body: { orderData: order } });
-    await this.sendOrderConfirmation({ body: { orderData: order } });
-
-    res
-      .status(201)
-      .json({ orderDate: order.orderDate, orderNumber: order.orderNumber });
+    return order;
   } catch (error) {
-    res.status(400).json({ error: error });
+    throw new Error("Error creating order");
   }
 };
 
@@ -110,19 +109,16 @@ module.exports.toggleOrder = async (req, res) => {
   }
 };
 
-module.exports.printOrder = async (req, res) => {
-  const { orderData } = req.body;
-
+module.exports.printOrder = async (orderData) => {
   if (!orderData) {
-    return res.status(400).json({ error: "No text provided for printing" });
+    throw new Error("No text provided for printing");
   }
 
   try {
     const result = await printText(orderData);
-    res.status(200).json({ message: result });
+    return result;
   } catch (error) {
-    console.error("[🧾 THERMAL] Error:", error);
-    res.status(500).json({ error: "Error printing order" });
+    throw new Error("Error printing order");
   }
 };
 
@@ -158,32 +154,66 @@ module.exports.getUserOrders = async (req, res) => {
     if (!order) {
       return res.status(404).send("No order found");
     }
-    res.send(order);
+    return result;
   } catch (error) {
     console.error("Error while fetching user:", error);
     res.status(500).send("Internal Server Error");
   }
 };
 
-module.exports.sendOrderConfirmation = async (req, res) => {
-  const { orderData } = req.body;
-  console.log(orderData);
-
+module.exports.sendOrderConfirmation = async (orderData) => {
   if (!orderData) {
-    return res.status(400).json({ error: "No text provided for email" });
+    throw new Error("No text provided for email");
   }
 
+  const templatePath = path.join(__dirname, "../Template/emailTemplate.html");
+  const source = fs.readFileSync(templatePath, "utf-8");
+  const template = Handlebars.compile(source);
+
+  const html = template({
+    orderNumber: orderData.orderNumber,
+    clientName: orderData.clientData.name,
+    items: orderData.items.map((item) => item.name),
+  });
+
   try {
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: `"Pokey Bar" <${process.env.GMAIL_ACCOUNT}>`,
       to: orderData.clientData.email,
       subject: `Votre commande #${orderData.orderNumber}`,
       text: "Hello world?",
-      html: "<b>Hello world?</b>",
+      html: html,
     });
-    res.send(info);
   } catch (error) {
-    console.error("Error while sending email:", error);
-    res.status(500).send("Internal Server Error");
+    throw new Error("Error sending email");
+  }
+};
+
+module.exports.handleOrderCreation = async (req, res) => {
+  try {
+    const order = await module.exports.createOrder(req);
+
+    // await module.exports.printOrder(order);
+
+    await module.exports.sendOrderConfirmation(order);
+
+    res.status(201).json({
+      message: "Order created, printed, and confirmation email sent",
+      orderDate: order.orderDate,
+      orderNumber: order.orderNumber,
+    });
+  } catch (error) {
+    console.error("Error handling order creation:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports.handleOrderPrinting = async (req, res) => {
+  try {
+    const orderData = req.body;
+    const result = await orderController.printOrder(orderData);
+    res.status(200).json({ message: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
