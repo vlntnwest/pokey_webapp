@@ -170,6 +170,31 @@ module.exports.sendOrderConfirmation = async (orderData) => {
   const source = fs.readFileSync(templatePath, "utf-8");
   const template = Handlebars.compile(source);
 
+  const generateText = (orderData) => {
+    return `
+        Votre commande est en préparation
+
+        Votre commande #${orderData.orderNumber}
+
+        Merci pour votre commande, ${orderData.clientData.name}!
+
+        Vous pouvez venir la récupérer :
+        ${orderData.orderDate.date} à ${orderData.orderDate.time}
+
+        Total : ${orderData.totalPrice.toLocaleString("fr-FR", {
+          style: "currency",
+          currency: "EUR",
+          minimumFractionDigits: 2,
+        })}
+
+        ---
+
+        Pokey Bar - 36 rue de la Krutenau, 67000 STRASBOURG - 03 88 96 63 39
+          `;
+  };
+
+  const text = generateText(orderData);
+
   const html = template({
     orderNumber: orderData.orderNumber,
     clientName: orderData.clientData.name,
@@ -187,7 +212,7 @@ module.exports.sendOrderConfirmation = async (orderData) => {
       from: `"Pokey Bar" <${process.env.GMAIL_ACCOUNT}>`,
       to: orderData.clientData.email,
       subject: `Votre commande #${orderData.orderNumber}`,
-      text: "Hello world?",
+      text: text,
       html: html,
     });
   } catch (error) {
