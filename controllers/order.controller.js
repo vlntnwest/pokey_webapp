@@ -173,7 +173,7 @@ module.exports.sendOrderConfirmation = async (orderData) => {
   const generateText = (orderData) => {
     return `
         Votre commande est en préparation
-
+        
         Votre commande #${orderData.orderNumber}
 
         Merci pour votre commande, ${orderData.clientData.name}!
