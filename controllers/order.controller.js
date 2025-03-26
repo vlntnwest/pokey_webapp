@@ -150,14 +150,14 @@ module.exports.getUserOrders = async (req, res) => {
     return res.status(400).send("ID unknown : " + userId);
 
   try {
-    const order = await OrderModel.find({ userId });
-    if (!order) {
+    const orders = await OrderModel.find({ userId });
+    if (!orders) {
       return res.status(404).send("No order found");
     }
-    return result;
+    res.status(200).json(orders);
   } catch (error) {
     console.error("Error while fetching user:", error);
-    res.status(500).send("Internal Server Error");
+    return res.status(500).send("Internal Server Error");
   }
 };
 
@@ -172,8 +172,6 @@ module.exports.sendOrderConfirmation = async (orderData) => {
 
   const generateText = (orderData) => {
     return `
-        Votre commande est en préparation
-        
         Votre commande #${orderData.orderNumber}
 
         Merci pour votre commande, ${orderData.clientData.name}!
