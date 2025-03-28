@@ -5,16 +5,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Simple Transactional Email</title>
     <style media="all" type="text/css">
-      @media all {
-        .btn-primary table td:hover {
-          background-color: #ec0867 !important;
-        }
-
-        .btn-primary a:hover {
-          background-color: #ec0867 !important;
-          border-color: #ec0867 !important;
-        }
-      }
       @media only screen and (max-width: 640px) {
         .main p,
         .main td,
@@ -39,17 +29,6 @@
           border-left-width: 0 !important;
           border-radius: 0 !important;
           border-right-width: 0 !important;
-        }
-
-        .btn table {
-          max-width: 100% !important;
-          width: 100% !important;
-        }
-
-        .btn a {
-          font-size: 16px !important;
-          max-width: 100% !important;
-          width: 100% !important;
         }
       }
       @media all {
@@ -83,6 +62,21 @@
           font-weight: inherit;
           line-height: inherit;
         }
+      }
+      button {
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 1.75;
+        border: 0;
+        border-radius: 4px;
+        color: #fff;
+        background-color: #1f4493;
+        padding: 6px 16px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+
+      button:hover {
+        background-color: rgb(21, 47, 102);
       }
     </style>
   </head>
@@ -257,6 +251,25 @@
                   "
                 >
                   {{totalPrice}}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: center;
+                      margin-bottom: 16px;
+                    "
+                  >
+                    <a
+                      href="{{orderlink}}"
+                      style="text-decoration: none"
+                      classe="button"
+                    >
+                      <button>Voir la commande</button>
+                    </a>
+                  </div>
                 </td>
               </tr>
               <!-- END MAIN CONTENT AREA -->

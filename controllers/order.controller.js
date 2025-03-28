@@ -230,6 +230,7 @@ module.exports.sendOrderConfirmation = async (orderData) => {
       currency: "EUR",
       minimumFractionDigits: 2,
     }),
+    orderlink: `${process.env.CLIENT_URL}/confirmation/${orderData._id}`,
   });
 
   try {
