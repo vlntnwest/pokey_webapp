@@ -36,11 +36,10 @@ module.exports.getOrder = async (req, res) => {
   }
 };
 
-module.exports.getOrderByPaymentId = async (req, res) => {
-  const paymentId = req.params.id;
-
+module.exports.getConfirmedOrder = async (req, res) => {
+  const objectId = new ObjectID(req.params.id);
   try {
-    const order = await OrderModel.findOne({ paymentId });
+    const order = await OrderModel.findById(objectId).select("-clientData");
     if (!order) {
       return res.status(404).send("Order not found");
     }

@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/", orderController.getAllOrders);
 router.get("/:id", orderController.getOrder);
-router.get("/payed/:id", orderController.getOrderByPaymentId);
+router.get("/confirmed/:id", orderController.getConfirmedOrder);
 router.get("/history/:userId", orderController.getUserOrders);
 router.post("/", orderController.handleOrderCreation);
 router.delete("/:id", orderController.deleteOrder);
