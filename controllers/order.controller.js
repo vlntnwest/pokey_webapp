@@ -81,6 +81,8 @@ module.exports.createOrder = async (req) => {
 
     return order;
   } catch (error) {
+    console.log(error);
+
     throw new Error("Error creating order");
   }
 };
@@ -250,7 +252,9 @@ module.exports.handleOrderCreation = async (req, res) => {
 
     // await module.exports.printOrder(order);
 
-    await module.exports.sendOrderConfirmation(order);
+    if (req.body.orderType === "clickandcollect") {
+      await module.exports.sendOrderConfirmation(order);
+    }
 
     res.status(201).json({
       message: "Order created, printed, and confirmation email sent",
