@@ -27,6 +27,8 @@ const corsOption = {
 
 app.use(cors(corsOption));
 
+app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
+
 app.use(express.json());
 
 //Body Parseer

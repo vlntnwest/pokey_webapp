@@ -1,14 +1,23 @@
 require("dotenv").config();
+const { handleOrderCreation } = require("./order.controller");
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia; custom_checkout_beta=v1;",
 });
 
 module.exports.createCheckoutSession = async (req, res) => {
-  const { email, items } = req.body;
+  const { email, stripeItems, data } = req.body;
+
+  const formattedMetadata = Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [
+      key,
+      typeof value === "object" ? JSON.stringify(value) : String(value),
+    ])
+  );
 
   const session = await stripe.checkout.sessions.create({
-    line_items: items,
+    line_items: stripeItems,
+    metadata: formattedMetadata,
     customer_email: email,
     mode: "payment",
     payment_method_types: ["card"],
@@ -18,4 +27,51 @@ module.exports.createCheckoutSession = async (req, res) => {
   });
 
   res.json({ checkoutSessionClientSecret: session.client_secret });
+};
+
+module.exports.paymentWebhook = async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET_KEY;
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    console.error(`Webhook Error: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  switch (event.type) {
+    //Event when payment happen
+    case "checkout.session.completed":
+      console.log("Payment was successful!");
+
+      const metadata = event.data.object.metadata;
+
+      const formattedData = {
+        ...metadata,
+        clientData: JSON.parse(metadata.clientData),
+        orderDate: JSON.parse(metadata.orderDate),
+        items: JSON.parse(metadata.items),
+        totalPrice: parseFloat(metadata.totalPrice),
+        isSuccess: true,
+        paymentId: event.data.object.id,
+      };
+
+      await handleOrderCreation({ body: formattedData }, res);
+
+      break;
+
+    //Event when payment failed due to card problem or insufficient funds
+    case "payment_intent.payment_failed":
+      console.log("Payment failed");
+
+    default:
+      break;
+  }
+
+  // Return a res to acknowledge receipt of the event
+  res.json();
 };

@@ -105,6 +105,9 @@ const OrderSchema = new mongoose.Schema(
     isSuccess: {
       type: Boolean,
     },
+    paymentId: {
+      type: String,
+    },
   },
   {
     timestamps: true,

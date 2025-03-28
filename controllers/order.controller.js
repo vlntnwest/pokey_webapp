@@ -36,11 +36,25 @@ module.exports.getOrder = async (req, res) => {
   }
 };
 
+module.exports.getOrderByPaymentId = async (req, res) => {
+  const paymentId = req.params.id;
+
+  try {
+    const order = await OrderModel.findOne({ paymentId });
+    if (!order) {
+      return res.status(404).send("Order not found");
+    }
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Error while fetching order:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
 module.exports.createOrder = async (req) => {
   const {
     items,
     specialInstructions,
-    archived,
     orderType,
     tableNumber,
     orderDate,
@@ -48,6 +62,7 @@ module.exports.createOrder = async (req) => {
     clientData,
     userId,
     totalPrice,
+    paymentId,
   } = req.body;
 
   try {
@@ -55,13 +70,13 @@ module.exports.createOrder = async (req) => {
       userId,
       items,
       specialInstructions,
-      archived,
       orderType,
       tableNumber,
       orderDate,
       isSuccess,
       clientData,
       totalPrice,
+      paymentId,
     });
 
     return order;
@@ -104,6 +119,17 @@ module.exports.toggleOrder = async (req, res) => {
     order.isArchived = !order.isArchived;
     await order.save();
     res.json({ message: "Order state updated", isArchived: order.isArchived });
+  } catch (error) {
+    res.status(500).json({ error: "Error toggling order state" });
+  }
+};
+
+module.exports.isSuccess = async (req, res) => {
+  try {
+    const order = await OrderModel.findById(id);
+    order.isSuccess = data;
+    await order.save();
+    res.json({ message: "Order state update", isPayes: order.isSuccess });
   } catch (error) {
     res.status(500).json({ error: "Error toggling order state" });
   }

@@ -6,5 +6,6 @@ router.post(
   "/create-checkout-session",
   paymentController.createCheckoutSession
 );
+router.post("/webhook", paymentController.paymentWebhook);
 
 module.exports = router;
