@@ -2,6 +2,7 @@ const express = require("express");
 const usersRoutes = require("./routes/users.routes");
 const menuItemRoutes = require("./routes/menuItems.routes");
 const orderRoutes = require("./routes/order.routes");
+const privateOrdersRoutes = require("./routes/private.orders.routes");
 const tableRoutes = require("./routes/table.routes");
 const allergenRoutes = require("./routes/allergen.routes");
 const foodRoutes = require("./routes/food.routes");
@@ -38,6 +39,7 @@ app.use(cookieParser());
 
 //privates routes
 app.use("/api/users", checkJwt, usersRoutes);
+app.use("/api/private/orders", checkJwt, privateOrdersRoutes);
 
 //public routes
 app.use("/api/item", menuItemRoutes);
