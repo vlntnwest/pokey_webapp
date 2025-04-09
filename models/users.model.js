@@ -18,6 +18,10 @@ const UsersSchema = new mongoose.Schema(
       unique: true,
       validate: [isEmail],
     },
+    shouldGiveInformation: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
