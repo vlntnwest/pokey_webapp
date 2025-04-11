@@ -62,3 +62,4 @@ jobs:
             -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
             -e GMAIL_NODEMAILER_PASSWORD=${{ secrets.GMAIL_NODEMAILER_PASSWORD }} \
             vlntnwest/pokey-app-node:latest
+
