@@ -33,14 +33,6 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: Clean Docker on EC2
-        run: |
-          echo "Freeing up Docker space on EC2..."
-          docker container prune -f
-          docker image prune -a -f
-          docker volume prune -f
-          df -h
-        
       - name: Pull Image from Docker Hub
         run: docker pull vlntnwest/pokey-app-node:latest
 
