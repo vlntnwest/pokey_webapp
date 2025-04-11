@@ -8,12 +8,31 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
 module.exports.createCheckoutSession = async (req, res) => {
   const { email, stripeItems, data } = req.body;
 
-  const formattedMetadata = Object.fromEntries(
-    Object.entries(data).map(([key, value]) => [
-      key,
-      typeof value === "object" ? JSON.stringify(value) : String(value),
-    ])
-  );
+  function splitStringToMetadataParts(key, value, chunkSize = 490) {
+    const chunks = value.match(new RegExp(`.{1,${chunkSize}}`, "g")) || [];
+    return chunks.reduce((acc, chunk, i) => {
+      acc[`${key}_part_${i + 1}`] = chunk;
+      return acc;
+    }, {});
+  }
+
+  const formattedMetadata = {};
+
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value === "object") {
+      const jsonValue = JSON.stringify(value);
+      if (jsonValue.length > 490) {
+        Object.assign(
+          formattedMetadata,
+          splitStringToMetadataParts(key, jsonValue)
+        );
+      } else {
+        formattedMetadata[key] = jsonValue;
+      }
+    } else {
+      formattedMetadata[key] = String(value);
+    }
+  }
 
   const session = await stripe.checkout.sessions.create({
     line_items: stripeItems,
@@ -35,6 +54,16 @@ module.exports.paymentWebhook = async (req, res) => {
 
   let event;
 
+  function reconstructFromMetadata(metadata, keyPrefix) {
+    const parts = Object.entries(metadata)
+      .filter(([k]) => k.startsWith(`${keyPrefix}_part_`))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, v]) => v)
+      .join("");
+
+    return parts ? JSON.parse(parts) : null;
+  }
+
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
@@ -52,9 +81,11 @@ module.exports.paymentWebhook = async (req, res) => {
 
       const formattedData = {
         ...metadata,
-        clientData: JSON.parse(metadata.clientData),
-        orderDate: JSON.parse(metadata.orderDate),
-        items: JSON.parse(metadata.items),
+        clientData: metadata.clientData
+          ? JSON.parse(metadata.clientData)
+          : null,
+        orderDate: metadata.orderDate ? JSON.parse(metadata.orderDate) : null,
+        items: reconstructFromMetadata(metadata, "items"),
         totalPrice: parseFloat(metadata.totalPrice),
         isSuccess: true,
         paymentId: event.data.object.id,
