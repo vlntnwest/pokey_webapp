@@ -18,12 +18,10 @@ const UsersSchema = new mongoose.Schema(
       unique: true,
       validate: [isEmail],
     },
-    orders: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Order",
-      },
-    ],
+    shouldGiveInformation: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

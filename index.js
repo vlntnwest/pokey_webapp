@@ -2,12 +2,14 @@ const express = require("express");
 const usersRoutes = require("./routes/users.routes");
 const menuItemRoutes = require("./routes/menuItems.routes");
 const orderRoutes = require("./routes/order.routes");
+const privateOrdersRoutes = require("./routes/private.orders.routes");
 const tableRoutes = require("./routes/table.routes");
 const allergenRoutes = require("./routes/allergen.routes");
 const foodRoutes = require("./routes/food.routes");
+const paymentRoutes = require("./routes/payment.routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-require("dotenv").config({ path: "./config/.env" });
+require("dotenv").config({ path: "./.env" });
 require("./config/db");
 const cors = require("cors");
 const checkJwt = require("./middleware/auth.middleware");
@@ -26,6 +28,8 @@ const corsOption = {
 
 app.use(cors(corsOption));
 
+app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
+
 app.use(express.json());
 
 //Body Parseer
@@ -35,6 +39,7 @@ app.use(cookieParser());
 
 //privates routes
 app.use("/api/users", checkJwt, usersRoutes);
+app.use("/api/private/orders", checkJwt, privateOrdersRoutes);
 
 //public routes
 app.use("/api/item", menuItemRoutes);
@@ -42,6 +47,8 @@ app.use("/api/order", orderRoutes);
 app.use("/api/table", tableRoutes);
 app.use("/api/allergen", allergenRoutes);
 app.use("/api/food", foodRoutes);
+
+app.use("/api/checkout", paymentRoutes);
 
 // server
 app.listen(process.env.PORT, () => {
