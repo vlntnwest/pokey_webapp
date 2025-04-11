@@ -225,7 +225,7 @@ module.exports.sendOrderConfirmation = async (orderData) => {
     clientName: orderData.clientData.name,
     orderDate: orderData.orderDate.date,
     orderTime: orderData.orderDate.time,
-    totalPrice: orderData.totalPrice.toLocaleString("fr-FR", {
+    totalPrice: (orderData.totalPrice / 100).toLocaleString("fr-FR", {
       style: "currency",
       currency: "EUR",
       minimumFractionDigits: 2,

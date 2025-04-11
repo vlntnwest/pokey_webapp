@@ -27,6 +27,14 @@ module.exports.printText = (orderData) => {
 
     client.connect(process.env.PRINTER_PORT, process.env.PRINTER_HOST, () => {
       console.log("[🧾 THERMAL] Connected to printer");
+      const now = new Date();
+      const time = now.toLocaleString("fr-FR", {
+        day: "numeric",
+        month: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
 
       try {
         const encoder = new EscPosEncoder();
@@ -35,17 +43,21 @@ module.exports.printText = (orderData) => {
           .initialize()
           .codepage("cp850")
           .newline()
-          .text("Mon Restaurant\n");
+          .text("Pokey Bar\n");
         if (orderData.orderType === "clickandcollect") {
           printData.text(`Click and Collect\n`);
           printData.text(`${orderData.orderNumber}\n`);
+          printData.text(
+            `Date: ${orderData.orderDate.date} à ${orderData.orderDate.time}\n`
+          );
           if (orderData.isSuccess) {
             printData.text(`Payé\n`);
           }
         } else {
           printData.text(`Table: ${orderData.tableNumber}\n`);
+          printData.text(`${time}\n`);
         }
-        printData.newline().text("------------------------------\n");
+        printData.newline().text("------------------------------\n").newline();
 
         orderData.items.forEach((item) => {
           printData.text(`${item.name} x${item.quantity}\n`);
@@ -53,7 +65,6 @@ module.exports.printText = (orderData) => {
           if (item.base) {
             printData.text(`Base: ${item.base}\n`);
           }
-
           // Check if protein is a string
           if (
             typeof item.proteins === "string" &&
@@ -94,8 +105,8 @@ module.exports.printText = (orderData) => {
           printData.text(`${orderData.specialInstructions}\n`);
         }
 
-        printData.text("------------------------------\n");
-        if (orderData.clientData) {
+        if (orderData.clientData?.name || orderData.clientData?.phone) {
+          printData.text("------------------------------\n");
           printData.text(`${orderData.clientData.name}\n`);
           printData.text(`${orderData.clientData.phone}\n`);
         }
