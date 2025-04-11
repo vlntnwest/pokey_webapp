@@ -60,5 +60,5 @@ jobs:
             -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
             -e STRIPE_WEBHOOK_SECRET_KEY=${{ secrets.STRIPE_WEBHOOK_SECRET_KEY }} \
             -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
-            -e GMAIL_NODEMAILER_PASSWORD=${{ secrets.GMAIL_NODEMAILER_PASSWORD }} \
+            -e GMAIL_NODEMAILER_PASSWORD="${{ secrets.GMAIL_NODEMAILER_PASSWORD }}" \
             vlntnwest/pokey-app-node:latest
