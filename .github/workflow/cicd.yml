@@ -1,0 +1,64 @@
+name: Deploy Node Application
+
+on:
+  push:
+    branches:
+      - mern-ec2-docker
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CHECKOUT SOURCE
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          echo "Disk space after cleanup:"
+          df -h
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: docker build -t vlntnwest/pokey-app-node .
+
+      - name: Publish Image to Docker Hub
+        run: docker push vlntnwest/pokey-app-node:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull Image from Docker Hub
+        run: docker pull vlntnwest/pokey-app-node:latest
+
+      - name: Check disk after pull
+        run: df -h
+
+      - name: Stop and Remove Existing Container
+        run: |
+          docker stop nodejs-app-container || true
+          docker rm nodejs-app-container || true
+
+      - name: Run Docker Container
+        run: |
+          docker run -d -p 5001:5001 \
+            --name nodejs-app-container \
+            -e PORT=${{ secrets.PORT }} \
+            -e CLIENT_URL=${{ secrets.CLIENT_URL }} \
+            -e DB_USER_PASS=${{ secrets.DB_USER_PASS }} \
+            -e PRINTER_PORT=${{ secrets.PRINTER_PORT }} \
+            -e PRINTER_HOST=${{ secrets.PRINTER_HOST }} \
+            -e AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }} \
+            -e AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
+            -e AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }} \
+            -e AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }} \
+            -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
+            -e STRIPE_WEBHOOK_SECRET_KEY=${{ secrets.STRIPE_WEBHOOK_SECRET_KEY }} \
+            -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
+            -e GMAIL_NODEMAILER_PASSWORD=${{ secrets.GMAIL_NODEMAILER_PASSWORD }} \
+            vlntnwest/pokey-app-node:latest
