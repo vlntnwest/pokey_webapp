@@ -85,7 +85,9 @@ module.exports.paymentWebhook = async (req, res) => {
           ? JSON.parse(metadata.clientData)
           : null,
         orderDate: metadata.orderDate ? JSON.parse(metadata.orderDate) : null,
-        items: reconstructFromMetadata(metadata, "items"),
+        items:
+          reconstructFromMetadata(metadata, "items") ??
+          (metadata.items ? JSON.parse(metadata.items) : null),
         totalPrice: parseFloat(metadata.totalPrice),
         isSuccess: true,
         paymentId: event.data.object.id,
