@@ -46,4 +46,8 @@ jobs:
             -e AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
             -e AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }} \
             -e AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }} \
+            -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
+            -e STRIPE_WEBHOOK_SECRET_KEY=${{ secrets.STRIPE_WEBHOOK_SECRET_KEY }} \
+            -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
+            -e GMAIL_NODEMAILER_PASSWORD=${{ secrets.GMAIL_NODEMAILER_PASSWORD }} \
             vlntnwest/pokey-app-node:latest
