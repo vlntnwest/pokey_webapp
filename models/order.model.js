@@ -1,10 +1,21 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const OrderSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+    },
+    orderType: {
+      type: String,
+      enum: ["dine-in", "clickandcollect"],
+      required: true,
+    },
     tableNumber: {
       type: Number,
-      required: true,
+      required: function () {
+        return this.orderType === "dine-in";
+      },
     },
     items: {
       type: [
@@ -30,6 +41,10 @@ const OrderSchema = new mongoose.Schema(
             type: [String],
             default: [],
           },
+          extraProteinPrice: {
+            type: Number,
+            default: 0,
+          },
           garnishes: {
             type: [String],
             // Only for custom
@@ -46,22 +61,60 @@ const OrderSchema = new mongoose.Schema(
             type: Number,
             required: true,
           },
+          price: {
+            type: Number,
+          },
         },
       ],
       required: true,
     },
+    orderDate: {
+      type: {
+        date: {
+          type: String,
+        },
+        time: {
+          type: String,
+        },
+      },
+      required: function () {
+        return this.orderType === "clickandcollect";
+      },
+    },
     specialInstructions: {
       type: String,
+    },
+    totalPrice: {
+      type: Number,
+    },
+    clientData: {
+      name: {
+        type: String,
+      },
+      email: {
+        type: String,
+      },
+      phone: {
+        type: String,
+      },
     },
     isArchived: {
       type: Boolean,
       default: false,
+    },
+    isSuccess: {
+      type: Boolean,
+    },
+    paymentId: {
+      type: String,
     },
   },
   {
     timestamps: true,
   }
 );
+
+OrderSchema.plugin(AutoIncrement, { inc_field: "orderNumber" });
 
 const OrderModel = mongoose.model("Order", OrderSchema);
 module.exports = OrderModel;

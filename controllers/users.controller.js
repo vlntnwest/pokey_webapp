@@ -45,6 +45,8 @@ module.exports.updateUser = async (req, res) => {
     if (req.body.firstName) updateData.firstName = req.body.firstName;
     if (req.body.lastName) updateData.lastName = req.body.lastName;
     if (req.body.phone) updateData.phone = req.body.phone;
+    if (typeof req.body.shouldGiveInformation !== "undefined")
+      updateData.shouldGiveInformation = req.body.shouldGiveInformation;
 
     const updatedUser = await UsersModel.findOneAndUpdate(
       { _id: id },
