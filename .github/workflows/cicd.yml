@@ -45,20 +45,20 @@ jobs:
           docker rm nodejs-app-container || true
 
       - name: Run Docker Container
-        run: >
-          docker run -d -p 5001:5001
-          --name nodejs-app-container
-          -e PORT=${{ secrets.PORT }}
-          -e CLIENT_URL=${{ secrets.CLIENT_URL }}
-          -e DB_USER_PASS=${{ secrets.DB_USER_PASS }}
-          -e PRINTER_PORT=${{ secrets.PRINTER_PORT }}
-          -e PRINTER_HOST=${{ secrets.PRINTER_HOST }}
-          -e AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}
-          -e AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}
-          -e AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}
-          -e AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}
-          -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-          -e STRIPE_WEBHOOK_SECRET_KEY=${{ secrets.STRIPE_WEBHOOK_SECRET_KEY }}
-          -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }}
-          -e GMAIL_NODEMAILER_PASSWORD=${{ secrets.GMAIL_NODEMAILER_PASSWORD }}
-          vlntnwest/pokey-app-node:latest
+        run: |
+          docker run -d -p 5001:5001 \
+            --name nodejs-app-container \
+            -e PORT=${{ secrets.PORT }} \
+            -e CLIENT_URL=${{ secrets.CLIENT_URL }} \
+            -e DB_USER_PASS=${{ secrets.DB_USER_PASS }} \
+            -e PRINTER_PORT=${{ secrets.PRINTER_PORT }} \
+            -e PRINTER_HOST=${{ secrets.PRINTER_HOST }} \
+            -e AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }} \
+            -e AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
+            -e AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }} \
+            -e AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }} \
+            -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
+            -e STRIPE_WEBHOOK_SECRET_KEY=${{ secrets.STRIPE_WEBHOOK_SECRET_KEY }} \
+            -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
+            -e GMAIL_NODEMAILER_PASSWORD=${{ secrets.GMAIL_NODEMAILER_PASSWORD }} \
+            vlntnwest/pokey-app-node:latest
