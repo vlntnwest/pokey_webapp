@@ -248,8 +248,6 @@ module.exports.sendOrderConfirmation = async (orderData) => {
 
 module.exports.handleOrderCreation = async (req, res) => {
   try {
-    console.log(req.body);
-
     const order = await module.exports.createOrder(req);
 
     await module.exports.printOrder(order);

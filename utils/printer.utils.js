@@ -1,6 +1,7 @@
 const net = require("net");
 const EscPosEncoder = require("esc-pos-encoder");
 const { createCanvas, loadImage } = require("canvas");
+const { log } = require("console");
 
 const createPrinterClient = () => {
   console.log("[🧾 THERMAL] Creating new socket...");
@@ -86,12 +87,10 @@ module.exports.printText = (orderData) => {
           }
 
           if (
-            Array.isArray(item.extraProteins) &&
-            item.extraProteins.length > 0
+            Array.isArray(item.extraProtein) &&
+            item.extraProtein.length > 0
           ) {
-            printData.text(
-              `Extra proteins: ${item.extraProteins.join(", ")}\n`
-            );
+            printData.text(`Extra proteins: ${item.extraProtein.join(", ")}\n`);
           }
 
           printData.newline();
