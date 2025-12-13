@@ -66,12 +66,14 @@ module.exports.printText = (orderData) => {
           if (item.base) {
             printData.text(`Base: ${item.base}\n`);
           }
-          // Check if protein is a string
+          if (Array.isArray(item.proteins) && item.proteins.length > 0) {
+            printData.text(`Proteins: ${item.proteins.join(", ")}\n`);
+          }
           if (
-            typeof item.proteins === "string" &&
-            item.proteins.trim() !== ""
+            Array.isArray(item.extraProtein) &&
+            item.extraProtein.length > 0
           ) {
-            printData.text(`Proteins: ${item.proteins}\n`);
+            printData.text(`Extra proteins: ${item.extraProtein.join(", ")}\n`);
           }
 
           if (Array.isArray(item.garnishes) && item.garnishes.length > 0) {
@@ -84,13 +86,6 @@ module.exports.printText = (orderData) => {
 
           if (Array.isArray(item.sauces) && item.sauces.length > 0) {
             printData.text(`Sauces: ${item.sauces.join(", ")}\n`);
-          }
-
-          if (
-            Array.isArray(item.extraProtein) &&
-            item.extraProtein.length > 0
-          ) {
-            printData.text(`Extra proteins: ${item.extraProtein.join(", ")}\n`);
           }
 
           printData.newline();
