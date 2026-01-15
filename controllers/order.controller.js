@@ -242,7 +242,9 @@ module.exports.sendOrderConfirmation = async (orderData) => {
       html: html,
     });
   } catch (error) {
-    throw new Error("Error sending email");
+    console.error("DÉTAIL ERREUR MAIL :", error);
+    console.log("User utilisé :", process.env.GMAIL_ACCOUNT);
+    throw new Error("Error sending email: " + error.message);
   }
 };
 
