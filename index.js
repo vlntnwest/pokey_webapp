@@ -16,6 +16,9 @@ const checkJwt = require("./middleware/auth.middleware");
 
 const app = express();
 
+// Webhook route FIRST - before CORS to avoid blocking Stripe requests
+app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
+
 // CORS
 const corsOption = {
   origin: process.env.CLIENT_URL,
@@ -26,9 +29,14 @@ const corsOption = {
   preflightContinue: false,
 };
 
-app.use(cors(corsOption));
-
-app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
+// Apply CORS to all routes EXCEPT webhook
+app.use((req, res, next) => {
+  // Skip CORS for webhook endpoint - Stripe uses signature verification
+  if (req.path === "/api/checkout/webhook") {
+    return next();
+  }
+  cors(corsOption)(req, res, next);
+});
 
 app.use(express.json());
 
