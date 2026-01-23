@@ -2,16 +2,6 @@ const net = require("net");
 const EscPosEncoder = require("esc-pos-encoder");
 const { log } = require("console");
 
-// Canvas is optional - only needed for printImage function
-let createCanvas, loadImage;
-try {
-  const canvas = require("canvas");
-  createCanvas = canvas.createCanvas;
-  loadImage = canvas.loadImage;
-} catch (err) {
-  console.warn("[🧾 THERMAL] Canvas module not available - printImage will not work");
-}
-
 const createPrinterClient = () => {
   console.log("[🧾 THERMAL] Creating new socket...");
   const client = new net.Socket();
@@ -141,62 +131,5 @@ module.exports.printText = (orderData) => {
       client.end();
       reject("Error connecting to printer");
     });
-  });
-};
-
-module.exports.printImage = (image) => {
-  return new Promise(async (resolve, reject) => {
-    // Check if canvas is available
-    if (!createCanvas || !loadImage) {
-      console.error("[🧾 THERMAL] Canvas module not available");
-      return reject({
-        status: "error",
-        message: "Image printing not available - canvas module not installed"
-      });
-    }
-
-    try {
-      // Decode the base64 image into a buffer
-      const base64Data = image.split(",")[1];
-
-      // Load the image using the canvas library
-      const img = await loadImage(`data:image/png;base64,${base64Data}`);
-
-      // Create a canvas and draw the image onto it
-      const canvas = createCanvas(64, 64); // Adjust the size as needed
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, 64, 64);
-
-      // Initialize the ESC/POS encoder
-      const encoder = new EscPosEncoder();
-
-      // Encode the image for the ESC/POS printer
-      const encodedImage = encoder
-        .initialize()
-        .align("center")
-        .image(canvas, 512, 512, "floydsteinberg")
-        .encode();
-
-      // Send the encoded image to the printer via socket
-      const client = new net.Socket();
-      client.connect(process.env.PRINTER_PORT, process.env.PRINTER_HOST, () => {
-        console.log("[🧾 THERMAL] Connected to the printer");
-
-        client.write(encodedImage, () => {
-          console.log("[🧾 THERMAL] Image sent to the printer");
-          client.end();
-          resolve({ status: "success", message: "Image printed successfully" });
-        });
-      });
-
-      client.on("error", (err) => {
-        console.error("[🧾 THERMAL] Error connecting to printer:", err);
-        client.end();
-        reject({ status: "error", message: err.message });
-      });
-    } catch (err) {
-      console.error("[🧾 THERMAL] Error processing the image:", err);
-      reject({ status: "error", message: "Error processing the image" });
-    }
   });
 };
