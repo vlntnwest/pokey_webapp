@@ -1,7 +1,16 @@
 const net = require("net");
 const EscPosEncoder = require("esc-pos-encoder");
-const { createCanvas, loadImage } = require("canvas");
 const { log } = require("console");
+
+// Canvas is optional - only needed for printImage function
+let createCanvas, loadImage;
+try {
+  const canvas = require("canvas");
+  createCanvas = canvas.createCanvas;
+  loadImage = canvas.loadImage;
+} catch (err) {
+  console.warn("[🧾 THERMAL] Canvas module not available - printImage will not work");
+}
 
 const createPrinterClient = () => {
   console.log("[🧾 THERMAL] Creating new socket...");
@@ -137,6 +146,15 @@ module.exports.printText = (orderData) => {
 
 module.exports.printImage = (image) => {
   return new Promise(async (resolve, reject) => {
+    // Check if canvas is available
+    if (!createCanvas || !loadImage) {
+      console.error("[🧾 THERMAL] Canvas module not available");
+      return reject({
+        status: "error",
+        message: "Image printing not available - canvas module not installed"
+      });
+    }
+
     try {
       // Decode the base64 image into a buffer
       const base64Data = image.split(",")[1];
