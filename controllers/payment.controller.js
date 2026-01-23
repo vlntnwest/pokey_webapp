@@ -1,5 +1,9 @@
-require("dotenv").config();
 const { handleOrderCreation } = require("./order.controller");
+
+// Validate Stripe API key is configured
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY must be defined in environment variables");
+}
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia; custom_checkout_beta=v1;",
