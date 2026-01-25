@@ -1,0 +1,57 @@
+const { ZodError } = require("zod");
+
+/**
+ * Middleware factory for validating request data with Zod schemas
+ * @param {Object} schemas - Object containing schemas for body, params, and/or query
+ * @param {import('zod').ZodSchema} [schemas.body] - Schema for request body
+ * @param {import('zod').ZodSchema} [schemas.params] - Schema for URL params
+ * @param {import('zod').ZodSchema} [schemas.query] - Schema for query string
+ */
+const validate = (schemas) => {
+  return async (req, res, next) => {
+    try {
+      if (schemas.body) {
+        req.body = await schemas.body.parseAsync(req.body);
+      }
+      if (schemas.params) {
+        req.params = await schemas.params.parseAsync(req.params);
+      }
+      if (schemas.query) {
+        req.query = await schemas.query.parseAsync(req.query);
+      }
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.errors.map((err) => ({
+          field: err.path.join("."),
+          message: err.message,
+        }));
+        return res.status(400).json({
+          error: "Validation failed",
+          details: errors,
+        });
+      }
+      // Unexpected error
+      console.error("Validation middleware error:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  };
+};
+
+/**
+ * Validate ObjectId parameter
+ */
+const validateObjectId = (paramName = "id") => {
+  return (req, res, next) => {
+    const id = req.params[paramName];
+    if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
+      return res.status(400).json({ error: `Invalid ${paramName}: ${id}` });
+    }
+    next();
+  };
+};
+
+module.exports = {
+  validate,
+  validateObjectId,
+};

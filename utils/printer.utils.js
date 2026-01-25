@@ -1,6 +1,5 @@
 const net = require("net");
-const EscPosEncoder = require("esc-pos-encoder");
-const { log } = require("console");
+const ReceiptPrinterEncoder = require("@point-of-sale/receipt-printer-encoder");
 
 const createPrinterClient = () => {
   console.log("[🧾 THERMAL] Creating new socket...");
@@ -37,11 +36,14 @@ module.exports.printText = (orderData) => {
       });
 
       try {
-        const encoder = new EscPosEncoder();
+        const encoder = new ReceiptPrinterEncoder({
+          language: "esc-pos",
+          codepageMapping: "epson",
+        });
 
         let printData = encoder
           .initialize()
-          .codepage("cp850")
+          .codepage("cp437")
           .newline()
           .text("Pokey Bar\n");
         if (orderData.orderType === "clickandcollect") {
