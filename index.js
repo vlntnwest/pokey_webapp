@@ -1,4 +1,3 @@
-// Load environment variables FIRST before any other imports
 require("dotenv").config({ path: "./.env" });
 
 const express = require("express");
@@ -33,7 +32,9 @@ const authLimiter = rateLimit({
   max: 20, // 20 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many authentication attempts, please try again later." },
+  message: {
+    error: "Too many authentication attempts, please try again later.",
+  },
 });
 
 const paymentLimiter = rateLimit({
