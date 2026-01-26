@@ -3,6 +3,7 @@ require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const usersRoutes = require("./routes/users.routes");
+const authRoutes = require("./routes/auth.routes");
 const menuItemRoutes = require("./routes/menuItems.routes");
 const orderRoutes = require("./routes/order.routes");
 const privateOrdersRoutes = require("./routes/private.orders.routes");
@@ -83,6 +84,7 @@ app.use("/api/users", authLimiter, checkJwt, usersRoutes);
 app.use("/api/private/orders", authLimiter, checkJwt, privateOrdersRoutes);
 
 // Public routes
+app.use("/api/auth", authRoutes);
 app.use("/api/item", menuItemRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/table", tableRoutes);
