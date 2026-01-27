@@ -38,3 +38,5 @@ yarn-error.log*
 *.pem
 
 /lib/generated/prisma
+
+/lib/generated/prisma
