@@ -31,7 +31,7 @@ router.post("/signup", async (req, res) => {
 router.get("/users/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await prisma.public_users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id },
     });
     res.status(200).json({ user });
