@@ -1,14 +1,11 @@
 require("dotenv").config();
-
+const prisma = require("../lib/prisma");
 const supabase = require("../lib/supabase");
 
 const checkAuth = async (req, res, next) => {
-  console.log("=== checkAuth middleware appelé ===");
   const token = req.headers.authorization?.replace("Bearer ", "");
-  console.log("Token reçu:", token);
 
   if (!token) {
-    console.log("Pas de token → 401");
     return res.status(401).json({ error: "Non authentifié" });
   }
 
@@ -21,7 +18,15 @@ const checkAuth = async (req, res, next) => {
     return res.status(401).json({ error: "Token invalide" });
   }
 
-  req.user = user;
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+  });
+
+  if (!dbUser) {
+    return res.status(401).json({ error: "Utilisateur non trouvé" });
+  }
+
+  req.user = dbUser;
   next();
 };
 

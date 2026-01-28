@@ -3,7 +3,6 @@ require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const userRoutes = require("./routes/user.routes");
-const authRoutes = require("./routes/auth.routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -72,7 +71,6 @@ app.use(globalLimiter);
 
 // Private routes (with auth rate limiter)
 app.use("/api/user", authLimiter, userRoutes);
-app.use("/api/auth", authRoutes);
 
 // Public routes
 

@@ -8,7 +8,7 @@ describe("get user by id", () => {
   let response;
 
   beforeAll(async () => {
-    response = await request(app).get(`/api/auth/users/${userId}`);
+    response = await request(app).get(`/api/user/${userId}`);
   }, BEFORE_ALL_TIMEOUT);
 
   test("should return 200", () => {
