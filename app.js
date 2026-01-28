@@ -2,20 +2,11 @@ require("dotenv").config({ path: "./.env" });
 
 const express = require("express");
 const rateLimit = require("express-rate-limit");
-const usersRoutes = require("./routes/users.routes");
+const userRoutes = require("./routes/user.routes");
 const authRoutes = require("./routes/auth.routes");
-const menuItemRoutes = require("./routes/menuItems.routes");
-const orderRoutes = require("./routes/order.routes");
-const privateOrdersRoutes = require("./routes/private.orders.routes");
-const tableRoutes = require("./routes/table.routes");
-const allergenRoutes = require("./routes/allergen.routes");
-const foodRoutes = require("./routes/food.routes");
-const paymentRoutes = require("./routes/payment.routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const checkJwt = require("./middleware/auth.middleware");
-require("./config/db");
 
 const app = express();
 
@@ -80,18 +71,9 @@ app.use(cookieParser());
 app.use(globalLimiter);
 
 // Private routes (with auth rate limiter)
-app.use("/api/users", authLimiter, checkJwt, usersRoutes);
-app.use("/api/private/orders", authLimiter, checkJwt, privateOrdersRoutes);
+app.use("/api/user", authLimiter, userRoutes);
+app.use("/api/auth", authRoutes);
 
 // Public routes
-app.use("/api/auth", authRoutes);
-app.use("/api/item", menuItemRoutes);
-app.use("/api/order", orderRoutes);
-app.use("/api/table", tableRoutes);
-app.use("/api/allergen", allergenRoutes);
-app.use("/api/food", foodRoutes);
-
-// Payment routes (with payment rate limiter)
-app.use("/api/checkout", paymentLimiter, paymentRoutes);
 
 module.exports = app;
