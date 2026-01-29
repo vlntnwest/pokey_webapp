@@ -5,9 +5,9 @@ const rateLimit = require("express-rate-limit");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
 const userRoutes = require("./routes/user.routes");
 const restaurantRoutes = require("./routes/restaurant.routes");
+const errorHandler = require("./middleware/error.middleware");
 
 const app = express();
 
@@ -70,10 +70,11 @@ app.use(cookieParser());
 // Apply global rate limiter to all routes
 app.use(globalLimiter);
 
-// Private routes (with auth rate limiter)
+// Routes
 app.use("/api/user", authLimiter, userRoutes);
 app.use("/api/restaurants", authLimiter, restaurantRoutes);
 
-// Public routes
+// Error handler
+app.use(errorHandler);
 
 module.exports = app;

@@ -1,4 +1,5 @@
 const { ZodError } = require("zod");
+const logger = require("../logger");
 
 /**
  * Middleware factory for validating request data with Zod schemas
@@ -32,7 +33,7 @@ const validate = (schemas) => {
         });
       }
       // Unexpected error
-      console.error("Validation middleware error:", error);
+      logger.error({ error }, "Validation middleware error");
       return res.status(500).json({ error: "Internal server error" });
     }
   };

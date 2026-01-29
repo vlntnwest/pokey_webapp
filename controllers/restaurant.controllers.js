@@ -1,11 +1,13 @@
 const prisma = require("../lib/prisma");
 const { restaurantSchema } = require("../validators/schemas");
+const logger = require("../logger");
 
-module.exports.createRestaurant = async (req, res) => {
+module.exports.createRestaurant = async (req, res, next) => {
   const result = restaurantSchema.safeParse(req.body);
   const user = req.user;
 
   if (!result.success) {
+    logger.error({ issues: result.error.issues }, "Invalid restaurant data");
     return res.status(400).json({ error: result.error.issues });
   }
 
@@ -35,23 +37,24 @@ module.exports.createRestaurant = async (req, res) => {
 
       return restaurant;
     });
-
+    logger.info({ responseId: response.id }, "Restaurant created successfully");
     return res.status(201).json({ response });
   } catch (error) {
-    console.log("Error creating restaurant", error.message);
-    return res.status(500).json({ error: "Error creating restaurant" });
+    next(error);
   }
 };
 
-module.exports.updateRestaurant = async (req, res) => {
+module.exports.updateRestaurant = async (req, res, next) => {
   const result = restaurantSchema.partial().safeParse(req.body);
   const { id } = req.params;
 
   if (!result.success) {
+    logger.error({ issues: result.error.issues }, "Invalid restaurant data");
     return res.status(400).json({ error: result.error.issues });
   }
 
   if (Object.keys(result.data).length === 0) {
+    logger.error("No data to update");
     return res.status(400).json({ error: "No data" });
   }
   try {
@@ -60,32 +63,26 @@ module.exports.updateRestaurant = async (req, res) => {
       data: result.data,
     });
 
+    logger.info({ responseId: response.id }, "Restaurant updated successfully");
     return res.status(200).json({ response });
   } catch (error) {
-    console.log("Error updating restaurant", error.message);
-    if (error.code === "P2025") {
-      return res.status(404).json({ error: "Restaurant not found" });
-    }
-    return res.status(500).json({ error: "Error updating restaurant" });
+    next(error);
   }
 };
 
-module.exports.deleteRestaurant = async (req, res) => {
+module.exports.deleteRestaurant = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const response = await prisma.restaurant.delete({
+    await prisma.restaurant.delete({
       where: { id },
     });
-    console.log("Restaurant deleted successfully", response);
+
+    logger.info({ restaurantId: id }, "Restaurant deleted successfully");
     return res
       .status(200)
       .json({ response: "Restaurant deleted successfully" });
   } catch (error) {
-    console.log("Error deleting restaurant", error.message);
-    if (error.code === "P2025") {
-      return res.status(404).json({ error: "Restaurant not found" });
-    }
-    return res.status(500).json({ error: "Error deleting restaurant" });
+    next(error);
   }
 };

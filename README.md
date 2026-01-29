@@ -11,6 +11,7 @@ Node.js/Express backend for a restaurant online ordering system. Customers can p
 - **Auth:** Supabase Auth (JWT)
 - **Payment:** Stripe
 - **Validation:** Zod
+- **Logging:** Pino (pino-pretty in dev)
 - **Tests:** Vitest + Supertest
 
 ## Installation
@@ -72,8 +73,10 @@ pokey_webapp/
 ├── routes/
 │   ├── user.routes.js                # User endpoints
 │   └── restaurant.routes.js          # Restaurant endpoints
+├── logger.js                         # Pino logger (pino-pretty in dev)
 ├── middleware/
 │   ├── auth.middleware.js            # JWT verification (Supabase)
+│   ├── error.middleware.js           # Centralized error handler
 │   ├── role.middleware.js            # Role authorization (isOwner, isAdmin, isStaff)
 │   └── validate.middleware.js        # Zod validation
 ├── lib/
@@ -81,9 +84,6 @@ pokey_webapp/
 │   └── prisma.js                     # Prisma client
 ├── validators/
 │   └── schemas.js                    # Zod schemas
-├── utils/
-│   ├── printer.utils.js              # Thermal printer integration
-│   └── error.utils.js                # Error formatting
 ├── prisma/
 │   └── schema.prisma                 # Database schema
 └── tests/
@@ -128,6 +128,24 @@ The backend verifies tokens via the `checkAuth` middleware and checks roles via 
 | ------- | --------------- | ---------- |
 | Global  | 100 requests/IP | 15 minutes |
 | Payment | 10 requests/IP  | 15 minutes |
+
+### Error Handling
+
+Centralized error middleware (`error.middleware.js`) catches all errors forwarded via `next(error)`:
+
+| Error type                         | Status | Response                  |
+| ---------------------------------- | ------ | ------------------------- |
+| `ZodError`                         | 400    | Validation details        |
+| Prisma `P2025` (not found)         | 404    | Resource not found        |
+| Prisma `P2002` (unique constraint) | 409    | Resource already exists   |
+| Other Prisma errors                | 400    | Database request error    |
+| Unexpected errors                  | 500    | Internal server error     |
+
+### Logging
+
+Structured logging with [Pino](https://getpino.io/). Pretty-printed in dev, JSON in production.
+
+Logs are emitted in controllers, middleware (auth, role), and the error handler. Process-level `uncaughtException` and `unhandledRejection` handlers log fatal errors before exiting.
 
 ### CORS
 

@@ -62,7 +62,7 @@ describe("RESTAURANT CRUD", () => {
       response = await authRequest("post", "/api/restaurants", token).send(
         validRestaurant,
       );
-      restaurantId = response.body.restaurant?.id;
+      restaurantId = response.body.response?.id;
     }, TIMEOUT);
 
     test("should return 201", () => {
@@ -70,19 +70,19 @@ describe("RESTAURANT CRUD", () => {
     });
 
     test("should return restaurant object", () => {
-      expect(response.body.restaurant).toBeDefined();
+      expect(response.body.response).toBeDefined();
     });
 
     test("should return the correct name", () => {
-      expect(response.body.restaurant.name).toBe(validRestaurant.name);
+      expect(response.body.response.name).toBe(validRestaurant.name);
     });
 
     test("should return the correct address", () => {
-      expect(response.body.restaurant.address).toBe(validRestaurant.address);
+      expect(response.body.response.address).toBe(validRestaurant.address);
     });
 
     test("should return the correct city", () => {
-      expect(response.body.restaurant.city).toBe(validRestaurant.city);
+      expect(response.body.response.city).toBe(validRestaurant.city);
     });
   });
 
@@ -209,7 +209,7 @@ describe("RESTAURANT CRUD", () => {
     );
 
     test(
-      "should return 404 for non-existent id",
+      "should return 403 for restaurant user is not member of",
       async () => {
         const fakeId = "00000000-0000-0000-0000-000000000000";
         const response = await authRequest(
@@ -217,13 +217,51 @@ describe("RESTAURANT CRUD", () => {
           `/api/restaurants/${fakeId}`,
           token,
         ).send({ name: "Nope" });
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(403);
       },
       TIMEOUT,
     );
   });
 
-  // ─── 3. AUTH ERRORS ────────────────────────────────────
+  // ─── 3. DELETE RESTAURANT ───────────────────────────────
+  describe("Delete restaurant", () => {
+    let response;
+
+    beforeAll(async () => {
+      response = await authRequest(
+        "delete",
+        `/api/restaurants/${restaurantId}`,
+        token,
+      );
+    }, TIMEOUT);
+
+    test("should return 200", () => {
+      expect(response.status).toBe(200);
+    });
+
+    test("should return success message", () => {
+      expect(response.body.response).toBe("Restaurant deleted successfully");
+    });
+  });
+
+  // ─── 3b. DELETE RESTAURANT – errors ─────────────────────
+  describe("Delete restaurant - errors", () => {
+    test(
+      "should return 403 for restaurant user is not member of",
+      async () => {
+        const fakeId = "00000000-0000-0000-0000-000000000000";
+        const response = await authRequest(
+          "delete",
+          `/api/restaurants/${fakeId}`,
+          token,
+        );
+        expect(response.status).toBe(403);
+      },
+      TIMEOUT,
+    );
+  });
+
+  // ─── 4. AUTH ERRORS ────────────────────────────────────
   describe("Authentication errors", () => {
     test("should return 401 without token", async () => {
       const response = await request(app)
@@ -242,7 +280,7 @@ describe("RESTAURANT CRUD", () => {
     });
   });
 
-  // ─── 4. CLEANUP ────────────────────────────────────────
+  // ─── 5. CLEANUP ────────────────────────────────────────
   afterAll(async () => {
     try {
       await authRequest("delete", "/api/user/me", token);

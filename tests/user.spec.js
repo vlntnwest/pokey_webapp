@@ -107,7 +107,6 @@ describe("USER CRUD", () => {
       response = await authRequest("put", "/api/user/me", token).send({
         fullName: "Test User",
         phone: "06 12 34 56 78",
-        role: "CLIENT",
       });
     }, TIMEOUT);
 
@@ -121,10 +120,6 @@ describe("USER CRUD", () => {
 
     test("should return updated phone", () => {
       expect(response.body.user.phone).toBe("06 12 34 56 78");
-    });
-
-    test("should return updated role", () => {
-      expect(response.body.user.role).toBe("CLIENT");
     });
   });
 
@@ -152,16 +147,6 @@ describe("USER CRUD", () => {
       TIMEOUT,
     );
 
-    test(
-      "should reject invalid role",
-      async () => {
-        const response = await authRequest("put", "/api/user/me", token).send({
-          role: "SUPERADMIN",
-        });
-        expect(response.status).toBe(400);
-      },
-      TIMEOUT,
-    );
   });
 
   // ─── 5. DELETE USER ──────────────────────────────────────

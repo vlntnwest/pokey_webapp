@@ -1,8 +1,9 @@
 const prisma = require("../lib/prisma");
 const supabase = require("../lib/supabase");
 const { updateUserSchema } = require("../validators/schemas");
+const logger = require("../logger");
 
-module.exports.getUserData = async (req, res) => {
+module.exports.getUserData = async (req, res, next) => {
   const { id } = req.user;
 
   try {
@@ -13,51 +14,49 @@ module.exports.getUserData = async (req, res) => {
     });
 
     if (!user) {
+      logger.error("User not found");
       return res.status(404).json({ error: "Utilisateur non trouvé" });
     }
 
     return res.status(200).json({ user });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-module.exports.updateUserData = async (req, res) => {
+module.exports.updateUserData = async (req, res, next) => {
   const { id } = req.user;
   const result = updateUserSchema.safeParse(req.body);
 
   if (!result.success) {
-    return res.status(400).json({ error: result.error.message });
+    logger.error({ issues: result.error.issues }, "Invalid user data");
+    return res.status(400).json({ error: result.error.issues });
   }
 
-  const { fullName, phone, role } = result.data;
+  const { fullName, phone } = result.data;
 
   try {
     const user = await prisma.user.update({
       where: { id },
-      data: { fullName, phone, role },
+      data: { fullName, phone },
     });
+
+    logger.info({ userId: user.id }, "User data updated successfully");
     return res.status(200).json({ user });
   } catch (error) {
-    console.log(error.message);
-    if (error.code === "P2025") {
-      return res.status(404).json({ error: "Utilisateur non trouvé" });
-    }
-    return res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-module.exports.deleteUser = async (req, res) => {
+module.exports.deleteUser = async (req, res, next) => {
   const { id } = req.user;
 
   try {
-    const { error } = await supabase.auth.admin.deleteUser(id);
+    await supabase.auth.admin.deleteUser(id);
 
-    if (error) throw error;
-
+    logger.info({ userId: id }, "User deleted successfully");
     return res.status(200).json({ message: "Utilisateur supprimé" });
   } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ error: error.message });
+    next(error);
   }
 };
