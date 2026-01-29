@@ -59,11 +59,11 @@ npm run dev
 
 ## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start production server |
+| Command       | Description                            |
+| ------------- | -------------------------------------- |
+| `npm start`   | Start production server                |
 | `npm run dev` | Start server with hot-reload (nodemon) |
-| `npm test` | Run tests (Vitest) |
+| `npm test`    | Run tests (Vitest)                     |
 
 ---
 
@@ -139,9 +139,9 @@ Authentication (signup, login, logout) is handled directly on the **frontend** v
 
 ```js
 // Frontend examples
-await supabase.auth.signUp({ email, password })
-await supabase.auth.signInWithPassword({ email, password })
-await supabase.auth.signOut()
+await supabase.auth.signUp({ email, password });
+await supabase.auth.signInWithPassword({ email, password });
+await supabase.auth.signOut();
 ```
 
 A Supabase trigger automatically creates a corresponding row in `public.users` on signup.
@@ -152,9 +152,9 @@ The backend only verifies tokens via the `checkAuth` middleware for protected ro
 
 ### Users (`/api/users`)
 
-| Method | Endpoint | Description | Auth Required | Params |
-|--------|----------|-------------|---------------|--------|
-| `GET` | `/:id` | Get user data by ID | Yes | `id` (UUID) |
+| Method | Endpoint | Description         | Auth Required | Params      |
+| ------ | -------- | ------------------- | ------------- | ----------- |
+| `GET`  | `/:id`   | Get user data by ID | Yes           | `id` (UUID) |
 
 ---
 
@@ -163,11 +163,13 @@ The backend only verifies tokens via the `checkAuth` middleware for protected ro
 Retrieves user information by their ID.
 
 **Required Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": "uuid",
@@ -179,6 +181,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Errors:**
+
 - `401`: Invalid or missing token
 - `404`: User not found
 - `500`: Server error
@@ -191,14 +194,15 @@ Authorization: Bearer <jwt_token>
 
 The API applies request rate limits:
 
-| Type | Limit | Window |
-|------|-------|--------|
-| Global | 100 requests/IP | 15 minutes |
-| Payment | 10 requests/IP | 15 minutes |
+| Type    | Limit           | Window     |
+| ------- | --------------- | ---------- |
+| Global  | 100 requests/IP | 15 minutes |
+| Payment | 10 requests/IP  | 15 minutes |
 
 ### CORS
 
 Configured to accept requests from `CLIENT_URL` with headers:
+
 - `sessionId`
 - `Content-Type`
 - `Authorization`
@@ -206,6 +210,7 @@ Configured to accept requests from `CLIENT_URL` with headers:
 ### Authentication
 
 The `checkAuth` middleware:
+
 1. Validates the Supabase JWT token
 2. Fetches the user from Prisma (with role)
 3. Attaches `req.user` to the request object
@@ -218,17 +223,17 @@ Additional role middlewares (`isAdmin`, `isStaff`) check `req.user.role` for aut
 
 ### Main Entities
 
-| Entity | Description |
-|--------|-------------|
-| `User` | Users (clients, admins, staff) |
-| `Restaurant` | Restaurant information |
-| `Category` | Menu categories |
-| `Product` | Menu items |
-| `OptionGroup` | Option groups for customization |
+| Entity         | Description                      |
+| -------------- | -------------------------------- |
+| `User`         | Users (clients, admins, staff)   |
+| `Restaurant`   | Restaurant information           |
+| `Category`     | Menu categories                  |
+| `Product`      | Menu items                       |
+| `OptionGroup`  | Option groups for customization  |
 | `OptionChoice` | Available choices within a group |
-| `Order` | Customer orders |
-| `OrderProduct` | Products in an order |
-| `OpeningHour` | Opening hours |
+| `Order`        | Customer orders                  |
+| `OrderProduct` | Products in an order             |
+| `OpeningHour`  | Opening hours                    |
 
 ### User Roles
 
@@ -267,12 +272,14 @@ In development, authentication is handled directly via Supabase REST API. Follow
 **POST** `https://<SUPABASE_URL>/auth/v1/signup`
 
 **Headers:**
+
 ```
 apikey: <SUPABASE_ANON_KEY>
 Content-Type: application/json
 ```
 
 **Body:**
+
 ```json
 {
   "email": "test@example.com",
@@ -285,12 +292,14 @@ Content-Type: application/json
 **POST** `https://<SUPABASE_URL>/auth/v1/token?grant_type=password`
 
 **Headers:**
+
 ```
 apikey: <SUPABASE_ANON_KEY>
 Content-Type: application/json
 ```
 
 **Body:**
+
 ```json
 {
   "email": "test@example.com",
@@ -299,6 +308,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIs...",
@@ -312,6 +322,7 @@ Content-Type: application/json
 Add the `access_token` to your requests:
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
@@ -320,17 +331,18 @@ Authorization: Bearer <access_token>
 
 Create a Postman environment with:
 
-| Variable | Value |
-|----------|-------|
-| `supabase_url` | `https://your-project.supabase.co` |
+| Variable            | Value                                 |
+| ------------------- | ------------------------------------- |
+| `supabase_url`      | `https://your-project.supabase.co`    |
 | `supabase_anon_key` | Your anon key from Supabase dashboard |
-| `access_token` | (set after login) |
+| `access_token`      | (set after login)                     |
 
 Then use `{{supabase_url}}`, `{{supabase_anon_key}}`, and `{{access_token}}` in your requests.
 
 ### Where to find Supabase credentials
 
 Supabase Dashboard → Project Settings → API
+
 - **Project URL**: `https://xxxxx.supabase.co`
 - **anon public key**: `eyJhbGciOiJIUzI1NiIs...`
 

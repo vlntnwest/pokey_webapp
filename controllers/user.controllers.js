@@ -54,6 +54,8 @@ module.exports.deleteUser = async (req, res) => {
     const { error } = await supabase.auth.admin.deleteUser(id);
 
     if (error) throw error;
+
+    return res.status(200).json({ message: "Utilisateur supprimé" });
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ error: error.message });

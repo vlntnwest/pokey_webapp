@@ -2,10 +2,12 @@ require("dotenv").config({ path: "./.env" });
 
 const express = require("express");
 const rateLimit = require("express-rate-limit");
-const userRoutes = require("./routes/user.routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+
+const userRoutes = require("./routes/user.routes");
+const restaurantRoutes = require("./routes/restaurant.routes");
 
 const app = express();
 
@@ -52,7 +54,6 @@ const corsOption = {
 
 // Apply CORS to all routes EXCEPT webhook
 app.use((req, res, next) => {
-  // Skip CORS for webhook endpoint - Stripe uses signature verification
   if (req.path === "/api/checkout/webhook") {
     return next();
   }
@@ -71,6 +72,7 @@ app.use(globalLimiter);
 
 // Private routes (with auth rate limiter)
 app.use("/api/user", authLimiter, userRoutes);
+app.use("/api/restaurants", authLimiter, restaurantRoutes);
 
 // Public routes
 
