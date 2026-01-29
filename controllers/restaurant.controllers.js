@@ -12,10 +12,9 @@ module.exports.createRestaurant = async (req, res) => {
   const { name, address, zipCode, city, phone, email, imageUrl } = result.data;
 
   try {
-    const restaurant = await prisma.$transaction(async (tx) => {
-      const created = await tx.restaurant.create({
+    const response = await prisma.$transaction(async (tx) => {
+      const restaurant = await tx.restaurant.create({
         data: {
-          managerId: user.id,
           name,
           address,
           zipCode,
@@ -26,15 +25,18 @@ module.exports.createRestaurant = async (req, res) => {
         },
       });
 
-      await tx.user.update({
-        where: { id: user.id },
-        data: { role: "ADMIN" },
+      await tx.restaurantMember.create({
+        data: {
+          restaurantId: restaurant.id,
+          userId: user.id,
+          role: "OWNER",
+        },
       });
 
-      return created;
+      return restaurant;
     });
 
-    return res.status(201).json({ restaurant });
+    return res.status(201).json({ response });
   } catch (error) {
     console.log("Error creating restaurant", error.message);
     return res.status(500).json({ error: "Error creating restaurant" });

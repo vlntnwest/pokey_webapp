@@ -7,14 +7,11 @@ const phoneSchema = z
     /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/,
     "Invalid French phone number",
   );
-// Order item types
-const roleEnum = z.enum(["ADMIN", "STAFF", "CLIENT"]);
 
 // User schemas
 const updateUserSchema = z.object({
   fullName: z.string().min(1).max(50).optional(),
   phone: phoneSchema.optional(),
-  role: roleEnum.optional(),
 });
 
 const restaurantSchema = z.object({

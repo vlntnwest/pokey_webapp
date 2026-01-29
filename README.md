@@ -74,7 +74,7 @@ pokey_webapp/
 │   └── restaurant.routes.js          # Restaurant endpoints
 ├── middleware/
 │   ├── auth.middleware.js            # JWT verification (Supabase)
-│   ├── role.middleware.js            # Role authorization (isAdmin, isStaff)
+│   ├── role.middleware.js            # Role authorization (isOwner, isAdmin, isStaff)
 │   └── validate.middleware.js        # Zod validation
 ├── lib/
 │   ├── supabase.js                   # Supabase client
@@ -91,61 +91,20 @@ pokey_webapp/
     └── restaurant.spec.js            # Restaurant integration tests
 ```
 
-## API Routes
+## API Documentation
 
 **Base URL:** `http://localhost:5001/api`
 
 All protected routes require the header:
+
 ```
 Authorization: Bearer <supabase_jwt_token>
 ```
 
-### Users — `/api/user`
+See the [docs/](docs/) folder for detailed API documentation:
 
-| Method   | Endpoint | Description      | Auth | Role |
-| -------- | -------- | ---------------- | ---- | ---- |
-| `GET`    | `/me`    | Get current user | Yes  | —    |
-| `PUT`    | `/me`    | Update user      | Yes  | —    |
-| `DELETE` | `/me`    | Delete user      | Yes  | —    |
-
-#### PUT /api/user/me
-
-```json
-{
-  "fullName": "John Doe",
-  "phone": "06 12 34 56 78",
-  "role": "CLIENT"
-}
-```
-
-All fields are optional. `role` must be one of: `CLIENT`, `ADMIN`, `STAFF`.
-
-### Restaurants — `/api/restaurants`
-
-| Method | Endpoint | Description       | Auth | Role  |
-| ------ | -------- | ----------------- | ---- | ----- |
-| `POST` | `/`      | Create restaurant | Yes  | —     |
-| `PUT`  | `/:id`   | Update restaurant | Yes  | ADMIN |
-
-#### POST /api/restaurants
-
-```json
-{
-  "name": "Mon Restaurant",
-  "address": "123 Rue de Paris",
-  "zipCode": "75001",
-  "city": "Paris",
-  "phone": "06 12 34 56 78",
-  "email": "contact@resto.com",
-  "imageUrl": "https://example.com/image.jpg"
-}
-```
-
-`email` and `imageUrl` are optional. Creating a restaurant promotes the user to `ADMIN`.
-
-#### PUT /api/restaurants/:id
-
-Same body as POST, but all fields are optional (partial update).
+- [Users](docs/users.md) — `/api/user`
+- [Restaurants](docs/restaurants.md) — `/api/restaurants`
 
 ## Authentication
 
@@ -159,16 +118,16 @@ await supabase.auth.signOut();
 
 A Supabase trigger automatically creates a row in `public.users` on signup.
 
-The backend verifies tokens via the `checkAuth` middleware and checks roles via `isAdmin` / `isStaff`.
+The backend verifies tokens via the `checkAuth` middleware and checks roles via `isOwner` / `isAdmin` / `isStaff`.
 
 ## Middleware
 
 ### Rate Limiting
 
-| Type    | Limit              | Window     |
-| ------- | ------------------ | ---------- |
-| Global  | 100 requests/IP    | 15 minutes |
-| Payment | 10 requests/IP     | 15 minutes |
+| Type    | Limit           | Window     |
+| ------- | --------------- | ---------- |
+| Global  | 100 requests/IP | 15 minutes |
+| Payment | 10 requests/IP  | 15 minutes |
 
 ### CORS
 
@@ -178,21 +137,22 @@ Accepts requests from `CLIENT_URL` with headers: `sessionId`, `Content-Type`, `A
 
 ### Models
 
-| Model          | Description                      |
-| -------------- | -------------------------------- |
-| `User`         | Users (clients, admins, staff)   |
-| `Restaurant`   | Restaurant information           |
-| `OpeningHour`  | Opening hours per day            |
-| `Category`     | Menu categories                  |
-| `Product`      | Menu items                       |
-| `OptionGroup`  | Option groups for customization  |
-| `OptionChoice` | Choices within an option group   |
-| `Order`        | Customer orders                  |
-| `OrderProduct` | Products within an order         |
+| Model              | Description                        |
+| ------------------ | ---------------------------------- |
+| `User`             | Users                              |
+| `Restaurant`       | Restaurant information             |
+| `RestaurantMember` | User-restaurant role (membership)  |
+| `OpeningHour`      | Opening hours per day              |
+| `Category`         | Menu categories                    |
+| `Product`          | Menu items                         |
+| `OptionGroup`      | Option groups for customization    |
+| `OptionChoice`     | Choices within an option group     |
+| `Order`            | Customer orders                    |
+| `OrderProduct`     | Products within an order           |
 
-### Roles
+### Restaurant Roles
 
-`CLIENT` · `ADMIN` · `STAFF`
+`OWNER` · `ADMIN` · `STAFF`
 
 ### Order Statuses
 

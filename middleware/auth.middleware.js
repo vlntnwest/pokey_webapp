@@ -20,6 +20,9 @@ const checkAuth = async (req, res, next) => {
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
+    include: {
+      restaurantMembers: { include: { restaurant: true } },
+    },
   });
 
   if (!dbUser) {
