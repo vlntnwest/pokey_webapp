@@ -1,63 +1,44 @@
 # Pokey Webapp Backend
 
-Node.js/Express backend for a restaurant online ordering system. This application enables customers to place orders through a web app, with Stripe payment integration and kitchen order management.
-
-## Features
-
-- User authentication via Supabase (handled on frontend)
-- Customer order management
-- Customizable menu items with option groups
-- Stripe payment integration
-- Thermal printer support for kitchen orders
-- Email notifications
+Node.js/Express backend for a restaurant online ordering system. Customers can place orders through a web app, with Stripe payment integration and kitchen order management.
 
 ## Tech Stack
 
 - **Runtime:** Node.js v20+
 - **Framework:** Express.js
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL (Supabase)
 - **ORM:** Prisma
-- **Authentication:** Supabase Auth
+- **Auth:** Supabase Auth (JWT)
 - **Payment:** Stripe
 - **Validation:** Zod
-
----
+- **Tests:** Vitest + Supertest
 
 ## Installation
 
 ### Prerequisites
 
-- Node.js v20.0.0 or higher
+- Node.js v20.0.0+
 - npm v9.0.0+
-- PostgreSQL database
+- PostgreSQL database (Supabase)
 
 ### Setup
 
 ```bash
-# Clone the repository
 git clone <repo-url>
-cd pokey_webapp_backend
+cd pokey_webapp
 
-# Install dependencies
 npm install
 
-# Configure environment variables
 cp .env.example .env
-# Edit .env with your values (see Environment Variables section)
+# Edit .env with your values
 
-# Generate Prisma client
 npx prisma generate
-
-# Run database migrations
 npx prisma migrate dev
 
-# Start development server
 npm run dev
 ```
 
----
-
-## Available Scripts
+## Scripts
 
 | Command       | Description                            |
 | ------------- | -------------------------------------- |
@@ -65,289 +46,186 @@ npm run dev
 | `npm run dev` | Start server with hot-reload (nodemon) |
 | `npm test`    | Run tests (Vitest)                     |
 
----
-
 ## Environment Variables
 
-Create a `.env` file at the project root:
+Copy `.env.example` to `.env` and fill in the values:
 
 ```env
-# Server
-PORT=3000
-CLIENT_URL=http://localhost:3000
-
-# Database
-DATABASE_URL=postgresql://user:password@host:port/database
-
-# Supabase
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# Stripe
-STRIPE_SECRET_KEY=sk_test_your_stripe_key
-STRIPE_WEBHOOK_SECRET_KEY=whsec_your_webhook_secret
-
-# Email (Gmail)
-GMAIL_ACCOUNT=your_email@gmail.com
-GMAIL_NODEMAILER_PASSWORD=your_app_password
-
-# Thermal Printer (optional)
-PRINTER_HOST=192.168.1.100
-PRINTER_PORT=9100
+PORT="5001"
+SUPABASE_URL="https://[YOUR_PROJECT].supabase.co"
+SUPABASE_ANON_KEY="[YOUR_ANON_KEY]"
+DATABASE_URL="postgresql://postgres:[YOUR_DB_PASSWORD]@db.[YOUR_PROJECT].supabase.co:5432/postgres"
+SUPABASE_SERVICE_ROLE_KEY="[YOUR_SERVICE_ROLE_KEY]"
 ```
 
----
+Supabase credentials: Dashboard → Project Settings → API.
 
 ## Project Structure
 
 ```
-pokey_webapp_backend/
-├── index.js                   # Server entry point
-├── app.js                     # Express configuration
-├── package.json
-├── prisma/
-│   └── schema.prisma          # Database schema
+pokey_webapp/
+├── index.js                          # Server entry point
+├── app.js                            # Express configuration
 ├── controllers/
-│   └── user.controllers.js    # User management
+│   ├── user.controllers.js           # User CRUD
+│   └── restaurant.controllers.js     # Restaurant CRUD
 ├── routes/
-│   └── user.routes.js         # User endpoints
+│   ├── user.routes.js                # User endpoints
+│   └── restaurant.routes.js          # Restaurant endpoints
 ├── middleware/
-│   ├── auth.middleware.js     # JWT verification (Supabase + Prisma)
-│   └── validate.middleware.js # Zod validation
+│   ├── auth.middleware.js            # JWT verification (Supabase)
+│   ├── role.middleware.js            # Role authorization (isAdmin, isStaff)
+│   └── validate.middleware.js        # Zod validation
 ├── lib/
-│   ├── supabase.js            # Supabase client
-│   └── prisma.js              # Prisma client
+│   ├── supabase.js                   # Supabase client
+│   └── prisma.js                     # Prisma client
 ├── validators/
-│   └── schemas.js             # Zod validation schemas
+│   └── schemas.js                    # Zod schemas
 ├── utils/
-│   ├── printer.utils.js       # Thermal printer integration
-│   └── error.utils.js         # Error formatting
+│   ├── printer.utils.js              # Thermal printer integration
+│   └── error.utils.js                # Error formatting
+├── prisma/
+│   └── schema.prisma                 # Database schema
 └── tests/
-    └── sample.spec.js         # Integration tests
+    ├── user.spec.js                  # User integration tests
+    └── restaurant.spec.js            # Restaurant integration tests
 ```
-
----
 
 ## API Routes
 
-**Base URL:** `http://localhost:3000/api`
+**Base URL:** `http://localhost:5001/api`
 
-### Authentication
+All protected routes require the header:
+```
+Authorization: Bearer <supabase_jwt_token>
+```
 
-Authentication (signup, login, logout) is handled directly on the **frontend** via the Supabase SDK:
+### Users — `/api/user`
+
+| Method   | Endpoint | Description      | Auth | Role |
+| -------- | -------- | ---------------- | ---- | ---- |
+| `GET`    | `/me`    | Get current user | Yes  | —    |
+| `PUT`    | `/me`    | Update user      | Yes  | —    |
+| `DELETE` | `/me`    | Delete user      | Yes  | —    |
+
+#### PUT /api/user/me
+
+```json
+{
+  "fullName": "John Doe",
+  "phone": "06 12 34 56 78",
+  "role": "CLIENT"
+}
+```
+
+All fields are optional. `role` must be one of: `CLIENT`, `ADMIN`, `STAFF`.
+
+### Restaurants — `/api/restaurants`
+
+| Method | Endpoint | Description       | Auth | Role  |
+| ------ | -------- | ----------------- | ---- | ----- |
+| `POST` | `/`      | Create restaurant | Yes  | —     |
+| `PUT`  | `/:id`   | Update restaurant | Yes  | ADMIN |
+
+#### POST /api/restaurants
+
+```json
+{
+  "name": "Mon Restaurant",
+  "address": "123 Rue de Paris",
+  "zipCode": "75001",
+  "city": "Paris",
+  "phone": "06 12 34 56 78",
+  "email": "contact@resto.com",
+  "imageUrl": "https://example.com/image.jpg"
+}
+```
+
+`email` and `imageUrl` are optional. Creating a restaurant promotes the user to `ADMIN`.
+
+#### PUT /api/restaurants/:id
+
+Same body as POST, but all fields are optional (partial update).
+
+## Authentication
+
+Authentication (signup, login, logout) is handled on the **frontend** via the Supabase SDK:
 
 ```js
-// Frontend examples
 await supabase.auth.signUp({ email, password });
 await supabase.auth.signInWithPassword({ email, password });
 await supabase.auth.signOut();
 ```
 
-A Supabase trigger automatically creates a corresponding row in `public.users` on signup.
+A Supabase trigger automatically creates a row in `public.users` on signup.
 
-The backend only verifies tokens via the `checkAuth` middleware for protected routes.
-
----
-
-### Users (`/api/users`)
-
-| Method | Endpoint | Description         | Auth Required | Params      |
-| ------ | -------- | ------------------- | ------------- | ----------- |
-| `GET`  | `/:id`   | Get user data by ID | Yes           | `id` (UUID) |
-
----
-
-#### GET /api/users/:id
-
-Retrieves user information by their ID.
-
-**Required Headers:**
-
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Response (200):**
-
-```json
-{
-  "id": "uuid",
-  "email": "user@example.com",
-  "fullName": "John Doe",
-  "phone": "+33612345678",
-  "role": "CLIENT"
-}
-```
-
-**Errors:**
-
-- `401`: Invalid or missing token
-- `404`: User not found
-- `500`: Server error
-
----
+The backend verifies tokens via the `checkAuth` middleware and checks roles via `isAdmin` / `isStaff`.
 
 ## Middleware
 
 ### Rate Limiting
 
-The API applies request rate limits:
-
-| Type    | Limit           | Window     |
-| ------- | --------------- | ---------- |
-| Global  | 100 requests/IP | 15 minutes |
-| Payment | 10 requests/IP  | 15 minutes |
+| Type    | Limit              | Window     |
+| ------- | ------------------ | ---------- |
+| Global  | 100 requests/IP    | 15 minutes |
+| Payment | 10 requests/IP     | 15 minutes |
 
 ### CORS
 
-Configured to accept requests from `CLIENT_URL` with headers:
-
-- `sessionId`
-- `Content-Type`
-- `Authorization`
-
-### Authentication
-
-The `checkAuth` middleware:
-
-1. Validates the Supabase JWT token
-2. Fetches the user from Prisma (with role)
-3. Attaches `req.user` to the request object
-
-Additional role middlewares (`isAdmin`, `isStaff`) check `req.user.role` for authorization.
-
----
+Accepts requests from `CLIENT_URL` with headers: `sessionId`, `Content-Type`, `Authorization`.
 
 ## Database
 
-### Main Entities
+### Models
 
-| Entity         | Description                      |
+| Model          | Description                      |
 | -------------- | -------------------------------- |
 | `User`         | Users (clients, admins, staff)   |
 | `Restaurant`   | Restaurant information           |
+| `OpeningHour`  | Opening hours per day            |
 | `Category`     | Menu categories                  |
 | `Product`      | Menu items                       |
 | `OptionGroup`  | Option groups for customization  |
-| `OptionChoice` | Available choices within a group |
+| `OptionChoice` | Choices within an option group   |
 | `Order`        | Customer orders                  |
-| `OrderProduct` | Products in an order             |
-| `OpeningHour`  | Opening hours                    |
+| `OrderProduct` | Products within an order         |
 
-### User Roles
+### Roles
 
-- `CLIENT`: Standard customer
-- `ADMIN`: Administrator
-- `STAFF`: Restaurant staff
+`CLIENT` · `ADMIN` · `STAFF`
 
-### Order Status
+### Order Statuses
 
-- `PENDING`: Waiting
-- `IN_PROGRESS`: Being prepared
-- `COMPLETED`: Done
-- `DELIVERED`: Delivered
-- `CANCELLED`: Cancelled
+`PENDING` → `IN_PROGRESS` → `COMPLETED` → `DELIVERED` | `CANCELLED`
 
----
+## Testing with Postman
 
-## Tests
-
-Run tests:
-
-```bash
-npm test
-```
-
-Tests use Vitest and Supertest to test API endpoints.
-
----
-
-## Development: Testing with Postman
-
-In development, authentication is handled directly via Supabase REST API. Follow these steps to test protected routes.
-
-### 1. Create a test user (Signup)
+### 1. Signup
 
 **POST** `https://<SUPABASE_URL>/auth/v1/signup`
 
-**Headers:**
-
-```
-apikey: <SUPABASE_ANON_KEY>
-Content-Type: application/json
-```
-
-**Body:**
+Headers: `apikey: <SUPABASE_ANON_KEY>`
 
 ```json
-{
-  "email": "test@example.com",
-  "password": "password123"
-}
+{ "email": "test@example.com", "password": "password123" }
 ```
 
-### 2. Get an access token (Login)
+### 2. Login
 
 **POST** `https://<SUPABASE_URL>/auth/v1/token?grant_type=password`
 
-**Headers:**
-
-```
-apikey: <SUPABASE_ANON_KEY>
-Content-Type: application/json
-```
-
-**Body:**
+Headers: `apikey: <SUPABASE_ANON_KEY>`
 
 ```json
-{
-  "email": "test@example.com",
-  "password": "password123"
-}
+{ "email": "test@example.com", "password": "password123" }
 ```
 
-**Response:**
-
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIs...",
-  "refresh_token": "...",
-  "user": { ... }
-}
-```
-
-### 3. Use the token for protected routes
-
-Add the `access_token` to your requests:
-
-**Headers:**
+### 3. Use the token
 
 ```
 Authorization: Bearer <access_token>
 ```
 
-### Postman Environment Variables (recommended)
-
-Create a Postman environment with:
-
-| Variable            | Value                                 |
-| ------------------- | ------------------------------------- |
-| `supabase_url`      | `https://your-project.supabase.co`    |
-| `supabase_anon_key` | Your anon key from Supabase dashboard |
-| `access_token`      | (set after login)                     |
-
-Then use `{{supabase_url}}`, `{{supabase_anon_key}}`, and `{{access_token}}` in your requests.
-
-### Where to find Supabase credentials
-
-Supabase Dashboard → Project Settings → API
-
-- **Project URL**: `https://xxxxx.supabase.co`
-- **anon public key**: `eyJhbGciOiJIUzI1NiIs...`
-
----
-
 ## License
 
-Private project - All rights reserved.
+Private project — All rights reserved.
