@@ -35,6 +35,12 @@ const categorySchema = z.object({
   displayOrder: z.number(),
 });
 
+const updateCategorySchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  subHeading: z.string().min(1).max(255).optional(),
+  displayOrder: z.number().optional(),
+});
+
 const productSchema = z.object({
   restaurantId: z.string().uuid(),
   name: z.string().min(1).max(50),
@@ -71,6 +77,7 @@ module.exports = {
 
   // Menu
   categorySchema,
+  updateCategorySchema,
   productSchema,
   productOptionGroupSchema,
   productOptionChoiceSchema,

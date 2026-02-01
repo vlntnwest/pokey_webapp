@@ -21,9 +21,43 @@ module.exports.createProductCategorie = async (req, res, next) => {
   }
 };
 
-module.exports.updateProductCategorie = async (req, res, next) => {};
+module.exports.updateProductCategorie = async (req, res, next) => {
+  const { categorieId } = req.params;
+  const { name, subHeading, displayOrder } = req.body;
 
-module.exports.deleteProductCategorie = async (req, res, next) => {};
+  try {
+    const data = await prisma.category.update({
+      where: {
+        id: categorieId,
+      },
+      data: {
+        name,
+        subHeading,
+        displayOrder,
+      },
+    });
+    logger.info({ responseId: data.id }, "Product categorie updated");
+    return res.status(201).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.deleteProductCategorie = async (req, res, next) => {
+  const { categorieId } = req.params;
+
+  try {
+    const data = await prisma.category.delete({
+      where: {
+        id: categorieId,
+      },
+    });
+    logger.info({ responseId: data.id }, "Product categorie deleted");
+    return res.status(201).json("Product categorie deleted");
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports.createProduct = async (req, res, next) => {};
 

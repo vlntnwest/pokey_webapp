@@ -4,7 +4,10 @@ const menuControllers = require("../controllers/menu.controllers");
 const checkAuth = require("../middleware/auth.middleware");
 const { isAdmin } = require("../middleware/role.middleware");
 const { validate } = require("../middleware/validate.middleware");
-const { categorySchema } = require("../validators/schemas");
+const {
+  categorySchema,
+  updateCategorySchema,
+} = require("../validators/schemas");
 
 router.post(
   "/restaurants/:restaurantId/categories",
@@ -17,6 +20,7 @@ router.put(
   "/restaurants/:restaurantId/categories/:categorieId",
   checkAuth,
   isAdmin,
+  validate({ body: updateCategorySchema }),
   menuControllers.updateProductCategorie,
 );
 router.delete(
