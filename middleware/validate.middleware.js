@@ -39,20 +39,6 @@ const validate = (schemas) => {
   };
 };
 
-/**
- * Validate ObjectId parameter
- */
-const validateObjectId = (paramName = "id") => {
-  return (req, res, next) => {
-    const id = req.params[paramName];
-    if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
-      return res.status(400).json({ error: `Invalid ${paramName}: ${id}` });
-    }
-    next();
-  };
-};
-
 module.exports = {
   validate,
-  validateObjectId,
 };

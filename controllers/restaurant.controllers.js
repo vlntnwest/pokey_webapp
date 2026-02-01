@@ -14,7 +14,7 @@ module.exports.createRestaurant = async (req, res, next) => {
   const { name, address, zipCode, city, phone, email, imageUrl } = result.data;
 
   try {
-    const response = await prisma.$transaction(async (tx) => {
+    const data = await prisma.$transaction(async (tx) => {
       const restaurant = await tx.restaurant.create({
         data: {
           name,
@@ -37,8 +37,8 @@ module.exports.createRestaurant = async (req, res, next) => {
 
       return restaurant;
     });
-    logger.info({ responseId: response.id }, "Restaurant created successfully");
-    return res.status(201).json({ response });
+    logger.info({ responseId: data.id }, "Restaurant created successfully");
+    return res.status(201).json({ data });
   } catch (error) {
     next(error);
   }
@@ -58,13 +58,13 @@ module.exports.updateRestaurant = async (req, res, next) => {
     return res.status(400).json({ error: "No data" });
   }
   try {
-    const response = await prisma.restaurant.update({
+    const data = await prisma.restaurant.update({
       where: { id },
       data: result.data,
     });
 
-    logger.info({ responseId: response.id }, "Restaurant updated successfully");
-    return res.status(200).json({ response });
+    logger.info({ responseId: data.id }, "Restaurant updated successfully");
+    return res.status(200).json({ data });
   } catch (error) {
     next(error);
   }

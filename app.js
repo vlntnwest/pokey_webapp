@@ -22,7 +22,7 @@ const globalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // 20 requests per window per IP
+  max: 100, // 100 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -60,11 +60,7 @@ app.use((req, res, next) => {
   cors(corsOption)(req, res, next);
 });
 
-app.use(express.json());
-
-//Body Parseer
-app.use(bodyParser.json({ limit: "10mb" }));
-app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
 // Apply global rate limiter to all routes
