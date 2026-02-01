@@ -1,4 +1,9 @@
-module.exports.createProductCategorie = async (req, res, next) => {};
+const logger = require("../logger");
+
+module.exports.createProductCategorie = async (req, res, next) => {
+  logger.info("createProductCategorie");
+  return res.json({ message: "createProductCategorie" });
+};
 
 module.exports.updateProductCategorie = async (req, res, next) => {};
 

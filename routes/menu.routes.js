@@ -11,13 +11,13 @@ router.post(
   menuControllers.createProductCategorie,
 );
 router.put(
-  "/categories/:id",
+  "/restaurants/:restaurantId/categories/:categorieId",
   checkAuth,
   isAdmin,
   menuControllers.updateProductCategorie,
 );
 router.delete(
-  "/categories/:id",
+  "/restaurants/:restaurantId/categories/:categorieId",
   checkAuth,
   isAdmin,
   menuControllers.deleteProductCategorie,
@@ -29,47 +29,52 @@ router.post(
   isAdmin,
   menuControllers.createProduct,
 );
-router.put("/products/:id", checkAuth, isAdmin, menuControllers.updateProduct);
+router.put(
+  "/restaurants/:restaurantId/products/:productId",
+  checkAuth,
+  isAdmin,
+  menuControllers.updateProduct,
+);
 router.delete(
-  "/products/:id",
+  "/restaurants/:restaurantId/products/:productId",
   checkAuth,
   isAdmin,
   menuControllers.deleteProduct,
 );
 
 router.post(
-  "/products/:productId/option-groups",
+  "/restaurants/:restaurantId/products/:productId/option-groups",
   checkAuth,
   isAdmin,
   menuControllers.createProductOptionGroup,
 );
 router.put(
-  "/option-groups/:id",
+  "/restaurants/:restaurantId/option-groups/:optionGroupId",
   checkAuth,
   isAdmin,
   menuControllers.updateProductOptionGroup,
 );
 router.delete(
-  "/option-groups/:id",
+  "/restaurants/:restaurantId/option-groups/:id",
   checkAuth,
   isAdmin,
   menuControllers.deleteProductOptionGroup,
 );
 
 router.post(
-  "/option-groups/:optionId/option-choices",
+  "/restaurants/:restaurantId/option-groups/:optionId/option-choices",
   checkAuth,
   isAdmin,
   menuControllers.createProductOptionChoice,
 );
 router.put(
-  "/option-choices/:optionId",
+  "/restaurants/:restaurantId/option-choices/:optionId",
   checkAuth,
   isAdmin,
   menuControllers.updateProductOptionChoice,
 );
 router.delete(
-  "/option-choices/:optionId",
+  "/restaurants/:restaurantId/option-choices/:optionId",
   checkAuth,
   isAdmin,
   menuControllers.deleteProductOptionChoice,

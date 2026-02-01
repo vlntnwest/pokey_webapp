@@ -5,9 +5,14 @@ const checkAuth = require("../middleware/auth.middleware");
 const { isAdmin, isOwner } = require("../middleware/role.middleware");
 
 router.post("/", checkAuth, restaurantControllers.createRestaurant);
-router.put("/:id", checkAuth, isAdmin, restaurantControllers.updateRestaurant);
+router.put(
+  "/:restaurantId",
+  checkAuth,
+  isAdmin,
+  restaurantControllers.updateRestaurant,
+);
 router.delete(
-  "/:id",
+  "/:restaurantId",
   checkAuth,
   isOwner,
   restaurantControllers.deleteRestaurant,

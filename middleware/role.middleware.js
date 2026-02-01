@@ -2,11 +2,11 @@ const logger = require("../logger");
 
 const isOwner = (req, res, next) => {
   const user = req.user;
-  const id = req.params.id;
+  const restaurantId = req.params.restaurantId;
 
   if (
     !user.restaurantMembers.some((member) => {
-      const isMember = member.restaurantId === id;
+      const isMember = member.restaurantId === restaurantId;
       const isOwner = member.role === "OWNER";
       return isMember && isOwner;
     })
@@ -14,7 +14,7 @@ const isOwner = (req, res, next) => {
     logger.warn(
       {
         userId: user.id,
-        restaurantId: id,
+        restaurantId: restaurantId,
       },
       "User is not owner of restaurant",
     );
@@ -26,11 +26,11 @@ const isOwner = (req, res, next) => {
 
 const isAdmin = (req, res, next) => {
   const user = req.user;
-  const id = req.params.id;
+  const restaurantId = req.params.restaurantId;
 
   if (
     !user.restaurantMembers.some((member) => {
-      const isMember = member.restaurantId === id;
+      const isMember = member.restaurantId === restaurantId;
       const isOwner = member.role === "OWNER";
       const isAdmin = member.role === "ADMIN";
       return isMember && (isOwner || isAdmin);
@@ -39,7 +39,7 @@ const isAdmin = (req, res, next) => {
     logger.warn(
       {
         userId: user.id,
-        restaurantId: id,
+        restaurantId: restaurantId,
       },
       "User is not admin of restaurant",
     );
@@ -51,13 +51,17 @@ const isAdmin = (req, res, next) => {
 
 const isStaff = (req, res, next) => {
   const user = req.user;
-  const id = req.params.id;
+  const restaurantId = req.params.restaurantId;
 
-  if (!user.restaurantMembers.some((member) => member.restaurantId === id)) {
+  if (
+    !user.restaurantMembers.some(
+      (member) => member.restaurantId === restaurantId,
+    )
+  ) {
     logger.warn(
       {
         userId: user.id,
-        restaurantId: id,
+        restaurantId: restaurantId,
       },
       "User is not staff of restaurant",
     );
