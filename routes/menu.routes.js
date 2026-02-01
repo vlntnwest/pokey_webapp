@@ -5,22 +5,25 @@ const checkAuth = require("../middleware/auth.middleware");
 const { isAdmin } = require("../middleware/role.middleware");
 const { validate } = require("../middleware/validate.middleware");
 const {
-  categorySchema,
-  updateCategorySchema,
+  categorieSchema,
+  updateCategorieSchema,
+  productSchema,
+  updateProductSchema,
 } = require("../validators/schemas");
 
+// Categories
 router.post(
   "/restaurants/:restaurantId/categories",
   checkAuth,
   isAdmin,
-  validate({ body: categorySchema }),
+  validate({ body: categorieSchema }),
   menuControllers.createProductCategorie,
 );
 router.put(
   "/restaurants/:restaurantId/categories/:categorieId",
   checkAuth,
   isAdmin,
-  validate({ body: updateCategorySchema }),
+  validate({ body: updateCategorieSchema }),
   menuControllers.updateProductCategorie,
 );
 router.delete(
@@ -30,16 +33,19 @@ router.delete(
   menuControllers.deleteProductCategorie,
 );
 
+// Products
 router.post(
   "/restaurants/:restaurantId/products",
   checkAuth,
   isAdmin,
+  validate({ body: productSchema }),
   menuControllers.createProduct,
 );
 router.put(
   "/restaurants/:restaurantId/products/:productId",
   checkAuth,
   isAdmin,
+  validate({ body: updateProductSchema }),
   menuControllers.updateProduct,
 );
 router.delete(
@@ -49,6 +55,7 @@ router.delete(
   menuControllers.deleteProduct,
 );
 
+// Option groups
 router.post(
   "/restaurants/:restaurantId/products/:productId/option-groups",
   checkAuth,
@@ -68,6 +75,7 @@ router.delete(
   menuControllers.deleteProductOptionGroup,
 );
 
+// Option choices
 router.post(
   "/restaurants/:restaurantId/option-groups/:optionId/option-choices",
   checkAuth,

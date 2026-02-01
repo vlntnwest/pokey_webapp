@@ -28,14 +28,14 @@ const restaurantSchema = z.object({
   imageUrl: z.string().url().optional(),
 });
 
-const categorySchema = z.object({
+const categorieSchema = z.object({
   restaurantId: z.string().uuid(),
   name: z.string().min(1).max(50),
   subHeading: z.string().min(1).max(255).optional(),
   displayOrder: z.number(),
 });
 
-const updateCategorySchema = z.object({
+const updateCategorieSchema = z.object({
   name: z.string().min(1).max(50).optional(),
   subHeading: z.string().min(1).max(255).optional(),
   displayOrder: z.number().optional(),
@@ -50,7 +50,20 @@ const productSchema = z.object({
   tags: z.array(z.string()).optional(),
   discount: z.number().default(0),
   isAvailable: z.boolean().default(true),
-  displayOrder: z.number(),
+  displayOrder: z.number().default(999),
+  categorieId: z.string().uuid(),
+});
+
+const updateProductSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  description: z.string().min(1).max(255).optional(),
+  imageUrl: z.string().url().optional(),
+  price: z.number().optional(),
+  tags: z.array(z.string()).optional(),
+  discount: z.number().default(0).optional(),
+  isAvailable: z.boolean().default(true).optional(),
+  displayOrder: z.number().optional(),
+  categorieId: z.string().uuid().optional(),
 });
 
 const productOptionGroupSchema = z.object({
@@ -76,9 +89,10 @@ module.exports = {
   restaurantSchema,
 
   // Menu
-  categorySchema,
-  updateCategorySchema,
+  categorieSchema,
+  updateCategorieSchema,
   productSchema,
+  updateProductSchema,
   productOptionGroupSchema,
   productOptionChoiceSchema,
 };
