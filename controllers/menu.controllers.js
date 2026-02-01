@@ -1,8 +1,24 @@
+const prisma = require("../lib/prisma");
 const logger = require("../logger");
 
 module.exports.createProductCategorie = async (req, res, next) => {
-  logger.info("createProductCategorie");
-  return res.json({ message: "createProductCategorie" });
+  const { restaurantId } = req.params;
+  const { name, subHeading, displayOrder } = req.body;
+
+  try {
+    const data = await prisma.category.create({
+      data: {
+        restaurantId,
+        name,
+        subHeading,
+        displayOrder,
+      },
+    });
+    logger.info({ responseId: data.id }, "Product categorie created");
+    return res.status(201).json({ data });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports.updateProductCategorie = async (req, res, next) => {};

@@ -28,11 +28,11 @@ const restaurantSchema = z.object({
   imageUrl: z.string().url().optional(),
 });
 
-const categorieSchema = z.object({
+const categorySchema = z.object({
   restaurantId: z.string().uuid(),
   name: z.string().min(1).max(50),
   subHeading: z.string().min(1).max(255).optional(),
-  displayOrder: z.number().optional(),
+  displayOrder: z.number(),
 });
 
 const productSchema = z.object({
@@ -44,7 +44,7 @@ const productSchema = z.object({
   tags: z.array(z.string()).optional(),
   discount: z.number().default(0),
   isAvailable: z.boolean().default(true),
-  displayOrder: z.number().optional(),
+  displayOrder: z.number(),
 });
 
 const productOptionGroupSchema = z.object({
@@ -70,7 +70,7 @@ module.exports = {
   restaurantSchema,
 
   // Menu
-  categorieSchema,
+  categorySchema,
   productSchema,
   productOptionGroupSchema,
   productOptionChoiceSchema,

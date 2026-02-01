@@ -3,11 +3,14 @@ const router = express.Router();
 const menuControllers = require("../controllers/menu.controllers");
 const checkAuth = require("../middleware/auth.middleware");
 const { isAdmin } = require("../middleware/role.middleware");
+const { validate } = require("../middleware/validate.middleware");
+const { categorySchema } = require("../validators/schemas");
 
 router.post(
   "/restaurants/:restaurantId/categories",
   checkAuth,
   isAdmin,
+  validate({ body: categorySchema }),
   menuControllers.createProductCategorie,
 );
 router.put(
