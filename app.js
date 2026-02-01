@@ -22,7 +22,7 @@ const globalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window per IP
+  max: 15, // 15 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -68,7 +68,7 @@ app.use(globalLimiter);
 
 // Routes
 app.use("/api/user", authLimiter, userRoutes);
-app.use("/api/restaurants", authLimiter, restaurantRoutes);
+app.use("/api/restaurants", globalLimiter, restaurantRoutes);
 
 // Error handler
 app.use(errorHandler);
