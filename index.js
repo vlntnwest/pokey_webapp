@@ -28,12 +28,16 @@ const corsOption = {
 
 app.use(cors(corsOption));
 
-app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
-
-app.use(express.json());
-
-//Body Parseer
-app.use(bodyParser.json({ limit: "10mb" }));
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, res, buf) => {
+      if (req.originalUrl === "/api/checkout/webhook") {
+        req.rawBody = buf;
+      }
+    },
+  })
+);
 app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 
