@@ -1,5 +1,5 @@
 const OrderModel = require("../models/order.model");
-const { printText, printImage } = require("../utils/printer.utils");
+const { printText } = require("../utils/printer.utils");
 const ObjectID = require("mongoose").Types.ObjectId;
 const nodemailer = require("nodemailer");
 require("dotenv").config();
@@ -146,27 +146,6 @@ module.exports.printOrder = async (orderData) => {
     return result;
   } catch (error) {
     throw new Error("Error printing order");
-  }
-};
-
-module.exports.printPic = async (req, res) => {
-  const { image } = req.body;
-
-  if (!image) {
-    return res
-      .status(400)
-      .json({ status: "error", message: "No image provided" });
-  }
-
-  try {
-    const result = await printImage(image);
-    res.status(200).json({ message: result });
-  } catch (error) {
-    console.error("[🧾 THERMAL] Error processing the image:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Error encoding the image",
-    });
   }
 };
 

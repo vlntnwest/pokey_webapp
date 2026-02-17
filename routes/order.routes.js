@@ -9,6 +9,5 @@ router.delete("/:id", orderController.deleteOrder);
 router.put("/:id/toggle", orderController.toggleOrder);
 
 router.post("/print-order", orderController.handleOrderPrinting);
-router.post("/print-pic", orderController.printPic);
 
 module.exports = router;

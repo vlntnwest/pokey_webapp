@@ -62,6 +62,16 @@ module.exports.paymentWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET_KEY;
 
+  if (!endpointSecret) {
+    console.error("Webhook Error: STRIPE_WEBHOOK_SECRET_KEY is not configured");
+    return res.status(500).send("Webhook Error: Server configuration error");
+  }
+
+  if (!sig) {
+    console.error("Webhook Error: Missing stripe-signature header");
+    return res.status(400).send("Webhook Error: Missing signature");
+  }
+
   let event;
 
   function reconstructFromMetadata(metadata, keyPrefix) {
@@ -71,7 +81,16 @@ module.exports.paymentWebhook = async (req, res) => {
       .map(([, v]) => v)
       .join("");
 
-    return parts ? JSON.parse(parts) : null;
+    if (!parts || parts.length === 0) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(parts);
+    } catch (err) {
+      console.error(`Error parsing reconstructed metadata for key "${keyPrefix}":`, err.message);
+      return null;
+    }
   }
 
   try {
@@ -89,29 +108,53 @@ module.exports.paymentWebhook = async (req, res) => {
 
       const metadata = event.data.object.metadata;
 
-      const formattedData = {
-        ...metadata,
-        clientData: metadata.clientData
-          ? JSON.parse(metadata.clientData)
-          : null,
-        orderDate: metadata.orderDate ? JSON.parse(metadata.orderDate) : null,
-        items:
-          reconstructFromMetadata(metadata, "items") ??
-          (metadata.items ? JSON.parse(metadata.items) : null),
-        totalPrice: parseFloat(metadata.totalPrice),
-        isSuccess: true,
-        paymentId: event.data.object.id,
-      };
+      try {
+        // Validate metadata exists
+        if (!metadata) {
+          console.error("Webhook Error: Missing metadata in checkout session");
+          return res.status(400).json({ error: "Missing metadata" });
+        }
 
-      await handleOrderCreation({ body: formattedData }, res);
+        const formattedData = {
+          ...metadata,
+          clientData: metadata.clientData
+            ? JSON.parse(metadata.clientData)
+            : null,
+          orderDate: metadata.orderDate ? JSON.parse(metadata.orderDate) : null,
+          items:
+            reconstructFromMetadata(metadata, "items") ??
+            (metadata.items ? JSON.parse(metadata.items) : null),
+          totalPrice: parseFloat(metadata.totalPrice),
+          isSuccess: true,
+          paymentId: event.data.object.id,
+        };
 
-      break;
+        // Validate required fields
+        if (!formattedData.items || isNaN(formattedData.totalPrice)) {
+          console.error("Webhook Error: Invalid formatted data", {
+            hasItems: !!formattedData.items,
+            totalPrice: formattedData.totalPrice
+          });
+          return res.status(400).json({ error: "Invalid order data" });
+        }
+
+        await handleOrderCreation({ body: formattedData }, res);
+        return; // Exit early to prevent duplicate response
+      } catch (err) {
+        console.error("Error processing checkout.session.completed event:", err);
+        return res.status(500).json({
+          error: "Error processing payment webhook",
+          message: err.message
+        });
+      }
 
     //Event when payment failed due to card problem or insufficient funds
     case "payment_intent.payment_failed":
       console.log("Payment failed");
+      break;
 
     default:
+      console.log(`Unhandled event type: ${event.type}`);
       break;
   }
 

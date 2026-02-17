@@ -26,7 +26,14 @@ const corsOption = {
   preflightContinue: false,
 };
 
-app.use(cors(corsOption));
+// Apply CORS to all routes EXCEPT webhook
+app.use((req, res, next) => {
+  // Skip CORS for webhook endpoint - Stripe uses signature verification
+  if (req.path === "/api/checkout/webhook") {
+    return next();
+  }
+  cors(corsOption)(req, res, next);
+});
 
 app.use(
   express.json({
