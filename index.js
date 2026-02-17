@@ -16,9 +16,6 @@ const checkJwt = require("./middleware/auth.middleware");
 
 const app = express();
 
-// Webhook route FIRST - before CORS to avoid blocking Stripe requests
-app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
-
 // CORS
 const corsOption = {
   origin: process.env.CLIENT_URL,
@@ -38,10 +35,16 @@ app.use((req, res, next) => {
   cors(corsOption)(req, res, next);
 });
 
-app.use(express.json());
-
-//Body Parseer
-app.use(bodyParser.json({ limit: "10mb" }));
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, res, buf) => {
+      if (req.originalUrl === "/api/checkout/webhook") {
+        req.rawBody = buf;
+      }
+    },
+  })
+);
 app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 
