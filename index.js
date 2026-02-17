@@ -1,3 +1,6 @@
+// Load environment variables FIRST before any other imports
+require("dotenv").config({ path: "./.env" });
+
 const express = require("express");
 const usersRoutes = require("./routes/users.routes");
 const menuItemRoutes = require("./routes/menuItems.routes");
@@ -9,7 +12,6 @@ const foodRoutes = require("./routes/food.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-require("dotenv").config({ path: "./.env" });
 require("./config/db");
 const cors = require("cors");
 const checkJwt = require("./middleware/auth.middleware");
@@ -62,6 +64,7 @@ app.use("/api/food", foodRoutes);
 app.use("/api/checkout", paymentRoutes);
 
 // server
-app.listen(process.env.PORT, () => {
-  console.log(`Listening on port ${process.env.PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });
