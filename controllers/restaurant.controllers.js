@@ -46,7 +46,7 @@ module.exports.createRestaurant = async (req, res, next) => {
 
 module.exports.updateRestaurant = async (req, res, next) => {
   const result = restaurantSchema.partial().safeParse(req.body);
-  const { id } = req.params;
+  const { restaurantId } = req.params;
 
   if (!result.success) {
     logger.error({ issues: result.error.issues }, "Invalid restaurant data");
@@ -59,7 +59,7 @@ module.exports.updateRestaurant = async (req, res, next) => {
   }
   try {
     const data = await prisma.restaurant.update({
-      where: { id },
+      where: { id: restaurantId },
       data: result.data,
     });
 
@@ -71,14 +71,14 @@ module.exports.updateRestaurant = async (req, res, next) => {
 };
 
 module.exports.deleteRestaurant = async (req, res, next) => {
-  const { id } = req.params;
+  const { restaurantId } = req.params;
 
   try {
     await prisma.restaurant.delete({
-      where: { id },
+      where: { id: restaurantId },
     });
 
-    logger.info({ restaurantId: id }, "Restaurant deleted successfully");
+    logger.info({ restaurantId }, "Restaurant deleted successfully");
     return res
       .status(200)
       .json({ response: "Restaurant deleted successfully" });
