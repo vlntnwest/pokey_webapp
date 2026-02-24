@@ -9,7 +9,23 @@ const {
   updateCategorieSchema,
   productSchema,
   updateProductSchema,
+  productOptionGroupSchema,
+  updateProductOptionGroupSchema,
+  productOptionChoiceSchema,
+  updateProductOptionChoiceSchema,
 } = require("../validators/schemas");
+
+// Menu (public)
+router.get(
+  "/restaurants/:restaurantId/menu",
+  menuControllers.getMenu,
+);
+
+// Products (public read)
+router.get(
+  "/restaurants/:restaurantId/products/:productId",
+  menuControllers.getProduct,
+);
 
 // Categories
 router.post(
@@ -60,16 +76,18 @@ router.post(
   "/restaurants/:restaurantId/products/:productId/option-groups",
   checkAuth,
   isAdmin,
+  validate({ body: productOptionGroupSchema }),
   menuControllers.createProductOptionGroup,
 );
 router.put(
   "/restaurants/:restaurantId/option-groups/:optionGroupId",
   checkAuth,
   isAdmin,
+  validate({ body: updateProductOptionGroupSchema }),
   menuControllers.updateProductOptionGroup,
 );
 router.delete(
-  "/restaurants/:restaurantId/option-groups/:id",
+  "/restaurants/:restaurantId/option-groups/:optionGroupId",
   checkAuth,
   isAdmin,
   menuControllers.deleteProductOptionGroup,
@@ -77,19 +95,21 @@ router.delete(
 
 // Option choices
 router.post(
-  "/restaurants/:restaurantId/option-groups/:optionId/option-choices",
+  "/restaurants/:restaurantId/option-groups/:optionGroupId/option-choices",
   checkAuth,
   isAdmin,
+  validate({ body: productOptionChoiceSchema }),
   menuControllers.createProductOptionChoice,
 );
 router.put(
-  "/restaurants/:restaurantId/option-choices/:optionId",
+  "/restaurants/:restaurantId/option-choices/:optionChoiceId",
   checkAuth,
   isAdmin,
+  validate({ body: updateProductOptionChoiceSchema }),
   menuControllers.updateProductOptionChoice,
 );
 router.delete(
-  "/restaurants/:restaurantId/option-choices/:optionId",
+  "/restaurants/:restaurantId/option-choices/:optionChoiceId",
   checkAuth,
   isAdmin,
   menuControllers.deleteProductOptionChoice,

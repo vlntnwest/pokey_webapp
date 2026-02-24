@@ -67,7 +67,6 @@ const updateProductSchema = z.object({
 });
 
 const productOptionGroupSchema = z.object({
-  productId: z.string().uuid(),
   name: z.string().min(1).max(50),
   hasMultiple: z.boolean().default(false),
   isRequired: z.boolean().default(false),
@@ -75,10 +74,22 @@ const productOptionGroupSchema = z.object({
   maxQuantity: z.number().default(1),
 });
 
+const updateProductOptionGroupSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  hasMultiple: z.boolean().optional(),
+  isRequired: z.boolean().optional(),
+  minQuantity: z.number().optional(),
+  maxQuantity: z.number().optional(),
+});
+
 const productOptionChoiceSchema = z.object({
-  optionGroupId: z.string().uuid(),
   name: z.string().min(1).max(50),
   priceModifier: z.number().default(0),
+});
+
+const updateProductOptionChoiceSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  priceModifier: z.number().optional(),
 });
 
 module.exports = {
@@ -94,5 +105,7 @@ module.exports = {
   productSchema,
   updateProductSchema,
   productOptionGroupSchema,
+  updateProductOptionGroupSchema,
   productOptionChoiceSchema,
+  updateProductOptionChoiceSchema,
 };
