@@ -1,6 +1,7 @@
 require("dotenv").config({ path: "./.env" });
 
 const express = require("express");
+const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -41,6 +42,9 @@ const paymentLimiter = rateLimit({
   skip: (req) => req.path === "/webhook", // Skip webhook (Stripe calls)
 });
 
+// Security headers
+app.use(helmet());
+
 // Webhook route FIRST - before CORS to avoid blocking Stripe requests
 app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
 
@@ -67,6 +71,11 @@ app.use(cookieParser());
 
 // Apply global rate limiter to all routes
 app.use(globalLimiter);
+
+// Health check
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 // Routes
 app.use("/api/user", authLimiter, userRoutes);

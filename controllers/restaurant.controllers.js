@@ -1,17 +1,9 @@
 const prisma = require("../lib/prisma");
-const { restaurantSchema } = require("../validators/schemas");
 const logger = require("../logger");
 
 module.exports.createRestaurant = async (req, res, next) => {
-  const result = restaurantSchema.safeParse(req.body);
   const user = req.user;
-
-  if (!result.success) {
-    logger.error({ issues: result.error.issues }, "Invalid restaurant data");
-    return res.status(400).json({ error: result.error.issues });
-  }
-
-  const { name, address, zipCode, city, phone, email, imageUrl } = result.data;
+  const { name, address, zipCode, city, phone, email, imageUrl } = req.body;
 
   try {
     const data = await prisma.$transaction(async (tx) => {
@@ -45,22 +37,17 @@ module.exports.createRestaurant = async (req, res, next) => {
 };
 
 module.exports.updateRestaurant = async (req, res, next) => {
-  const result = restaurantSchema.partial().safeParse(req.body);
   const { restaurantId } = req.params;
 
-  if (!result.success) {
-    logger.error({ issues: result.error.issues }, "Invalid restaurant data");
-    return res.status(400).json({ error: result.error.issues });
-  }
-
-  if (Object.keys(result.data).length === 0) {
+  if (Object.keys(req.body).length === 0) {
     logger.error("No data to update");
     return res.status(400).json({ error: "No data" });
   }
+
   try {
     const data = await prisma.restaurant.update({
       where: { id: restaurantId },
-      data: result.data,
+      data: req.body,
     });
 
     logger.info({ responseId: data.id }, "Restaurant updated successfully");
@@ -81,7 +68,7 @@ module.exports.deleteRestaurant = async (req, res, next) => {
     logger.info({ restaurantId }, "Restaurant deleted successfully");
     return res
       .status(200)
-      .json({ response: "Restaurant deleted successfully" });
+      .json({ message: "Restaurant deleted successfully" });
   } catch (error) {
     next(error);
   }

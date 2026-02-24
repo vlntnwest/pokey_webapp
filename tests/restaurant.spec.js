@@ -62,7 +62,7 @@ describe("RESTAURANT CRUD", () => {
       response = await authRequest("post", "/api/restaurants", token).send(
         validRestaurant,
       );
-      restaurantId = response.body.response?.id;
+      restaurantId = response.body.data?.id;
     }, TIMEOUT);
 
     test("should return 201", () => {
@@ -70,19 +70,19 @@ describe("RESTAURANT CRUD", () => {
     });
 
     test("should return restaurant object", () => {
-      expect(response.body.response).toBeDefined();
+      expect(response.body.data).toBeDefined();
     });
 
     test("should return the correct name", () => {
-      expect(response.body.response.name).toBe(validRestaurant.name);
+      expect(response.body.data.name).toBe(validRestaurant.name);
     });
 
     test("should return the correct address", () => {
-      expect(response.body.response.address).toBe(validRestaurant.address);
+      expect(response.body.data.address).toBe(validRestaurant.address);
     });
 
     test("should return the correct city", () => {
-      expect(response.body.response.city).toBe(validRestaurant.city);
+      expect(response.body.data.city).toBe(validRestaurant.city);
     });
   });
 
@@ -159,11 +159,11 @@ describe("RESTAURANT CRUD", () => {
     });
 
     test("should return updated name", () => {
-      expect(response.body.response.name).toBe("Updated Restaurant");
+      expect(response.body.data.name).toBe("Updated Restaurant");
     });
 
     test("should keep unchanged fields", () => {
-      expect(response.body.response.city).toBe(validRestaurant.city);
+      expect(response.body.data.city).toBe(validRestaurant.city);
     });
   });
 
@@ -240,7 +240,7 @@ describe("RESTAURANT CRUD", () => {
     });
 
     test("should return success message", () => {
-      expect(response.body.response).toBe("Restaurant deleted successfully");
+      expect(response.body.message).toBe("Restaurant deleted successfully");
     });
   });
 

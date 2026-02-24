@@ -60,16 +60,16 @@
 
 > Priorite : corriger les bugs existants et stabiliser la base avant d'ajouter des fonctionnalites.
 
-- [ ] Corriger les status codes dans `menu.controllers.js` (200 au lieu de 201 pour update/delete)
-- [ ] Uniformiser le format de reponse (toujours `{ data }` ou `{ message }`, jamais de string brut)
-- [ ] Supprimer le code mort dans `user.controllers.js:updateUserData` (le check `if (!result)` inutile)
-- [ ] Utiliser le middleware `validate` sur la route `POST /api/restaurants` au lieu de valider dans le controller
-- [ ] Retirer `restaurantId` de `categorieSchema` et `productSchema` (vient de `req.params`)
-- [ ] Corriger les tests (`response.body.data` au lieu de `response.body.user` / `response.body.response`)
-- [ ] Uniformiser la langue des messages d'erreur (tout en anglais ou tout en francais)
-- [ ] Ajouter `helmet` pour les headers de securite HTTP
-- [ ] Creer et commiter un `.env.example`
-- [ ] Ajouter un endpoint `GET /health` (health check pour monitoring/deploiement)
+- [x] Corriger les status codes dans `menu.controllers.js` (200 au lieu de 201 pour update/delete)
+- [x] Uniformiser le format de reponse (toujours `{ data }` ou `{ message }`, jamais de string brut)
+- [x] Supprimer le code mort dans `user.controllers.js:updateUserData` (le check `if (!result)` inutile)
+- [x] Utiliser le middleware `validate` sur la route `POST /api/restaurants` au lieu de valider dans le controller
+- [x] Retirer `restaurantId` de `categorieSchema` et `productSchema` (vient de `req.params`)
+- [x] Corriger les tests (`response.body.data` au lieu de `response.body.user` / `response.body.response`)
+- [x] Uniformiser la langue des messages d'erreur (tout en anglais)
+- [x] Ajouter `helmet` pour les headers de securite HTTP
+- [x] Creer et commiter un `.env.example`
+- [x] Ajouter un endpoint `GET /health` (health check pour monitoring/deploiement)
 
 ## Phase 2 — Fonctionnalites manquantes (core business)
 

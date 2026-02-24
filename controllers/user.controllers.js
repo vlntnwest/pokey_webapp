@@ -25,14 +25,7 @@ module.exports.getUserData = async (req, res, next) => {
 
 module.exports.updateUserData = async (req, res, next) => {
   const { id } = req.user;
-  const result = req.body;
-
-  if (!result) {
-    logger.error({ issues: result.error.issues }, "Invalid user data");
-    return res.status(400).json({ error: result.error.issues });
-  }
-
-  const { fullName, phone } = result;
+  const { fullName, phone } = req.body;
 
   try {
     const data = await prisma.user.update({
