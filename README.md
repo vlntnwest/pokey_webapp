@@ -103,6 +103,7 @@ Authorization: Bearer <supabase_jwt_token>
 
 See the [docs/](docs/) folder for detailed API documentation:
 
+- **[API Reference (complete)](docs/api.md)** — All endpoints, request/response formats, error codes
 - [Users](docs/users.md) — `/api/user`
 - [Restaurants](docs/restaurants.md) — `/api/restaurants`
 
