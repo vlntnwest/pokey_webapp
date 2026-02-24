@@ -186,14 +186,180 @@ module.exports.deleteProduct = async (req, res, next) => {
   }
 };
 
-module.exports.createProductOptionGroup = async (req, res, next) => {};
+module.exports.createProductOptionGroup = async (req, res, next) => {
+  const { productId } = req.params;
+  const { name, hasMultiple, isRequired, minQuantity, maxQuantity } = req.body;
 
-module.exports.updateProductOptionGroup = async (req, res, next) => {};
+  try {
+    const data = await prisma.optionGroup.create({
+      data: {
+        productId,
+        name,
+        hasMultiple,
+        isRequired,
+        minQuantity,
+        maxQuantity,
+      },
+    });
+    logger.info({ responseId: data.id }, "Option group created");
+    return res.status(201).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
 
-module.exports.deleteProductOptionGroup = async (req, res, next) => {};
+module.exports.updateProductOptionGroup = async (req, res, next) => {
+  const { optionGroupId } = req.params;
+  const { name, hasMultiple, isRequired, minQuantity, maxQuantity } = req.body;
 
-module.exports.createProductOptionChoice = async (req, res, next) => {};
+  try {
+    const data = await prisma.optionGroup.update({
+      where: {
+        id: optionGroupId,
+      },
+      data: {
+        name,
+        hasMultiple,
+        isRequired,
+        minQuantity,
+        maxQuantity,
+      },
+    });
+    logger.info({ responseId: data.id }, "Option group updated");
+    return res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
 
-module.exports.updateProductOptionChoice = async (req, res, next) => {};
+module.exports.deleteProductOptionGroup = async (req, res, next) => {
+  const { optionGroupId } = req.params;
 
-module.exports.deleteProductOptionChoice = async (req, res, next) => {};
+  try {
+    const data = await prisma.optionGroup.delete({
+      where: {
+        id: optionGroupId,
+      },
+    });
+    logger.info({ responseId: data.id }, "Option group deleted");
+    return res.status(200).json("Option group deleted");
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.createProductOptionChoice = async (req, res, next) => {
+  const { optionGroupId } = req.params;
+  const { name, priceModifier } = req.body;
+
+  try {
+    const data = await prisma.optionChoice.create({
+      data: {
+        optionGroupId,
+        name,
+        priceModifier,
+      },
+    });
+    logger.info({ responseId: data.id }, "Option choice created");
+    return res.status(201).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.updateProductOptionChoice = async (req, res, next) => {
+  const { optionChoiceId } = req.params;
+  const { name, priceModifier } = req.body;
+
+  try {
+    const data = await prisma.optionChoice.update({
+      where: {
+        id: optionChoiceId,
+      },
+      data: {
+        name,
+        priceModifier,
+      },
+    });
+    logger.info({ responseId: data.id }, "Option choice updated");
+    return res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.deleteProductOptionChoice = async (req, res, next) => {
+  const { optionChoiceId } = req.params;
+
+  try {
+    const data = await prisma.optionChoice.delete({
+      where: {
+        id: optionChoiceId,
+      },
+    });
+    logger.info({ responseId: data.id }, "Option choice deleted");
+    return res.status(200).json("Option choice deleted");
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.getMenu = async (req, res, next) => {
+  const { restaurantId } = req.params;
+
+  try {
+    const categories = await prisma.categorie.findMany({
+      where: { restaurantId },
+      orderBy: { displayOrder: "asc" },
+      include: {
+        productCategories: {
+          include: {
+            product: {
+              include: {
+                optionGroups: {
+                  include: {
+                    optionChoices: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    logger.info({ restaurantId }, "Menu retrieved");
+    return res.status(200).json({ data: categories });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.getProduct = async (req, res, next) => {
+  const { productId } = req.params;
+
+  try {
+    const data = await prisma.product.findUnique({
+      where: { id: productId },
+      include: {
+        productCategories: {
+          include: { categorie: true },
+        },
+        optionGroups: {
+          include: {
+            optionChoices: true,
+          },
+        },
+      },
+    });
+
+    if (!data) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    logger.info({ responseId: data.id }, "Product retrieved");
+    return res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
