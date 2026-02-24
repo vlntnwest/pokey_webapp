@@ -18,7 +18,7 @@ const isOwner = (req, res, next) => {
       },
       "User is not owner of restaurant",
     );
-    return res.status(403).json({ error: "Accès refusé" });
+    return res.status(403).json({ error: "Access denied" });
   }
 
   next();
@@ -43,7 +43,7 @@ const isAdmin = (req, res, next) => {
       },
       "User is not admin of restaurant",
     );
-    return res.status(403).json({ error: "Accès refusé" });
+    return res.status(403).json({ error: "Access denied" });
   }
 
   next();
@@ -65,7 +65,7 @@ const isStaff = (req, res, next) => {
       },
       "User is not staff of restaurant",
     );
-    return res.status(403).json({ error: "Accès refusé" });
+    return res.status(403).json({ error: "Access denied" });
   }
 
   next();

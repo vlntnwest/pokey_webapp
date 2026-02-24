@@ -37,7 +37,7 @@ module.exports.updateProductCategorie = async (req, res, next) => {
       },
     });
     logger.info({ responseId: data.id }, "Product categorie updated");
-    return res.status(201).json({ data });
+    return res.status(200).json({ data });
   } catch (error) {
     next(error);
   }
@@ -53,7 +53,7 @@ module.exports.deleteProductCategorie = async (req, res, next) => {
       },
     });
     logger.info({ responseId: data.id }, "Product categorie deleted");
-    return res.status(201).json("Product categorie deleted");
+    return res.status(200).json({ message: "Product categorie deleted" });
   } catch (error) {
     next(error);
   }
@@ -164,7 +164,7 @@ module.exports.updateProduct = async (req, res, next) => {
     });
 
     logger.info({ responseId: data.id }, "Product updated");
-    return res.status(201).json({ data });
+    return res.status(200).json({ data });
   } catch (error) {
     next(error);
   }
@@ -180,7 +180,7 @@ module.exports.deleteProduct = async (req, res, next) => {
       },
     });
     logger.info({ responseId: data.id }, "Product deleted");
-    return res.status(201).json("Product deleted");
+    return res.status(200).json({ message: "Product deleted" });
   } catch (error) {
     next(error);
   }
@@ -242,7 +242,7 @@ module.exports.deleteProductOptionGroup = async (req, res, next) => {
       },
     });
     logger.info({ responseId: data.id }, "Option group deleted");
-    return res.status(200).json("Option group deleted");
+    return res.status(200).json({ message: "Option group deleted" });
   } catch (error) {
     next(error);
   }
@@ -298,7 +298,7 @@ module.exports.deleteProductOptionChoice = async (req, res, next) => {
       },
     });
     logger.info({ responseId: data.id }, "Option choice deleted");
-    return res.status(200).json("Option choice deleted");
+    return res.status(200).json({ message: "Option choice deleted" });
   } catch (error) {
     next(error);
   }

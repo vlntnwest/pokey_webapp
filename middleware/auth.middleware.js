@@ -9,7 +9,7 @@ const checkAuth = async (req, res, next) => {
 
   if (!token) {
     logger.warn("No token provided");
-    return res.status(401).json({ error: "Non authentifié" });
+    return res.status(401).json({ error: "Not authenticated" });
   }
 
   const {
@@ -19,7 +19,7 @@ const checkAuth = async (req, res, next) => {
 
   if (error || !user) {
     logger.warn({ error: error?.message || "No user found" }, "Invalid token");
-    return res.status(401).json({ error: "Token invalide" });
+    return res.status(401).json({ error: "Invalid token" });
   }
 
   try {
@@ -36,7 +36,7 @@ const checkAuth = async (req, res, next) => {
 
   if (!dbUser) {
     logger.warn({ userId: user.id }, "User not found in database");
-    return res.status(401).json({ error: "Utilisateur non trouvé" });
+    return res.status(401).json({ error: "User not found" });
   }
 
   req.user = dbUser;

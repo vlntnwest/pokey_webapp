@@ -29,7 +29,6 @@ const restaurantSchema = z.object({
 });
 
 const categorieSchema = z.object({
-  restaurantId: z.string().uuid(),
   name: z.string().min(1).max(50),
   subHeading: z.string().min(1).max(255).optional(),
   displayOrder: z.number(),
@@ -42,7 +41,6 @@ const updateCategorieSchema = z.object({
 });
 
 const productSchema = z.object({
-  restaurantId: z.string().uuid(),
   name: z.string().min(1).max(50),
   description: z.string().min(1).max(255),
   imageUrl: z.string().url(),

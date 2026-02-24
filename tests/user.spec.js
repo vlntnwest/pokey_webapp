@@ -91,11 +91,11 @@ describe("USER CRUD", () => {
     });
 
     test("should return user object", () => {
-      expect(response.body.user).toBeDefined();
+      expect(response.body.data).toBeDefined();
     });
 
     test("should return the correct email", () => {
-      expect(response.body.user.email).toBe(testEmail);
+      expect(response.body.data.email).toBe(testEmail);
     });
   });
 
@@ -115,11 +115,11 @@ describe("USER CRUD", () => {
     });
 
     test("should return updated fullName", () => {
-      expect(response.body.user.fullName).toBe("Test User");
+      expect(response.body.data.fullName).toBe("Test User");
     });
 
     test("should return updated phone", () => {
-      expect(response.body.user.phone).toBe("06 12 34 56 78");
+      expect(response.body.data.phone).toBe("06 12 34 56 78");
     });
   });
 
@@ -162,7 +162,7 @@ describe("USER CRUD", () => {
     });
 
     test("should return success message", () => {
-      expect(response.body.message).toBe("Utilisateur supprimé");
+      expect(response.body.message).toBe("User deleted successfully");
     });
   });
 
