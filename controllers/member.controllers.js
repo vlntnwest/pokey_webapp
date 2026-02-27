@@ -65,6 +65,60 @@ module.exports.inviteMember = async (req, res, next) => {
   }
 };
 
+module.exports.updateMemberRole = async (req, res, next) => {
+  const { restaurantId, memberId } = req.params;
+  const { role } = req.body;
+
+  try {
+    const member = await prisma.restaurantMember.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member || member.restaurantId !== restaurantId) {
+      return res.status(404).json({ error: "Member not found" });
+    }
+
+    if (member.role === "OWNER") {
+      return res.status(400).json({ error: "Cannot change the role of the owner" });
+    }
+
+    const data = await prisma.restaurantMember.update({
+      where: { id: memberId },
+      data: { role },
+    });
+
+    logger.info({ restaurantId, memberId, role }, "Member role updated");
+    return res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.removeMember = async (req, res, next) => {
+  const { restaurantId, memberId } = req.params;
+
+  try {
+    const member = await prisma.restaurantMember.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member || member.restaurantId !== restaurantId) {
+      return res.status(404).json({ error: "Member not found" });
+    }
+
+    if (member.role === "OWNER") {
+      return res.status(400).json({ error: "Cannot remove the owner" });
+    }
+
+    await prisma.restaurantMember.delete({ where: { id: memberId } });
+
+    logger.info({ restaurantId, memberId }, "Member removed");
+    return res.status(200).json({ message: "Member removed successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports.acceptInvitation = async (req, res, next) => {
   const { token } = req.body;
   const userId = req.user.id;

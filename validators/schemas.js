@@ -121,6 +121,10 @@ const inviteMemberSchema = z.object({
   role: z.enum(["ADMIN", "STAFF"]).default("STAFF"),
 });
 
+const updateMemberRoleSchema = z.object({
+  role: z.enum(["ADMIN", "STAFF"]),
+});
+
 const acceptInvitationSchema = z.object({
   token: z.string().min(1),
 });
@@ -167,6 +171,7 @@ module.exports = {
 
   // Members
   inviteMemberSchema,
+  updateMemberRoleSchema,
   acceptInvitationSchema,
 
   // Opening hours

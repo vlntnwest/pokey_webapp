@@ -6,6 +6,7 @@ const { isAdmin, isOwner } = require("../middleware/role.middleware");
 const { validate } = require("../middleware/validate.middleware");
 const {
   inviteMemberSchema,
+  updateMemberRoleSchema,
   acceptInvitationSchema,
 } = require("../validators/schemas");
 
@@ -22,6 +23,21 @@ router.post(
   isOwner,
   validate({ body: inviteMemberSchema }),
   memberControllers.inviteMember,
+);
+
+router.patch(
+  "/restaurants/:restaurantId/members/:memberId/role",
+  checkAuth,
+  isOwner,
+  validate({ body: updateMemberRoleSchema }),
+  memberControllers.updateMemberRole,
+);
+
+router.delete(
+  "/restaurants/:restaurantId/members/:memberId",
+  checkAuth,
+  isOwner,
+  memberControllers.removeMember,
 );
 
 // Accept an invitation (auth required — user must be logged in)

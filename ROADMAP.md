@@ -122,8 +122,8 @@
 
 - [x] `GET /api/restaurants/:restaurantId/members` — Lister les membres (auth, ADMIN+)
 - [x] `POST /api/restaurants/:restaurantId/members/invite` — Inviter un membre par email (auth, OWNER)
-- [ ] `PATCH /api/restaurants/:restaurantId/members/:memberId/role` — Changer le role (auth, OWNER)
-- [ ] `DELETE /api/restaurants/:restaurantId/members/:memberId` — Retirer un membre (auth, OWNER)
+- [x] `PATCH /api/restaurants/:restaurantId/members/:memberId/role` — Changer le role (auth, OWNER)
+- [x] `DELETE /api/restaurants/:restaurantId/members/:memberId` — Retirer un membre (auth, OWNER)
 - [x] Systeme d'invitation par email (token temporaire + lien d'acceptation)
 
 ### Dashboard / Stats
