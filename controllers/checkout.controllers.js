@@ -209,6 +209,7 @@ module.exports.handleWebhook = async (req, res) => {
             email: email || null,
             totalPrice,
             status: "PENDING",
+            stripePaymentIntentId: session.payment_intent || null,
           },
         });
 
@@ -249,4 +250,46 @@ module.exports.handleWebhook = async (req, res) => {
   }
 
   res.status(200).json({ received: true });
+};
+
+module.exports.refundOrder = async (req, res, next) => {
+  const { restaurantId, orderId } = req.params;
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order || order.restaurantId !== restaurantId) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    if (!order.stripePaymentIntentId) {
+      return res
+        .status(400)
+        .json({ error: "No Stripe payment associated with this order" });
+    }
+
+    if (order.status === "CANCELLED") {
+      return res.status(409).json({ error: "Order is already cancelled" });
+    }
+
+    const refund = await stripe.refunds.create({
+      payment_intent: order.stripePaymentIntentId,
+      reverse_transfer: true,
+    });
+
+    const updated = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "CANCELLED" },
+    });
+
+    logger.info(
+      { orderId, restaurantId, refundId: refund.id },
+      "Order refunded and cancelled",
+    );
+    return res.status(200).json({ data: { order: updated, refund: { id: refund.id, status: refund.status } } });
+  } catch (error) {
+    next(error);
+  }
 };

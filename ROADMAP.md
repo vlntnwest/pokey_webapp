@@ -95,7 +95,7 @@
   - _Configuration_ : Modifier `app.js` pour utiliser `express.raw({ type: 'application/json' })` STRICTEMENT sur cette route afin que Stripe puisse lire le buffer brut.
   - _Sécurité_ : Vérification de la signature du webhook avec `STRIPE_WEBHOOK_SECRET`.
   - _Action_ : Sur l'événement `checkout.session.completed`, créer la commande en base de données avec le statut `COMPLETED` (ou `PENDING` côté cuisine) et lier les produits/options.
-- [ ] Gestion des remboursements (Refunds)
+- [x] Gestion des remboursements (Refunds)
   - _Endpoint ou Webhook_ : Implémenter la logique en cas d'annulation de commande pour rembourser le client (et annuler le reversement au restaurant).
 
 ### Notifications email
