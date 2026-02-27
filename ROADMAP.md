@@ -112,7 +112,7 @@
 
 ### Lecture restaurant
 
-- [ ] `GET /api/restaurants/:restaurantId` — Consulter les infos d'un restaurant (public)
+- [x] `GET /api/restaurants/:restaurantId` — Consulter les infos d'un restaurant (public)
 
 ## Phase 3 — Gestion d'equipe et administration
 

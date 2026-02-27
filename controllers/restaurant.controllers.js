@@ -1,6 +1,25 @@
 const prisma = require("../lib/prisma");
 const logger = require("../logger");
 
+module.exports.getRestaurant = async (req, res, next) => {
+  const { restaurantId } = req.params;
+
+  try {
+    const data = await prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+    });
+
+    if (!data) {
+      return res.status(404).json({ error: "Restaurant not found" });
+    }
+
+    logger.info({ restaurantId }, "Restaurant retrieved");
+    return res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports.createRestaurant = async (req, res, next) => {
   const user = req.user;
   const { name, address, zipCode, city, phone, email, imageUrl } = req.body;
