@@ -1,328 +1,394 @@
-# Cahier des Charges - Pokey Bar
-## Application Web Click & Collect / Commande à table
+# Cahier des Charges - Servr
+## Plateforme de commande en ligne pour restaurants
 
-**Client :** Pokey Bar - 36 rue de la Krutenau, 67000 Strasbourg
+**Premier client :** Pokey Bar - 36 rue de la Krutenau, 67000 Strasbourg
 **Projet :** Servr (pokey_webapp)
-**Version :** 1.0
+**Version :** 2.0 (refonte Supabase/Prisma)
 **Date :** 27/02/2026
+**Branche de référence :** `dev`
 
 ---
 
 ## 1. Présentation du projet
 
 ### 1.1 Contexte
-Le Pokey Bar est un restaurant spécialisé dans les Poké bowls situé à Strasbourg. L'établissement souhaite digitaliser son processus de commande via une application web permettant :
+Servr est une plateforme backend de commande en ligne multi-restaurant. Le premier client est le Pokey Bar, un restaurant de Poké bowls à Strasbourg. La v1 (branche `master`) fonctionnait avec MongoDB/Mongoose/Auth0 pour un seul restaurant. La v2 (branche `dev`) est une refonte complète vers une architecture multi-restaurant avec Supabase/PostgreSQL/Prisma.
+
+L'application permet :
 - La **commande à table** (dine-in) : les clients scannent un QR code et commandent depuis leur smartphone
 - Le **Click & Collect** : les clients commandent en ligne et récupèrent leur commande à un créneau choisi
+- L'**impression automatique** des tickets en cuisine via TCP/IP (à ré-implémenter)
 
 ### 1.2 Objectifs
 - Fluidifier le processus de commande en salle (réduire les files d'attente)
 - Proposer un service Click & Collect pour élargir la clientèle
 - Automatiser l'impression des tickets de commande en cuisine
-- Offrir un back-office d'administration complet pour le staff
+- Offrir un back-office d'administration complet avec gestion d'équipe et de rôles
 - Sécuriser les paiements en ligne
+- Supporter plusieurs restaurants sur la même plateforme
 
 ### 1.3 Cible utilisateurs
 | Profil | Description |
 |--------|-------------|
-| **Client en salle** | Commande depuis son smartphone via QR code à la table |
-| **Client C&C** | Commande en ligne depuis chez lui, récupère en boutique |
-| **Admin / Staff** | Gère les commandes, le menu, les tables depuis le dashboard |
+| **Client final** | Commande depuis son smartphone (à table via QR code ou depuis chez lui en C&C) |
+| **Owner** | Propriétaire du restaurant, accès complet (gestion équipe, menu, commandes) |
+| **Admin** | Gestionnaire, peut modifier le menu et gérer les commandes |
+| **Staff** | Membre d'équipe, accès limité à la gestion des commandes |
+
+### 1.4 Historique des versions
+
+| Version | Branche | Stack | Statut |
+|---------|---------|-------|--------|
+| **v1** | `master` | MongoDB + Mongoose + Auth0 + Handlebars | Ancienne - en production |
+| **v2** | `dev` | PostgreSQL + Prisma + Supabase Auth + Zod | Active - en développement |
 
 ---
 
 ## 2. Architecture technique
 
-### 2.1 Stack technologique
+### 2.1 Stack technologique (v2 - branche `dev`)
 
 | Couche | Technologie | Version |
 |--------|-------------|---------|
-| **Backend** | Node.js + Express.js | Node 18-20 / Express 4.21 |
-| **Base de données** | MongoDB Atlas (Mongoose) | Mongoose 8.6 |
-| **Authentification** | Auth0 (OAuth2 JWT Bearer) | express-oauth2-jwt-bearer 1.6 |
-| **Paiement** | Stripe (Checkout Sessions + Webhooks) | stripe 17.4 |
-| **Impression** | ESC/POS via TCP/IP (Socket raw) | esc-pos-encoder 2.1 |
-| **Email** | Nodemailer (SMTP Gmail) | nodemailer 6.10 |
-| **Templates** | Handlebars | handlebars 4.7 |
-| **Frontend** | React + Material-UI | *(repo séparé)* |
-| **Hébergement** | Hostinger (Node.js) | - |
+| **Runtime** | Node.js (CommonJS) | v20+ (jusqu'à v24) |
+| **Framework** | Express.js | v4.21 |
+| **Base de données** | PostgreSQL (hébergé Supabase) | via Prisma adapter-pg |
+| **ORM** | Prisma | v7.3 |
+| **Authentification** | Supabase Auth (JWT) | @supabase/supabase-js 2.91 |
+| **Validation** | Zod | v3.24 |
+| **Sécurité HTTP** | Helmet | v8.1 |
+| **Rate Limiting** | express-rate-limit | v7.5 |
+| **Logging** | Pino + pino-pretty (dev) | v10.3 |
+| **Paiement** | Stripe | v17.5 (pas encore ré-implémenté) |
+| **Email** | Nodemailer | v7.0 (pas encore ré-implémenté) |
+| **Impression** | ESC/POS via TCP/IP | (pas encore ré-implémenté) |
+| **Tests** | Vitest + Supertest | vitest 4.0 / supertest 7.2 |
+| **Frontend** | React (repo séparé) | *(non inclus)* |
 
 ### 2.2 Architecture applicative
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Client React  │────▶│  API Express.js  │────▶│  MongoDB Atlas  │
-│   (Mobile-First)│◀────│   (REST API)     │◀────│   (Cloud DB)    │
-└─────────────────┘     └──────┬───┬───┬───┘     └─────────────────┘
-                               │   │   │
-                    ┌──────────┘   │   └──────────┐
-                    ▼              ▼               ▼
-              ┌──────────┐  ┌──────────┐    ┌──────────┐
-              │  Stripe  │  │ Imprimante│    │ Nodemailer│
-              │ Checkout │  │  Thermique│    │  (Gmail)  │
-              │ + Webhook│  │  TCP/IP   │    │           │
-              └──────────┘  └──────────┘    └──────────┘
+┌─────────────────┐     ┌──────────────────────────────────────────┐     ┌─────────────────────┐
+│   Client React  │────▶│  API Express.js                          │────▶│  PostgreSQL          │
+│   (Mobile-First)│◀────│                                          │◀────│  (Supabase Cloud)    │
+└─────────────────┘     │  Helmet → CORS → Rate Limit → Auth      │     └─────────────────────┘
+                        │  → Role Check → Zod Validate → Controller│
+                        │  → Error Handler                         │     ┌─────────────────────┐
+                        └──────────┬───────────┬───────────┬───────┘     │  Supabase Auth       │
+                                   │           │           │        ◀────│  (JWT + User mgmt)   │
+                        ┌──────────┘     ┌─────┘     ┌─────┘             └─────────────────────┘
+                        ▼                ▼           ▼
+                  ┌──────────┐    ┌──────────┐  ┌──────────┐
+                  │  Stripe  │    │ Imprimante│  │ Nodemailer│
+                  │ Checkout │    │  Thermique│  │  (Gmail)  │
+                  │ + Webhook│    │  TCP/IP   │  │           │
+                  │ (à faire)│    │ (à faire) │  │ (à faire) │
+                  └──────────┘    └──────────┘  └──────────┘
 ```
 
-### 2.3 Infrastructure réseau (impression)
+### 2.3 Flux d'une requête
 
-| Paramètre | Valeur |
-|-----------|--------|
-| Imprimante | Epson TM-T30 |
-| Protocole | TCP/IP (socket raw ESC/POS) |
-| Port | 9100 (standard) |
-| Réseau | LAN local du restaurant |
-| Encodage | CP850 (caractères français) |
+```
+Client → Express → Rate Limiter → CORS → checkAuth (JWT Supabase)
+       → isOwner/isAdmin/isStaff (rôle) → validate (Zod)
+       → Controller → Prisma → PostgreSQL
+                                    ↓ (si erreur)
+                              errorHandler (Zod/Prisma/générique)
+```
+
+### 2.4 Structure du projet (v2)
+
+```
+pokey_webapp/
+├── index.js                 # Point d'entrée — démarrage serveur
+├── app.js                   # Config Express (CORS, rate limiting, routes, error handler)
+├── logger.js                # Configuration Pino
+├── prisma.config.ts         # Configuration Prisma (datasource, migrations)
+├── vitest.config.js         # Configuration Vitest
+├── controllers/
+│   ├── user.controllers.js       # CRUD utilisateur (/api/user)
+│   ├── restaurant.controllers.js # CRUD restaurant (/api/restaurants)
+│   └── menu.controllers.js       # CRUD menu complet (/api/menu)
+├── routes/
+│   ├── user.routes.js            # Routes user (GET/PUT/DELETE /me)
+│   ├── restaurant.routes.js      # Routes restaurant (POST/PUT/DELETE)
+│   └── menu.routes.js            # Routes menu (catégories, produits, options)
+├── middleware/
+│   ├── auth.middleware.js        # checkAuth — vérifie JWT Supabase + charge user
+│   ├── role.middleware.js        # isOwner / isAdmin / isStaff — permissions
+│   ├── validate.middleware.js    # validate({ body, params, query }) — Zod
+│   └── error.middleware.js       # Error handler centralisé
+├── lib/
+│   ├── prisma.js                 # Instance PrismaClient (singleton)
+│   └── supabase.js               # Client Supabase admin (service_role_key)
+├── validators/
+│   └── schemas.js                # Tous les schémas Zod
+├── prisma/
+│   └── schema.prisma             # Schéma BDD (12 modèles)
+├── tests/
+│   ├── user.spec.js              # Tests intégration user
+│   └── restaurant.spec.js        # Tests intégration restaurant
+├── Template/
+│   └── emailTemplate.html        # Template email confirmation (hérité v1)
+└── docs/
+    ├── api.md                    # Documentation API complète
+    ├── users.md                  # Doc API users
+    └── restaurants.md            # Doc API restaurants
+```
 
 ---
 
-## 3. Modèle de données
+## 3. Modèle de données (Prisma Schema - 12 modèles)
 
-### 3.1 Schéma des entités
+### 3.1 Diagramme relationnel
+
+```
+User ──────────────── RestaurantMember ──────────────── Restaurant
+                      (role: OWNER/ADMIN/STAFF)            │
+                                                           ├── OpeningHour
+                                                           ├── Order ──── OrderProduct ──── OrderProductOption
+                                                           │                    │                   │
+                                                           ├── Product ─────────┘                   │
+                                                           │     │                                  │
+                                                           │     ├── ProductCategorie ── Categorie  │
+                                                           │     └── OptionGroup ── OptionChoice ───┘
+                                                           │
+```
+
+### 3.2 Détail des entités
+
+#### User
+| Champ | Type | Contrainte | Description |
+|-------|------|------------|-------------|
+| `id` | UUID | PK, auto (gen_random_uuid) | Lié à auth.users Supabase |
+| `email` | String | Unique | Email de l'utilisateur |
+| `fullName` | VARCHAR(50) | Optionnel | Nom complet |
+| `phone` | String | Optionnel | Téléphone |
+| `createdAt` | Timestamptz | Auto (UTC) | Date de création |
+| `updatedAt` | Timestamp | Auto | Date de mise à jour |
+
+#### Restaurant
+| Champ | Type | Contrainte | Description |
+|-------|------|------------|-------------|
+| `id` | UUID | PK | Identifiant unique |
+| `name` | VARCHAR(255) | Requis | Nom du restaurant |
+| `address` | Text | Requis | Adresse |
+| `zipCode` | VARCHAR(5) | Requis, regex `^[0-9]{5}$` | Code postal |
+| `city` | VARCHAR(50) | Requis | Ville |
+| `phone` | String | Optionnel | Téléphone |
+| `email` | String | Optionnel | Email contact |
+| `imageUrl` | String | Optionnel | URL logo/image |
+
+#### RestaurantMember (table pivot User ↔ Restaurant)
+| Champ | Type | Contrainte | Description |
+|-------|------|------------|-------------|
+| `id` | UUID | PK | Identifiant |
+| `restaurantId` | UUID | FK → Restaurant | Restaurant lié |
+| `userId` | UUID | FK → User | Utilisateur lié |
+| `role` | Enum: `OWNER`, `ADMIN`, `STAFF` | Requis | Rôle dans le restaurant |
+
+**Contrainte unique :** `(restaurantId, userId)` — un user ne peut avoir qu'un rôle par restaurant.
+
+#### OpeningHour
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Identifiant |
+| `restaurantId` | UUID (FK) | Restaurant |
+| `dayOfWeek` | Int | Jour (0=lundi, 6=dimanche) |
+| `openTime` | String | Heure d'ouverture |
+| `closeTime` | String | Heure de fermeture |
+| `order` | Int | Ordre d'affichage |
+
+#### Categorie (catégorie de menu)
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Identifiant |
+| `restaurantId` | UUID (FK) | Restaurant propriétaire |
+| `name` | VARCHAR(255) | Nom de la catégorie (ex: "Bowls", "Sides", "Drinks") |
+| `subHeading` | Text | Sous-titre optionnel |
+| `displayOrder` | Int | Ordre d'affichage dans le menu |
+
+#### Product (article du menu)
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Identifiant |
+| `restaurantId` | UUID (FK) | Restaurant propriétaire |
+| `name` | VARCHAR(50) | Nom du produit |
+| `description` | VARCHAR(255) | Description |
+| `imageUrl` | String | URL image |
+| `price` | Decimal(10,2) | Prix en EUR |
+| `tags` | String[] | Tags (ex: "vegan", "populaire") |
+| `discount` | Decimal(10,2) | Réduction (défaut: 0) |
+| `isAvailable` | Boolean | Disponible à la commande (défaut: true) |
+| `displayOrder` | Int | Ordre d'affichage |
+
+#### ProductCategorie (pivot Product ↔ Categorie)
+| Champ | Type | Description |
+|-------|------|-------------|
+| `productId` | UUID (FK) | Produit |
+| `categorieId` | UUID (FK) | Catégorie |
+
+**Contrainte unique :** `(productId, categorieId)`
+
+#### OptionGroup (groupe d'options pour un produit)
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Identifiant |
+| `productId` | UUID (FK) | Produit parent |
+| `name` | VARCHAR(255) | Nom du groupe (ex: "Choix de base", "Protéines") |
+| `hasMultiple` | Boolean | Sélection multiple autorisée (défaut: false) |
+| `isRequired` | Boolean | Choix obligatoire (défaut: true) |
+| `minQuantity` | Int | Quantité minimum à sélectionner |
+| `maxQuantity` | Int | Quantité maximum |
+
+#### OptionChoice (choix dans un groupe d'options)
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Identifiant |
+| `optionGroupId` | UUID (FK) | Groupe parent |
+| `name` | VARCHAR(255) | Nom du choix (ex: "Riz", "Saumon", "Avocat") |
+| `priceModifier` | Decimal(10,2) | Supplément de prix (défaut: 0) |
 
 #### Order (Commande)
-| Champ | Type | Requis | Description |
-|-------|------|--------|-------------|
-| `orderNumber` | Number (auto-incrémenté) | Auto | Numéro de commande séquentiel |
-| `userId` | String | Non | Identifiant utilisateur Auth0 |
-| `orderType` | Enum: `dine-in`, `clickandcollect` | Oui | Type de commande |
-| `tableNumber` | Number | Si dine-in | Numéro de table |
-| `items` | Array[Item] | Oui | Articles commandés |
-| `orderDate` | Object {date, time} | Si C&C | Date/heure de retrait |
-| `specialInstructions` | String | Non | Commentaires client |
-| `totalPrice` | Number | Oui | Prix total (en centimes) |
-| `clientData` | Object {name, email, phone} | Non | Coordonnées client |
-| `isArchived` | Boolean | Non | Commande archivée |
-| `isSuccess` | Boolean | Non | Paiement confirmé |
-| `paymentId` | String | Non | ID session Stripe |
-| `createdAt` / `updatedAt` | Date | Auto | Timestamps |
-
-#### Item (sous-document de Order)
 | Champ | Type | Description |
 |-------|------|-------------|
-| `type` | Enum: `bowl`, `side`, `drink`, `dessert`, `custom` | Catégorie |
-| `name` | String | Nom de l'article |
-| `base` | String | Base (riz, quinoa) - bowls/custom |
-| `proteins` | [String] | Protéines choisies |
-| `extraProtein` | [String] | Protéines supplémentaires |
-| `extraProteinPrice` | Number | Supplément protéine |
-| `garnishes` | [String] | Garnitures - custom |
-| `toppings` | [String] | Toppings - custom |
-| `sauces` | [String] | Sauces |
-| `quantity` | Number | Quantité |
-| `price` | Number | Prix unitaire |
+| `id` | UUID | Identifiant |
+| `restaurantId` | UUID (FK) | Restaurant |
+| `userId` | UUID (FK, optionnel) | Client (si connecté) |
+| `fullName` | VARCHAR(50) | Nom du client |
+| `phone` | VARCHAR(50) | Téléphone |
+| `email` | VARCHAR(50) | Email |
+| `status` | Enum: `PENDING`, `IN_PROGRESS`, `COMPLETED`, `DELIVERED`, `CANCELLED` | Statut |
+| `totalPrice` | Decimal(10,2) | Prix total |
 
-#### MenuItem (Carte du restaurant)
+#### OrderProduct (articles d'une commande)
 | Champ | Type | Description |
 |-------|------|-------------|
-| `name` | String | Nom du plat |
-| `type` | Enum: `bowl`, `side`, `drink`, `dessert`, `custom` | Catégorie |
-| `description` | String | Description |
-| `price` | String | Prix |
-| `bowlDetails` | BowlSchema | Détails bowl (protéines, garnitures, toppings) |
-| `drinkInfo` | Object {variant, size} | Info boisson |
-| `available` | Boolean | Disponibilité |
-| `hasSauce` | Boolean | Sauce incluse |
-| `picture` | String | URL image |
-| `isPopular` | Boolean | Mise en avant |
+| `id` | UUID | Identifiant |
+| `orderId` | UUID (FK) | Commande parent |
+| `productId` | UUID (FK) | Produit commandé |
+| `quantity` | Int | Quantité |
 
-#### User (Utilisateur client)
+#### OrderProductOption (options choisies par article commandé)
 | Champ | Type | Description |
 |-------|------|-------------|
-| `firstName` | String | Prénom |
-| `lastName` | String | Nom |
-| `phone` | String | Téléphone |
-| `email` | String (unique) | Email |
-| `shouldGiveInformation` | Boolean | Consent marketing |
+| `id` | UUID | Identifiant |
+| `orderProductId` | UUID (FK) | Article de commande parent |
+| `optionChoiceId` | UUID (FK) | Choix d'option sélectionné |
 
-#### Table
-| Champ | Type | Description |
-|-------|------|-------------|
-| `tableNumber` | Number (unique) | Numéro de table |
-| `isOpen` | Boolean | Table ouverte aux commandes |
+### 3.3 Enums
 
-#### Food (Aliment)
-| Champ | Type | Description |
-|-------|------|-------------|
-| `name` | String | Nom de l'aliment |
-| `allergens` | Array[{allergen, allergen_id, level}] | Allergènes (non/trace/oui) |
+| Enum | Valeurs | Description |
+|------|---------|-------------|
+| `RestaurantRole` | `OWNER`, `ADMIN`, `STAFF` | Hiérarchie des rôles |
+| `OrderStatus` | `PENDING` → `IN_PROGRESS` → `COMPLETED` → `DELIVERED` \| `CANCELLED` | Cycle de vie de la commande |
 
-#### Allergen
-| Champ | Type | Description |
-|-------|------|-------------|
-| `name` | String | Nom de l'allergène |
-
-#### MenuType (Catégorie de menu)
-| Champ | Type | Description |
-|-------|------|-------------|
-| `type` | Enum | Type de catégorie |
-| `title` | String | Titre affiché |
-| `description` | String | Description de la catégorie |
-
-#### CustomDetails (Options de personnalisation)
-| Champ | Type | Description |
-|-------|------|-------------|
-| `category` | String | Catégorie (base, protein, etc.) |
-| `name` | String | Nom de l'option |
-| `price` | String | Prix supplément |
-| `hasSauce` | Boolean | Sauce associée |
+### 3.4 Règles de cascade
+- Supprimer un **Restaurant** supprime tous ses membres, catégories, produits, commandes, horaires
+- Supprimer un **Product** supprime ses catégories liées, groupes d'options, articles de commande
+- Supprimer un **Order** supprime ses articles et options associées
+- Supprimer un **OptionGroup** supprime ses choix
+- Tous les IDs sont des UUID v4 générés par PostgreSQL (`gen_random_uuid()`)
 
 ---
 
 ## 4. Fonctionnalités détaillées
 
-### 4.1 Module Client - Commande à table (Dine-in)
+### 4.1 Module Authentification & Utilisateurs
 
-**Parcours utilisateur :**
-1. Le client scanne un QR code spécifique à sa table
-2. L'application charge le menu avec le numéro de table pré-rempli
-3. Le client parcourt le menu (bowls, sides, drinks, desserts)
-4. Il peut personnaliser un bowl custom (base, protéines, garnitures, toppings, sauces)
-5. Il ajoute des articles au panier commun de la table
-6. Il procède au paiement via Stripe Checkout
-7. La commande est imprimée automatiquement en cuisine
-8. Le client reçoit un numéro de commande
+**Technologie :** Supabase Auth (côté client) + vérification JWT (côté serveur)
 
-**Règles métier :**
-- Le numéro de table est obligatoire pour les commandes dine-in
-- Plusieurs clients à la même table partagent un panier commun
-- Le paiement minimum est de 0.50 EUR
-- Pas d'email de confirmation pour le dine-in (commande servie sur place)
+**Flux :**
+1. Le client s'authentifie via Supabase Auth SDK (login email/password, social login)
+2. Il envoie le JWT dans le header `Authorization: Bearer <token>`
+3. Le middleware `checkAuth` vérifie le token via `supabase.auth.getUser(token)`
+4. Il charge le user depuis la table `users` avec ses `restaurantMembers`
+5. `req.user` est disponible dans les controllers suivants
 
-### 4.2 Module Client - Click & Collect
+**Routes :**
+| Méthode | Endpoint | Auth | Description |
+|---------|----------|------|-------------|
+| `GET` | `/api/user/me` | Oui | Récupérer son profil |
+| `PUT` | `/api/user/me` | Oui | Modifier son profil (fullName, phone) |
+| `DELETE` | `/api/user/me` | Oui | Supprimer son compte (Supabase Auth + DB) |
 
-**Parcours utilisateur :**
-1. Le client accède à l'application web
-2. Il parcourt le menu et compose sa commande
-3. Il renseigne ses coordonnées (nom, email, téléphone)
-4. Il sélectionne une date et un créneau horaire de retrait
-5. Il procède au paiement via Stripe Checkout
-6. La commande est créée après confirmation du webhook Stripe
-7. Un ticket est imprimé en cuisine
-8. Un email de confirmation est envoyé au client (template HTML Handlebars)
-9. Le client consulte sa commande via un lien de confirmation `/confirmation/:id`
+### 4.2 Module Restaurant
 
-**Règles métier :**
-- La date et l'heure de retrait sont obligatoires
-- Les coordonnées client (nom, email) sont obligatoires
-- L'email contient : numéro de commande, nom du client, date/heure de retrait, total, lien vers la commande
-- Le format horaire est Europe/Paris
+**Routes :**
+| Méthode | Endpoint | Auth | Rôle | Description |
+|---------|----------|------|------|-------------|
+| `POST` | `/api/restaurants` | Oui | - | Créer un restaurant (devenir OWNER) |
+| `PUT` | `/api/restaurants/:restaurantId` | Oui | ADMIN+ | Modifier les infos |
+| `DELETE` | `/api/restaurants/:restaurantId` | Oui | OWNER | Supprimer le restaurant |
 
-### 4.3 Module Administration
+**Règle :** A la création, l'utilisateur authentifié est automatiquement ajouté comme `OWNER` via une transaction Prisma.
 
-**Fonctionnalités :**
+### 4.3 Module Menu (catégories, produits, options)
 
-| Fonction | Description | Route API |
-|----------|-------------|-----------|
-| **Gestion des commandes** | Voir toutes les commandes | `GET /api/private/orders` |
-| | Voir une commande | `GET /api/private/orders/:id` |
-| | Historique par utilisateur | `GET /api/private/orders/history/:userId` |
-| | Commandes par table | `GET /api/private/orders/tables/:tableNumber` |
-| | Archiver/désarchiver | `PUT /api/order/:id/toggle` |
-| | Supprimer une commande | `DELETE /api/order/:id` |
-| | Réimprimer un ticket | `POST /api/order/print-order` |
-| **Gestion du menu** | Lister les articles | `GET /api/item` |
-| | Créer un article | `POST /api/item` |
-| | Modifier un article | `PUT /api/item/:id` |
-| | Supprimer un article | `DELETE /api/item/:id` |
-| | Gérer les catégories | `GET/POST /api/item/details` |
-| | Gérer les options custom | `GET/POST /api/item/custom` |
-| **Gestion des tables** | Lister les tables | `GET /api/table` |
-| | Créer une table | `POST /api/table` |
-| | Ouvrir/fermer une table | `PUT /api/table/:id/toggle` |
-| **Gestion des allergènes** | Lister les aliments | `GET /api/food` |
-| | Créer un aliment | `POST /api/food` |
-| | Modifier niveaux allergènes | `PUT /api/food/:id` |
-| | Supprimer des aliments | `DELETE /api/food` |
-| | Gérer les allergènes | `GET/POST/DELETE /api/allergen` |
-| **Gestion utilisateurs** | Lister | `GET /api/users` |
-| | Info par email | `GET /api/users/:email` |
-| | Créer | `POST /api/users` |
-| | Modifier | `PUT /api/users/:id` |
-| | Supprimer (Auth0 + DB) | `DELETE /api/users/:id/:auth0Id` |
+**Routes publiques (sans auth) :**
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/menu/restaurants/:restaurantId/menu` | Menu complet (catégories → produits → options) |
+| `GET` | `/api/menu/restaurants/:restaurantId/products/:productId` | Détail d'un produit |
 
-**Sécurité admin :**
-- Toutes les routes `/api/users` et `/api/private/orders` sont protégées par JWT Auth0
-- Le middleware `checkJwt` valide le token contre le domaine et l'audience Auth0
+**Routes protégées (auth + ADMIN+) :**
 
-### 4.4 Module Impression thermique (TCP/IP)
+*Catégories :*
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `POST` | `/api/menu/restaurants/:restaurantId/categories` | Créer une catégorie |
+| `PUT` | `/api/menu/restaurants/:restaurantId/categories/:categorieId` | Modifier |
+| `DELETE` | `/api/menu/restaurants/:restaurantId/categories/:categorieId` | Supprimer |
 
-**Fonctionnement :**
-1. A la création d'une commande (post-paiement), le serveur ouvre un socket TCP vers l'imprimante
-2. Les données sont encodées en ESC/POS via `esc-pos-encoder`
-3. Le buffer est envoyé via la connexion TCP/IP
-4. Le socket est fermé après confirmation d'envoi
+*Produits :*
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `POST` | `/api/menu/restaurants/:restaurantId/products` | Créer un produit (+ lien catégorie en transaction) |
+| `PUT` | `/api/menu/restaurants/:restaurantId/products/:productId` | Modifier |
+| `DELETE` | `/api/menu/restaurants/:restaurantId/products/:productId` | Supprimer |
 
-**Format du ticket :**
+*Groupes d'options :*
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `POST` | `/api/menu/.../products/:productId/option-groups` | Créer un groupe d'options |
+| `PUT` | `/api/menu/.../option-groups/:optionGroupId` | Modifier |
+| `DELETE` | `/api/menu/.../option-groups/:optionGroupId` | Supprimer |
+
+*Choix d'options :*
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `POST` | `/api/menu/.../option-groups/:optionGroupId/option-choices` | Créer un choix |
+| `PUT` | `/api/menu/.../option-choices/:optionChoiceId` | Modifier |
+| `DELETE` | `/api/menu/.../option-choices/:optionChoiceId` | Supprimer |
+
+### 4.4 Module Commandes (À IMPLÉMENTER)
+
+**Statut :** Non encore implémenté sur la branche `dev`. Schéma Prisma prêt.
+
+**Routes prévues :**
+| Méthode | Endpoint | Auth | Rôle | Description |
+|---------|----------|------|------|-------------|
+| `POST` | `/api/restaurants/:restaurantId/orders` | Non | - | Créer une commande (client) |
+| `GET` | `/api/restaurants/:restaurantId/orders` | Oui | STAFF+ | Lister les commandes |
+| `GET` | `/api/restaurants/:restaurantId/orders/:orderId` | Oui | STAFF+ | Détail commande |
+| `PATCH` | `/api/restaurants/:restaurantId/orders/:orderId/status` | Oui | STAFF+ | Changer le statut |
+
+**Cycle de vie de la commande :**
 ```
-Pokey Bar
-[Click and Collect / Table: X]
-[Numéro de commande / Heure]
-[Payé] (si C&C)
-------------------------------
-[Article] x[Qté]
-  Base: [...]
-  Proteins: [...]
-  Extra proteins: [...]
-  Garnishes: [...]
-  Toppings: [...]
-  Sauces: [...]
-
-------------------------------
-Comments
-[Instructions spéciales]
-------------------------------
-[Nom client]
-[Téléphone client]
-------------------------------
-[cut]
+PENDING → IN_PROGRESS → COMPLETED → DELIVERED
+                                  ↘ CANCELLED
 ```
 
-### 4.5 Module Email transactionnel
+### 4.5 Module Paiement Stripe (À IMPLÉMENTER)
 
-**Déclenchement :** Uniquement pour les commandes Click & Collect
-**Service :** Nodemailer via SMTP Gmail (port 465, TLS)
-**Template :** HTML Handlebars responsive (mobile-first)
-**Contenu :**
-- Logo Pokey Bar
-- Numéro de commande
-- Nom du client
-- Date et heure de retrait
-- Montant total
-- Bouton "Voir la commande" (lien vers `/confirmation/:id`)
-- Pied de page avec adresse et téléphone du restaurant
+**Statut :** Stripe est en dépendance (`stripe@17.5`) mais pas encore ré-implémenté. Le placeholder webhook est déclaré dans `app.js` (raw body parsing) mais sans handler.
 
----
-
-## 5. Sécurité
-
-### 5.1 Authentification & Autorisation
-
-| Mécanisme | Technologie | Périmètre |
-|-----------|-------------|-----------|
-| **Auth0 OAuth2** | express-oauth2-jwt-bearer | Routes admin (`/api/users`, `/api/private/orders`) |
-| **JWT Validation** | Auth0 JWKS | Vérification audience + issuer |
-| **Suppression utilisateur** | Auth0 Management API | Suppression synchronisée Auth0 + MongoDB |
-
-### 5.2 Sécurité des paiements (CRITIQUE)
-
-| Mesure | Implémentation | Statut |
-|--------|---------------|--------|
-| **Stripe Checkout Sessions** | Paiement délégué à Stripe (PCI DSS compliant) | Actif |
-| **Webhook signature** | `stripe.webhooks.constructEvent()` vérifie la signature HMAC | Actif |
-| **Montant minimum** | Validation `totalPrice >= 0.50 EUR` côté serveur | Actif |
-| **Création post-paiement** | La commande n'est créée qu'après réception du webhook `checkout.session.completed` | Actif |
-| **CORS exclusion webhook** | Le endpoint webhook bypass CORS (Stripe ne peut pas envoyer les headers CORS) | Actif |
-| **Raw body pour webhook** | `express.raw()` appliqué avant `express.json()` pour la vérification de signature | Actif |
-| **Mode UI custom** | `ui_mode: "custom"` pour intégration embarquée du checkout | Actif |
-| **Méthodes de paiement** | Limité à `card` uniquement | Actif |
-
-**Flux de paiement sécurisé :**
+**Flux de paiement prévu :**
 ```
 Client              Frontend            Backend             Stripe
   │                    │                   │                   │
   ├──[Commande]───────▶│                   │                   │
-  │                    ├──[POST /create-checkout-session]─────▶│
+  │                    ├──[POST /checkout/create-session]─────▶│
   │                    │                   ├──[Session Stripe]─▶│
   │                    │◀──[client_secret]──┤                   │
   │◀──[Formulaire CB]──┤                   │                   │
@@ -335,125 +401,179 @@ Client              Frontend            Backend             Stripe
   │                    │◀──[Confirmation]───┤                   │
 ```
 
-### 5.3 Sécurité réseau & API
+**Routes prévues :**
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `POST` | `/api/checkout/create-session` | Créer une session Stripe Checkout |
+| `POST` | `/api/checkout/webhook` | Webhook Stripe (signature vérifiée) |
 
-| Mesure | Détail |
+### 4.6 Module Email (À IMPLÉMENTER)
+
+**Statut :** Nodemailer en dépendance, template HTML hérité de la v1 présent dans `Template/emailTemplate.html`.
+- Envoi d'email de confirmation uniquement pour le Click & Collect
+- Template responsive avec logo, numéro de commande, créneau de retrait, total, lien de suivi
+
+### 4.7 Module Impression thermique TCP/IP (À IMPLÉMENTER)
+
+**Statut :** Retiré lors de la migration v2. À ré-implémenter.
+- Imprimante : Epson TM-T30
+- Protocole : TCP/IP socket raw, port 9100, encodage ESC/POS (CP850)
+- Déclenchement : automatique à la création de commande (post-paiement)
+
+### 4.8 Module Horaires d'ouverture (À IMPLÉMENTER)
+
+**Statut :** Schéma Prisma prêt (`OpeningHour`), pas encore de routes/controllers.
+- CRUD des horaires par jour de la semaine
+- Vérification "restaurant ouvert" avant acceptation de commande
+
+---
+
+## 5. Sécurité
+
+### 5.1 Authentification & Autorisation
+
+| Mécanisme | Technologie | Détail |
+|-----------|-------------|--------|
+| **Supabase Auth** | JWT | Le client s'authentifie via Supabase SDK, le backend vérifie via `supabase.auth.getUser(token)` |
+| **Service Role Key** | Supabase Admin | Le backend utilise `service_role_key` pour bypass RLS et opérations admin |
+| **Rôles par restaurant** | RestaurantMember | Hiérarchie OWNER > ADMIN > STAFF, vérifiée par middleware |
+| **Middleware chaîné** | checkAuth → isRole | Auth d'abord, puis vérification du rôle pour le restaurant ciblé |
+
+### 5.2 Sécurité réseau & API
+
+| Mesure | Détail | Statut |
+|--------|--------|--------|
+| **Helmet** | Headers de sécurité HTTP (X-Content-Type-Options, HSTS, etc.) | Actif |
+| **Rate Limiting global** | 100 requêtes / 15 min par IP | Actif |
+| **Rate Limiting auth** | 15 requêtes / 15 min (routes user) | Actif |
+| **Rate Limiting paiement** | 10 requêtes / 15 min (skip webhook) | Actif |
+| **CORS** | Origin restreint à `CLIENT_URL`, credentials activés | Actif |
+| **Body size limit** | 10 MB max | Actif |
+| **Validation Zod** | Validation/sanitization de tous les inputs via middleware | Actif |
+| **Error handler centralisé** | Gestion ZodError, Prisma P2025/P2002, erreurs génériques | Actif |
+| **Logging structuré** | Pino avec contexte (userId, restaurantId) | Actif |
+| **UUIDs** | Identifiants non prédictibles (pas d'auto-increment) | Actif |
+
+### 5.3 Sécurité des paiements (À COMPLÉTER)
+
+| Mesure | Statut |
 |--------|--------|
-| **CORS** | Origin restreint à `CLIENT_URL`, credentials activés |
-| **Headers autorisés** | Limités à `sessionId`, `Content-Type`, `Authorization` |
-| **Méthodes HTTP** | Limitées à `GET, HEAD, PUT, PATCH, POST, DELETE` |
-| **Variables d'environnement** | Secrets stockés dans `.env` (exclu du git) |
-| **Validation MongoDB ID** | Vérification `ObjectID.isValid()` sur tous les paramètres ID |
-| **Body size limit** | Limité à 10 MB |
-| **Validation email** | Via `validator` (isEmail) |
+| Stripe Checkout Sessions (PCI DSS compliant) | À implémenter |
+| Vérification signature webhook HMAC | À implémenter |
+| Création commande uniquement post-webhook | À implémenter |
+| Raw body parsing pour webhook (déjà dans `app.js`) | Préparé |
+| Montant minimum 0.50 EUR côté serveur | À implémenter |
+| Vérification prix serveur vs items | À implémenter |
+| Idempotence webhook (éviter double création) | À implémenter |
+| Logging webhook pour audit | À implémenter |
 
-### 5.4 Vulnérabilités identifiées et recommandations
+**Recommandations sécurité paiement :**
+1. Ne jamais faire confiance au prix envoyé par le client — recalculer côté serveur à partir des produits en base
+2. Stocker le `paymentIntentId` dans la commande pour traçabilité
+3. Implémenter un mécanisme d'idempotence (vérifier si la commande existe déjà avant création sur webhook replay)
+4. Logger tous les événements webhook dans une table d'audit
+5. Gérer les remboursements (webhook `charge.refunded`)
+6. Utiliser une version stable de l'API Stripe (pas de beta)
 
-| Risque | Niveau | Description | Recommandation |
-|--------|--------|-------------|----------------|
-| **Routes publiques sensibles** | ÉLEVÉ | `POST /api/order`, `DELETE /api/order/:id`, `PUT /api/order/:id/toggle` sont publiques | Protéger ces routes par auth ou rate limiting |
-| **Routes menu non protégées** | MOYEN | CRUD menu (`POST/PUT/DELETE /api/item`) accessible sans auth | Ajouter `checkJwt` sur les routes d'écriture |
-| **Routes table non protégées** | MOYEN | `POST /api/table`, `PUT /api/table/:id/toggle` publiques | Protéger par auth admin |
-| **Routes food/allergen non protégées** | MOYEN | CRUD complet public | Protéger par auth admin |
-| **Pas de rate limiting** | MOYEN | Aucune protection contre le brute force ou le spam | Ajouter `express-rate-limit` |
-| **Pas de validation d'input** | MOYEN | Pas de sanitization des données entrantes (XSS, injection) | Ajouter `express-validator` ou `joi` |
-| **Credentials DB dans le code** | ÉLEVÉ | Le host MongoDB est en dur dans `config/db.js` | Déplacer l'URL complète dans `.env` |
-| **Pas de HTTPS forcé** | MOYEN | Pas de redirection HTTP→HTTPS | Ajouter un middleware ou configurer au niveau hébergeur |
-| **Stripe beta API** | FAIBLE | Utilisation d'une API version beta Stripe | Migrer vers une version stable |
-| **Pas de logging structuré** | FAIBLE | `console.log/error` uniquement | Implémenter pino ou winston |
-| **Données client non chiffrées** | MOYEN | `clientData` (nom, email, tel) stocké en clair en base | Envisager le chiffrement au repos |
+### 5.4 Comparaison v1 → v2 (améliorations sécurité)
 
----
-
-## 6. API Endpoints - Récapitulatif complet
-
-### Routes publiques (sans auth)
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/item` | Lister tous les articles du menu |
-| `GET` | `/api/item/details` | Lister les catégories de menu |
-| `GET` | `/api/item/custom/:category` | Options de personnalisation par catégorie |
-| `GET` | `/api/item/:id` | Détail d'un article |
-| `POST` | `/api/item` | Créer un article |
-| `POST` | `/api/item/details` | Créer une catégorie |
-| `POST` | `/api/item/custom` | Créer une option custom |
-| `PUT` | `/api/item/:id` | Modifier un article |
-| `DELETE` | `/api/item/:id` | Supprimer un article |
-| `GET` | `/api/order/confirmed/:id` | Consulter une commande confirmée (sans clientData) |
-| `POST` | `/api/order` | Créer une commande |
-| `DELETE` | `/api/order/:id` | Supprimer une commande |
-| `PUT` | `/api/order/:id/toggle` | Archiver/désarchiver |
-| `POST` | `/api/order/print-order` | Imprimer un ticket |
-| `GET` | `/api/table` | Lister les tables |
-| `GET` | `/api/table/:tableNumber` | Détail d'une table |
-| `POST` | `/api/table` | Créer une table |
-| `PUT` | `/api/table/:id/toggle` | Ouvrir/fermer une table |
-| `GET` | `/api/allergen` | Lister les allergènes |
-| `POST` | `/api/allergen` | Créer un allergène |
-| `DELETE` | `/api/allergen/:id` | Supprimer un allergène |
-| `GET` | `/api/food` | Lister les aliments |
-| `GET` | `/api/food/:id` | Détail d'un aliment |
-| `POST` | `/api/food` | Créer un aliment |
-| `PUT` | `/api/food/:id` | Modifier les allergènes d'un aliment |
-| `DELETE` | `/api/food` | Supprimer des aliments (batch) |
-| `POST` | `/api/checkout/create-checkout-session` | Créer une session Stripe |
-| `POST` | `/api/checkout/webhook` | Webhook Stripe |
-
-### Routes privées (auth JWT Auth0 requise)
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/users` | Lister tous les utilisateurs |
-| `GET` | `/api/users/:email` | Info utilisateur par email |
-| `POST` | `/api/users` | Créer un utilisateur |
-| `PUT` | `/api/users/:id` | Modifier un utilisateur |
-| `DELETE` | `/api/users/:id/:auth0Id` | Supprimer (Auth0 + DB) |
-| `GET` | `/api/private/orders` | Toutes les commandes |
-| `GET` | `/api/private/orders/:id` | Détail commande |
-| `GET` | `/api/private/orders/history/:userId` | Historique par utilisateur |
-| `GET` | `/api/private/orders/tables/:tableNumber` | Commandes par table |
+| Point | v1 (master) | v2 (dev) |
+|-------|-------------|----------|
+| Routes d'écriture menu | Publiques (aucune auth) | Protégées (checkAuth + isAdmin) |
+| Rate limiting | Aucun | Global + Auth + Payment |
+| Validation input | Aucune | Zod sur toutes les routes |
+| Headers sécurité | Aucun | Helmet |
+| Logging | console.log | Pino structuré |
+| Auth | Auth0 JWT simple | Supabase Auth + Rôles RBAC |
+| Gestion d'erreur | Try/catch dispersé | Middleware centralisé |
+| IDs | MongoDB ObjectId (prédictible) | UUID v4 (non prédictible) |
+| DB credentials | Host en dur dans le code | Variables d'environnement |
 
 ---
 
-## 7. Variables d'environnement requises
+## 6. Validation des données (schémas Zod)
+
+| Schéma | Champs validés |
+|--------|----------------|
+| `updateUserSchema` | fullName (string 1-50, opt), phone (regex FR, opt) |
+| `restaurantSchema` | name (1-50), address (1-255), zipCode (regex 5 chiffres), city (1-50), phone (regex FR), email (opt), imageUrl (URL, opt) |
+| `categorieSchema` | name (1-50), subHeading (1-255, opt), displayOrder (number) |
+| `productSchema` | name (1-50), description (1-255), imageUrl (URL), price (number), tags (string[], opt), discount (number, def 0), isAvailable (bool, def true), displayOrder (number, def 999), categorieId (UUID) |
+| `productOptionGroupSchema` | name (1-50), hasMultiple (bool, def false), isRequired (bool, def false), minQuantity (number, def 1), maxQuantity (number, def 1) |
+| `productOptionChoiceSchema` | name (1-50), priceModifier (number, def 0) |
+
+Chaque schéma a sa variante `update` (tous les champs optionnels).
+
+---
+
+## 7. Variables d'environnement requises (v2)
 
 | Variable | Description | Exemple |
 |----------|-------------|---------|
 | `PORT` | Port du serveur | `5001` |
 | `CLIENT_URL` | URL du frontend React | `https://pokeybar.fr` |
-| `DB_USER_PASS` | Mot de passe MongoDB Atlas | `****` |
-| `PRINTER_HOST` | IP de l'imprimante thermique | `192.168.1.100` |
-| `PRINTER_PORT` | Port de l'imprimante | `9100` |
-| `AUTH0_DOMAIN` | Domaine Auth0 | `xxx.eu.auth0.com` |
-| `AUTH0_CLIENT_ID` | Client ID Auth0 | `****` |
-| `AUTH0_CLIENT_SECRET` | Client Secret Auth0 | `****` |
-| `AUTH0_AUDIENCE` | Audience API Auth0 | `https://api.pokeybar.fr` |
+| `SUPABASE_URL` | URL du projet Supabase | `https://xxx.supabase.co` |
+| `SUPABASE_ANON_KEY` | Clé publique Supabase | `eyJ...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé admin Supabase (backend only) | `eyJ...` |
+| `DATABASE_URL` | URL de connexion PostgreSQL | `postgresql://postgres:xxx@db.xxx.supabase.co:5432/postgres` |
 | `STRIPE_SECRET_KEY` | Clé secrète Stripe | `sk_live_****` |
-| `STRIPE_WEBHOOK_SECRET_KEY` | Secret du webhook Stripe | `whsec_****` |
-| `GMAIL_ACCOUNT` | Compte Gmail pour les emails | `pokeybar@gmail.com` |
+| `STRIPE_WEBHOOK_SECRET` | Secret du webhook Stripe | `whsec_****` |
+| `GMAIL_ACCOUNT` | Compte Gmail (emails transactionnels) | `pokeybar@gmail.com` |
 | `GMAIL_NODEMAILER_PASSWORD` | App password Gmail | `****` |
 
 ---
 
-## 8. Contraintes & Exigences non-fonctionnelles
+## 8. Tests
 
-### 8.1 Performance
+### 8.1 Stratégie
+- **Tests d'intégration** contre Supabase réel (signup/login → opérations → cleanup)
+- Framework : Vitest + Supertest
+- Chaque suite crée un user de test, effectue les opérations, puis nettoie (delete user)
+
+### 8.2 Couverture actuelle
+| Module | Tests | Statut |
+|--------|-------|--------|
+| Users | CRUD complet | Présent (bugs assertions à corriger) |
+| Restaurants | CRUD + permissions | Présent (bugs assertions à corriger) |
+| Menu | - | À écrire |
+| Orders | - | À écrire |
+| Middlewares | - | À écrire |
+
+### 8.3 Commandes
+```bash
+npm start        # Démarrer le serveur (production)
+npm run dev      # Démarrer avec nodemon (dev, hot-reload)
+npm test         # Lancer les tests (vitest run)
+```
+
+---
+
+## 9. Contraintes & Exigences non-fonctionnelles
+
+### 9.1 Performance
 - Temps de réponse API < 500ms
 - Impression du ticket < 3 secondes après confirmation paiement
-- Support de la charge en période de rush (midi/soir)
+- Support de la charge en période de rush (rate limiting adapté)
 
-### 8.2 Disponibilité
+### 9.2 Disponibilité
 - Application disponible 7j/7 pendant les heures d'ouverture
-- Hébergement Hostinger avec Node.js v20 LTS
-- MongoDB Atlas (cloud) pour la haute disponibilité de la base
+- PostgreSQL hébergé Supabase (haute disponibilité cloud)
+- Health check endpoint : `GET /health`
 
-### 8.3 Compatibilité
+### 9.3 Compatibilité
 - Mobile-first (smartphones des clients)
 - Navigateurs modernes (Chrome, Safari, Firefox)
-- Node.js 18-20 (contrainte `express-oauth2-jwt-bearer`)
+- Node.js v20+ (jusqu'à v24)
 
-### 8.4 Réglementation
-- Conformité PCI DSS via Stripe (aucune donnée bancaire ne transite par le serveur)
-- RGPD : consentement marketing (`shouldGiveInformation`), droit à la suppression (endpoint delete user)
-- Allergènes : traçabilité à 3 niveaux (non/trace/oui) conforme à la réglementation européenne
+### 9.4 Réglementation
+- **PCI DSS** : Conformité via Stripe — aucune donnée bancaire ne transite par le serveur
+- **RGPD** : Droit à la suppression (`DELETE /api/user/me` supprime Auth + DB), données minimales collectées
+- **Conformité fiscale** : NF525 à envisager pour la caisse enregistreuse (Phase 4+)
+
+### 9.5 Conventions de code
+- **CommonJS** : `require()` / `module.exports` (pas d'ESM)
+- **Controllers** : `async (req, res, next)` + `try/catch` + `next(error)`
+- **Format réponse** : `{ data: ... }` (succès), `{ error: "..." }` (erreur), `{ message: "..." }` (confirmation)
+- **Status codes** : 200 (OK), 201 (created), 400 (validation), 401 (non auth), 403 (forbidden), 404 (not found), 409 (conflict), 500 (serveur)
+- **Nommage DB** : snake_case en PostgreSQL, camelCase dans Prisma via `@map()`
+- **Langue** : Messages d'erreur en anglais, interface client en français

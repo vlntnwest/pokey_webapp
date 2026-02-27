@@ -1,252 +1,262 @@
-# Roadmap - Pokey Bar (Servr)
-## Application Web Click & Collect / Commande à table
+# Roadmap - Servr
+## Plateforme de commande en ligne pour restaurants
 
 **Dernière mise à jour :** 27/02/2026
+**Branche de référence :** `dev`
 
 ---
 
-## Vue d'ensemble
+## État des lieux (branche `dev`)
 
-Cette roadmap est organisée en **5 phases**, de la stabilisation de l'existant jusqu'aux fonctionnalités avancées. Chaque phase est priorisée par criticité et impact métier.
+### Ce qui est en place
+- **Users** : CRUD complet (GET/PUT/DELETE /me) avec auth Supabase
+- **Restaurants** : Create / Update / Delete avec gestion des rôles (OWNER, ADMIN)
+- **Menu** : CRUD complet pour catégories, produits, groupes d'options, choix d'options
+- **Menu public** : GET menu d'un restaurant (sans auth), GET produit individuel
+- **Auth** : Middleware JWT via Supabase, vérification du token + lookup DB
+- **Rôles** : Middleware isOwner / isAdmin / isStaff (RBAC par restaurant)
+- **Rate limiting** : Global (100/15min), Auth (15/15min), Payment (10/15min)
+- **Validation** : Schémas Zod sur les routes principales
+- **Error handling** : Middleware centralisé (Zod, Prisma P2025/P2002, erreurs génériques)
+- **Logging** : Pino structuré (pino-pretty en dev, JSON en prod)
+- **Tests** : Tests d'intégration pour Users et Restaurants (Vitest + Supertest)
+- **Sécurité** : Helmet (headers HTTP), CORS strict, UUIDs
+- **Template email** : Template HTML confirmation de commande (hérité v1)
+- **Base de données** : Schema Prisma complet avec 12 modèles
+- **Health check** : `GET /health`
 
-```
-Phase 1 ████████████████████ CRITIQUE - Sécurité & Stabilisation
-Phase 2 ██████████████████   HAUTE   - Fonctionnalités métier essentielles
-Phase 3 ████████████████     MOYENNE - Expérience utilisateur
-Phase 4 ██████████████       BASSE   - Fonctionnalités avancées
-Phase 5 ████████████         FUTURE  - Évolutions long terme
-```
+### Ce qui reste à faire (fonctionnel en v1 mais pas encore ré-implémenté en v2)
+- Commandes (CRUD + workflow de statuts)
+- Paiement Stripe (checkout + webhook)
+- Impression thermique TCP/IP
+- Emails transactionnels (Nodemailer)
+- Horaires d'ouverture
+- Lecture publique d'un restaurant
 
----
-
-## Phase 1 - Sécurité & Stabilisation (CRITIQUE)
-
-> Objectif : Corriger les failles de sécurité, stabiliser le paiement, fiabiliser le système existant.
-
-### 1.1 Sécurité des routes API
-- [ ] Protéger les routes d'écriture du menu (`POST/PUT/DELETE /api/item`) par `checkJwt`
-- [ ] Protéger les routes tables (`POST /api/table`, `PUT /api/table/:id/toggle`) par `checkJwt`
-- [ ] Protéger les routes food/allergen (`POST/PUT/DELETE`) par `checkJwt`
-- [ ] Protéger `DELETE /api/order/:id` et `PUT /api/order/:id/toggle` par `checkJwt`
-- [ ] Protéger `POST /api/order/print-order` par `checkJwt`
-- [ ] Garder publiques uniquement : `GET` menu, `GET` tables, `GET /api/order/confirmed/:id`, `POST /api/checkout/*`
-
-### 1.2 Sécurité du paiement Stripe
-- [ ] Migrer de la version beta Stripe (`17.4.0-beta.2`) vers une version stable
-- [ ] Migrer l'API version de `custom_checkout_beta=v1` vers la version stable
-- [ ] Ajouter une vérification côté serveur que le `totalPrice` correspond aux `items` envoyés (éviter la manipulation de prix côté client)
-- [ ] Ajouter un mécanisme d'idempotence pour éviter la double création de commande sur webhook replay
-- [ ] Logger les événements webhook dans une collection dédiée pour audit
-- [ ] Ajouter un monitoring des webhooks échoués (alerting)
-- [ ] Vérifier que le montant payé dans le webhook correspond au montant attendu
-
-### 1.3 Sécurité des données
-- [ ] Déplacer l'URL complète MongoDB dans `.env` (retirer le host en dur de `config/db.js`)
-- [ ] Ajouter `express-rate-limit` sur toutes les routes (anti-brute-force, anti-spam)
-- [ ] Ajouter `helmet` pour les headers de sécurité HTTP
-- [ ] Ajouter `express-validator` ou `joi` pour la validation/sanitization des inputs
-- [ ] Vérifier que `.env` est bien exclu du déploiement
-- [ ] Auditer les dépendances (`npm audit`)
-
-### 1.4 Stabilisation
-- [ ] Corriger le bug dans `isSuccess()` controller (`id` et `data` non définis)
-- [ ] Corriger la route `private.orders.routes.js` : `tables/:tableNumber` manque le `/` initial
-- [ ] Ajouter une gestion d'erreur globale (middleware Express error handler)
-- [ ] Remplacer `console.log/error` par un logger structuré (pino)
-- [ ] Ajouter des tests unitaires (vitest ou jest) pour les controllers critiques
-- [ ] Ajouter des tests d'intégration pour le flux de paiement
-
-**Livrables Phase 1 :**
-- Toutes les routes admin protégées par auth
-- Version stable de Stripe
-- Validation des prix côté serveur
-- Rate limiting actif
-- Bug fixes critiques
-- Logger structuré
+### Bugs connus
+1. **Tests user** : attendent `response.body.user` mais le controller renvoie `response.body.data`
+2. **Tests restaurant** : attendent `response.body.response` au lieu de `response.body.data`
+3. **Test deleteUser** : attend `"Utilisateur supprime"` mais le controller renvoie `"User deleted successfully"`
 
 ---
 
-## Phase 2 - Fonctionnalités métier essentielles (HAUTE)
+## Phase 1 - Corrections & Stabilisation (CRITIQUE)
 
-> Objectif : Compléter les fonctionnalités manquantes pour un service de production robuste.
+> Objectif : corriger les bugs existants avant d'ajouter des fonctionnalités.
 
-### 2.1 Gestion des commandes améliorée
-- [ ] Ajouter un statut de commande (reçue → en préparation → prête → servie/récupérée)
-- [ ] Notification temps réel au client quand la commande est prête (WebSocket - `ws` déjà installé)
-- [ ] Dashboard temps réel pour la cuisine (WebSocket)
-- [ ] Ajout d'un son/notification côté dashboard à la réception d'une commande
-- [ ] Filtrage des commandes par date, statut, type (dine-in/C&C)
+### 1.1 Bugs à corriger
+- [ ] Corriger les assertions des tests user (`response.body.data` au lieu de `response.body.user`)
+- [ ] Corriger les assertions des tests restaurant (`response.body.data` au lieu de `response.body.response`)
+- [ ] Corriger le message attendu dans test deleteUser (anglais)
 
-### 2.2 Gestion des créneaux Click & Collect
-- [ ] Définir les créneaux horaires disponibles (configurable par l'admin)
-- [ ] Limiter le nombre de commandes par créneau (capacité cuisine)
-- [ ] Bloquer les créneaux complets
-- [ ] Ajouter les jours de fermeture / congés
+### 1.2 Routes manquantes
+- [ ] `GET /api/restaurants/:restaurantId` — Consulter les infos d'un restaurant (public)
+- [ ] Documenter l'API menu dans `docs/menu.md`
 
-### 2.3 Gestion du menu avancée
-- [ ] Gestion de la disponibilité en temps réel (rupture de stock)
-- [ ] Gestion des prix par taille (S/M/L pour les bowls)
-- [ ] Gestion des suppléments avec prix dynamique
-- [ ] Upload d'images pour les articles (stockage cloud type S3/Vercel Blob)
-- [ ] Tri et ordre d'affichage des articles
-
-### 2.4 Gestion des tables améliorée
-- [ ] Associer un QR code unique par table (génération automatique)
-- [ ] Vérifier que la table est ouverte avant d'accepter une commande
-- [ ] Historique des commandes par session de table (ouverture/fermeture)
-- [ ] Calcul de l'addition totale par table
-
-**Livrables Phase 2 :**
-- Statuts de commande avec notifications temps réel
-- Gestion des créneaux C&C
-- Disponibilité menu en temps réel
-- QR codes tables
+**Estimation :** 1 sprint
 
 ---
 
-## Phase 3 - Expérience utilisateur (MOYENNE)
+## Phase 2 - Core Business : Commandes & Paiement (HAUTE)
 
-> Objectif : Améliorer l'expérience client et admin.
+> Objectif : implémenter les fonctionnalités nécessaires au fonctionnement du système de commande.
 
-### 3.1 Compte client
-- [ ] Inscription / connexion client (Auth0 social login : Google, Apple)
+### 2.1 Commandes (Orders)
+- [ ] `POST /api/restaurants/:restaurantId/orders` — Créer une commande (public)
+- [ ] `GET /api/restaurants/:restaurantId/orders` — Lister les commandes (auth, STAFF+)
+- [ ] `GET /api/restaurants/:restaurantId/orders/:orderId` — Détail commande (auth, STAFF+)
+- [ ] `PATCH /api/restaurants/:restaurantId/orders/:orderId/status` — Changer le statut (auth, STAFF+)
+- [ ] Schémas Zod pour les commandes (orderSchema, updateOrderStatusSchema)
+- [ ] Recalculer le `totalPrice` côté serveur (ne jamais faire confiance au client)
+- [ ] Tests d'intégration pour les commandes
+
+### 2.2 Paiement Stripe (FOCUS SÉCURITÉ)
+- [ ] `POST /api/checkout/create-session` — Créer une session Stripe Checkout
+- [ ] `POST /api/checkout/webhook` — Handler webhook Stripe (`checkout.session.completed`)
+- [ ] Vérification de la signature du webhook (`stripe.webhooks.constructEvent`)
+- [ ] La commande n'est créée qu'après confirmation du webhook (pas avant)
+- [ ] Vérifier que le montant payé correspond au montant recalculé côté serveur
+- [ ] Mécanisme d'idempotence (vérifier si commande déjà créée avant création sur replay webhook)
+- [ ] Table d'audit des événements webhook
+- [ ] Gestion `payment_intent.payment_failed`
+- [ ] Rate limit spécifique (10/15min, déjà préparé dans `app.js`)
+- [ ] Tests pour le flux de paiement
+
+### 2.3 Notifications email
+- [ ] Service d'envoi d'email avec Nodemailer (réutiliser `emailTemplate.html`)
+- [ ] Email de confirmation au client après commande Click & Collect
+- [ ] Adapter le template pour le multi-restaurant (nom/adresse dynamiques)
+
+### 2.4 Impression thermique TCP/IP
+- [ ] Ré-implémenter le module d'impression ESC/POS (socket TCP, port 9100)
+- [ ] Adapter le format du ticket au nouveau modèle de données (produits + options)
+- [ ] Impression automatique à la création de commande post-paiement
+- [ ] Gestion d'erreur si l'imprimante n'est pas accessible (ne pas bloquer la commande)
+- [ ] Configuration imprimante par restaurant (host/port en base ou env)
+
+### 2.5 Horaires d'ouverture
+- [ ] `GET /api/restaurants/:restaurantId/opening-hours` — Lister (public)
+- [ ] `PUT /api/restaurants/:restaurantId/opening-hours` — Mettre à jour (auth, ADMIN+)
+- [ ] Vérification "restaurant ouvert" avant d'accepter une commande
+
+**Estimation :** 3-4 sprints
+
+---
+
+## Phase 3 - Gestion d'équipe & Administration (MOYENNE)
+
+> Objectif : permettre aux propriétaires de gérer leur équipe et avoir de la visibilité.
+
+### 3.1 Gestion des membres (RestaurantMember)
+- [ ] `GET /api/restaurants/:restaurantId/members` — Lister les membres (auth, ADMIN+)
+- [ ] `POST /api/restaurants/:restaurantId/members/invite` — Inviter par email (auth, OWNER)
+- [ ] `PATCH /api/restaurants/:restaurantId/members/:memberId/role` — Changer le rôle (auth, OWNER)
+- [ ] `DELETE /api/restaurants/:restaurantId/members/:memberId` — Retirer un membre (auth, OWNER)
+- [ ] Système d'invitation par email (token temporaire + lien d'acceptation)
+
+### 3.2 Dashboard / Stats
+- [ ] `GET /api/restaurants/:restaurantId/stats` — Stats basiques
+  - Nombre de commandes (jour/semaine/mois)
+  - Chiffre d'affaires
+  - Produits les plus commandés
+  - Panier moyen
+- [ ] Filtrage par période
+
+### 3.3 Notifications temps réel
+- [ ] WebSocket ou Supabase Realtime pour le dashboard cuisine
+- [ ] Notification sonore à la réception d'une commande
+- [ ] Mise à jour temps réel du statut côté client
+
+**Estimation :** 3 sprints
+
+---
+
+## Phase 4 - Qualité & Infrastructure (MOYENNE)
+
+> Objectif : améliorer la maintenabilité, la fiabilité et le déploiement.
+
+### 4.1 Tests
+- [ ] Tests d'intégration pour le menu (catégories, produits, options)
+- [ ] Tests d'intégration pour les commandes
+- [ ] Tests unitaires pour les middlewares (auth, role, validate, error)
+- [ ] Tests des cas limites (UUID invalide, ressource inexistante, permissions)
+- [ ] Coverage report (`vitest --coverage`)
+
+### 4.2 CI/CD
+- [ ] GitHub Actions : lint + tests sur chaque PR
+- [ ] GitHub Actions : deploy automatique sur merge dans main
+- [ ] ESLint + Prettier avec config partagée
+
+### 4.3 Infrastructure
+- [ ] Dockerfile + docker-compose (app + PostgreSQL local)
+- [ ] Script de seed pour la base de données (données de dev)
+- [ ] Migrations Prisma versionnées dans le repo
+
+### 4.4 Documentation
+- [ ] Documentation API pour le menu (`docs/menu.md`)
+- [ ] Documentation API pour les commandes (`docs/orders.md`)
+- [ ] Swagger / OpenAPI spec (auto-générée ou manuelle)
+
+**Estimation :** 2-3 sprints
+
+---
+
+## Phase 5 - Expérience utilisateur avancée (BASSE)
+
+> Objectif : enrichir l'expérience client et admin.
+
+### 5.1 Compte client enrichi
+- [ ] Social login (Google, Apple via Supabase Auth)
 - [ ] Historique des commandes client
-- [ ] Commandes favorites / recomander
-- [ ] Profil client avec préférences allergènes
-- [ ] Consentement RGPD granulaire (marketing email, SMS, données)
+- [ ] Commandes favorites / recommander
+- [ ] Préférences allergènes dans le profil
 
-### 3.2 Notifications
+### 5.2 Notifications multi-canal
+- [ ] SMS de confirmation (Twilio)
 - [ ] Email de rappel 30 min avant le créneau C&C
-- [ ] SMS de confirmation (Twilio ou alternative)
 - [ ] Push notifications (PWA)
 
-### 3.3 Dashboard admin amélioré
-- [ ] Statistiques de vente (CA journalier, hebdo, mensuel)
-- [ ] Top des ventes (articles les plus commandés)
-- [ ] Graphiques de fréquentation par créneau
-- [ ] Export des données (CSV/PDF)
-- [ ] Gestion multi-utilisateurs admin avec rôles (manager, cuisine, caisse)
-
-### 3.4 UX Client
+### 5.3 UX Client
 - [ ] Recherche dans le menu
-- [ ] Filtrage par allergènes
-- [ ] Affichage des calories / informations nutritionnelles
-- [ ] Mode sombre
+- [ ] Filtrage par allergènes / tags
+- [ ] Upload d'images (Supabase Storage)
 - [ ] Multi-langue (FR/EN/DE pour Strasbourg)
 
-**Livrables Phase 3 :**
-- Comptes clients avec historique
-- Dashboard admin avec statistiques
-- Notifications multi-canal
-- UX enrichie
-
----
-
-## Phase 4 - Fonctionnalités avancées (BASSE)
-
-> Objectif : Différenciation et fidélisation.
-
-### 4.1 Programme de fidélité
-- [ ] Système de points par commande
-- [ ] Récompenses / articles gratuits
-- [ ] Offre anniversaire
-- [ ] Parrainage
-
-### 4.2 Promotions
-- [ ] Codes promo / réductions
-- [ ] Happy hour (réduction par créneau horaire)
-- [ ] Offres combinées (menu complet à prix réduit)
-- [ ] Offres flash (notification push)
-
-### 4.3 Paiement avancé
+### 5.4 Paiement avancé
+- [ ] Apple Pay / Google Pay (Stripe Payment Request)
 - [ ] Paiement partagé à la table (split bill)
 - [ ] Pourboire numérique
-- [ ] Apple Pay / Google Pay (via Stripe Payment Request)
-- [ ] Facturation entreprise
 
-### 4.4 Intégrations tierces
-- [ ] Intégration avec les plateformes de livraison (Uber Eats, Deliveroo) - agrégation des commandes
-- [ ] Intégration comptable (export pour expert-comptable)
-- [ ] Intégration caisse enregistreuse (NF525 pour conformité fiscale française)
-- [ ] Google My Business (mise à jour automatique des horaires)
-
-**Livrables Phase 4 :**
-- Programme de fidélité
-- Système de promotions
-- Moyens de paiement supplémentaires
-- Intégrations tierces
+**Estimation :** 4 sprints
 
 ---
 
-## Phase 5 - Évolutions long terme (FUTURE)
+## Phase 6 - Croissance & Scale (FUTURE)
 
-> Objectif : Scalabilité et expansion.
+> Objectif : préparer la plateforme pour plusieurs restaurants.
 
-### 5.1 Multi-restaurant
-- [ ] Architecture multi-tenant (plusieurs restaurants sur la même plateforme)
-- [ ] Configuration par restaurant (menu, horaires, imprimante)
+### 6.1 Multi-restaurant
+- [ ] Onboarding restaurant self-service
 - [ ] Dashboard centralisé multi-établissements
-- [ ] Gestion des équipes par restaurant
+- [ ] Configuration imprimante par restaurant
+- [ ] Branding personnalisé par restaurant (couleurs, logo)
 
-### 5.2 Infrastructure
-- [ ] Migration vers une architecture microservices (si la charge l'exige)
-- [ ] Migration base de données vers PostgreSQL/Supabase (schéma Prisma déjà initié dans l'historique git)
-- [ ] Cache Redis pour les performances (menu, sessions)
-- [ ] CDN pour les assets statiques (images menu)
-- [ ] CI/CD pipeline complet (tests automatisés, déploiement continu)
-- [ ] Monitoring applicatif (Sentry, Datadog)
+### 6.2 Monétisation
+- [ ] Système de promotions / codes promo
+- [ ] Programme de fidélité (points, récompenses)
+- [ ] Facturation/abonnement pour les restaurateurs
 
-### 5.3 Mobile natif
+### 6.3 Infrastructure scalable
+- [ ] Cache Redis pour les menus publics
+- [ ] API versioning (`/api/v1/...`)
+- [ ] Request ID dans les logs (`x-request-id`)
+- [ ] Monitoring et alerting (Sentry, Datadog)
+- [ ] Pagination sur tous les endpoints de liste
 - [ ] Application PWA complète (offline-first)
-- [ ] Application native iOS/Android (React Native) si besoin
 
-### 5.4 IA & Data
-- [ ] Recommandations personnalisées basées sur l'historique
-- [ ] Prévision de la demande par créneau (optimisation stocks)
-- [ ] Chatbot pour la prise de commande
+### 6.4 Conformité
+- [ ] NF525 (conformité fiscale caisse enregistreuse française)
+- [ ] Intégration comptable (export pour expert-comptable)
+- [ ] RGPD : consentement granulaire, export des données, droit à l'oubli
 
-**Livrables Phase 5 :**
-- Plateforme multi-restaurant
-- Infrastructure scalable
-- PWA/App native
-- Intelligence artificielle
+**Estimation :** Post-validation Phase 5
 
 ---
 
 ## Résumé des priorités
 
-| Phase | Priorité | Focus | Estimation |
-|-------|----------|-------|------------|
-| **Phase 1** | CRITIQUE | Sécurité, bugs, stabilisation | Sprint 1-2 |
-| **Phase 2** | HAUTE | Fonctionnalités métier core | Sprint 3-6 |
-| **Phase 3** | MOYENNE | UX, dashboard, notifications | Sprint 7-10 |
-| **Phase 4** | BASSE | Fidélité, promos, intégrations | Sprint 11-14 |
-| **Phase 5** | FUTURE | Multi-restaurant, infra, IA | Après validation Phase 4 |
+| Phase | Priorité | Focus | Sprints estimés |
+|-------|----------|-------|-----------------|
+| **Phase 1** | CRITIQUE | Corrections bugs, route manquante | 1 |
+| **Phase 2** | HAUTE | Commandes, Stripe, Email, Impression | 3-4 |
+| **Phase 3** | MOYENNE | Équipe, Stats, Temps réel | 3 |
+| **Phase 4** | MOYENNE | Tests, CI/CD, Docker, Docs | 2-3 |
+| **Phase 5** | BASSE | UX client, Notifications, Paiement avancé | 4 |
+| **Phase 6** | FUTURE | Multi-restaurant, Scale, Conformité | TBD |
 
 ---
 
-## Notes techniques
+## Dettes techniques actuelles
 
-### Dettes techniques identifiées
-1. **Stripe beta** : Version beta en production - à migrer en priorité
-2. **MongoDB host en dur** : Sécurité - à déplacer dans `.env`
-3. **Bug `isSuccess()`** : Variables `id` et `data` non définies dans le scope
-4. **Route manquante** : `/` manquant sur `tables/:tableNumber` dans `private.orders.routes.js`
-5. **`upsert: true`** dans `updateItem` : Peut créer des documents inattendus - à retirer
-6. **Pas de pagination** : `getAllOrders`, `getAllItems` retournent tout - problème de perf à terme
-7. **WebSocket (`ws`)** : Installé mais non utilisé - à implémenter en Phase 2
-8. **bcrypt** : Installé mais non utilisé (auth déléguée à Auth0)
-9. **sharp** : Installé mais pas de pipeline d'upload d'images implémenté
+| Dette | Priorité | Détail |
+|-------|----------|--------|
+| Tests en échec | HAUTE | Assertions incorrectes (mauvaises clés dans `response.body`) |
+| Pas de gestion de remboursement | HAUTE | À implémenter avec Stripe |
+| Template email figé v1 | MOYENNE | Adapter pour multi-restaurant |
+| Pas de pagination | MOYENNE | `findMany` sans limite sur les listes |
+| Pas de Docker | BASSE | Dev uniquement local pour l'instant |
+| Pas de CI/CD | BASSE | Tests et déploiement manuels |
+| Messages bilingues | FAIBLE | Quelques traces de français dans les anciens messages |
 
-### Stack recommandée pour les évolutions
+---
+
+## Stack recommandée pour les évolutions
+
 | Besoin | Recommandation |
 |--------|---------------|
-| Rate limiting | `express-rate-limit` |
-| Validation | `zod` (typesafe) ou `joi` |
-| Logger | `pino` + `pino-pretty` |
-| Tests | `vitest` (déjà initié) |
-| Cache | `ioredis` |
-| Upload images | Vercel Blob (déjà utilisé pour le logo) ou AWS S3 |
+| Temps réel | Supabase Realtime (déjà dans l'écosystème) ou `ws` |
+| Upload images | Supabase Storage (cohérent avec le reste de la stack) |
 | SMS | Twilio |
 | Monitoring | Sentry |
 | CI/CD | GitHub Actions |
+| Cache | ioredis |
