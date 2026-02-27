@@ -128,8 +128,8 @@
 
 ### Dashboard / Stats
 
-- [ ] `GET /api/restaurants/:restaurantId/stats` — Stats basiques (nombre de commandes, chiffre d'affaires, produits populaires)
-- [ ] Filtrage par periode (jour, semaine, mois)
+- [x] `GET /api/restaurants/:restaurantId/stats` — Stats basiques (nombre de commandes, chiffre d'affaires, produits populaires)
+- [x] Filtrage par periode (jour, semaine, mois)
 
 ## Phase 4 — Qualite et infrastructure
 

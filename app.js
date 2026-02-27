@@ -12,6 +12,7 @@ const restaurantRoutes = require("./routes/restaurant.routes");
 const orderRoutes = require("./routes/order.routes");
 const openingHourRoutes = require("./routes/openingHour.routes");
 const memberRoutes = require("./routes/member.routes");
+const statsRoutes = require("./routes/stats.routes");
 const checkoutRoutes = require("./routes/checkout.routes");
 
 const errorHandler = require("./middleware/error.middleware");
@@ -88,6 +89,7 @@ app.use("/api/menu", globalLimiter, menuRoutes);
 app.use("/api", globalLimiter, orderRoutes);
 app.use("/api", globalLimiter, openingHourRoutes);
 app.use("/api", globalLimiter, memberRoutes);
+app.use("/api", globalLimiter, statsRoutes);
 app.use("/api/checkout", paymentLimiter, checkoutRoutes);
 
 // Error handler
