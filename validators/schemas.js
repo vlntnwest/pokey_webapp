@@ -111,7 +111,17 @@ const updateOrderStatusSchema = z.object({
     "COMPLETED",
     "DELIVERED",
     "CANCELLED",
+    "PENDING_ON_SITE_PAYMENT",
   ]),
+});
+
+// Checkout schemas
+const checkoutSessionSchema = z.object({
+  restaurantId: z.string().uuid(),
+  fullName: z.string().min(1).max(50).optional(),
+  phone: phoneSchema.optional(),
+  email: z.string().email().optional(),
+  items: z.array(orderItemSchema).min(1),
 });
 
 module.exports = {
@@ -134,4 +144,7 @@ module.exports = {
   // Orders
   orderSchema,
   updateOrderStatusSchema,
+
+  // Checkout
+  checkoutSessionSchema,
 };

@@ -31,6 +31,7 @@ model Restaurant {
   phone             String?
   email             String?
   imageUrl          String?            @map("image_url")
+  stripeAccountId   String?            @map("stripe_account_id")
   createdAt         DateTime?          @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime?          @map("updated_at") @db.Timestamp(6)
   openingHours      OpeningHour[]
@@ -220,6 +221,7 @@ enum OrderStatus {
   COMPLETED
   DELIVERED
   CANCELLED
+  PENDING_ON_SITE_PAYMENT
 
   @@map("order_status")
   @@schema("public")
