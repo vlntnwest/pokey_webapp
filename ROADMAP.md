@@ -100,9 +100,9 @@
 
 ### Notifications email
 
-- [ ] Service d'envoi d'email avec Nodemailer (utiliser le template existant `emailTemplate.html`)
-- [ ] Envoyer un email de confirmation au client apres une commande
-- [ ] Configurer les variables SMTP dans `.env`
+- [x] Service d'envoi d'email avec Nodemailer (utiliser le template existant `emailTemplate.html`)
+- [x] Envoyer un email de confirmation au client apres une commande
+- [x] Configurer les variables SMTP dans `.env`
 
 ### Horaires d'ouverture
 

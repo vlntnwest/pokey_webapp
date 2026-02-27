@@ -1,5 +1,6 @@
 const prisma = require("../lib/prisma");
 const logger = require("../logger");
+const { sendOrderConfirmation } = require("../lib/mailer");
 
 module.exports.createOrder = async (req, res, next) => {
   const { restaurantId } = req.params;
@@ -77,6 +78,7 @@ module.exports.createOrder = async (req, res, next) => {
     });
 
     logger.info({ orderId: data.id, restaurantId }, "Order created");
+    sendOrderConfirmation({ to: data.email, order: data });
     return res.status(201).json({ data });
   } catch (error) {
     next(error);

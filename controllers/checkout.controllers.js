@@ -1,6 +1,7 @@
 const Stripe = require("stripe");
 const prisma = require("../lib/prisma");
 const logger = require("../logger");
+const { sendOrderConfirmation } = require("../lib/mailer");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -106,6 +107,7 @@ module.exports.createCheckoutSession = async (req, res, next) => {
         { orderId: order.id, restaurantId },
         "On-site payment order created (no Stripe account)",
       );
+      sendOrderConfirmation({ to: order.email, order });
       return res
         .status(201)
         .json({ data: { order, paymentMethod: "on_site" } });
@@ -239,6 +241,7 @@ module.exports.handleWebhook = async (req, res) => {
         { orderId: order.id, restaurantId, sessionId: session.id },
         "Order created from Stripe webhook",
       );
+      sendOrderConfirmation({ to: email || null, order });
     } catch (err) {
       logger.error(
         { error: err.message, sessionId: session.id, restaurantId },
