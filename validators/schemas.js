@@ -115,6 +115,16 @@ const updateOrderStatusSchema = z.object({
   ]),
 });
 
+// Member schemas
+const inviteMemberSchema = z.object({
+  email: z.string().email(),
+  role: z.enum(["ADMIN", "STAFF"]).default("STAFF"),
+});
+
+const acceptInvitationSchema = z.object({
+  token: z.string().min(1),
+});
+
 // Opening hours schemas
 const openingHourItemSchema = z.object({
   dayOfWeek: z.number().int().min(0).max(6),
@@ -154,6 +164,10 @@ module.exports = {
   // Orders
   orderSchema,
   updateOrderStatusSchema,
+
+  // Members
+  inviteMemberSchema,
+  acceptInvitationSchema,
 
   // Opening hours
   openingHoursSchema,
