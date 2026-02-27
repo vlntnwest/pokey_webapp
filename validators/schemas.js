@@ -90,6 +90,30 @@ const updateProductOptionChoiceSchema = z.object({
   priceModifier: z.number().optional(),
 });
 
+// Order schemas
+const orderItemSchema = z.object({
+  productId: z.string().uuid(),
+  quantity: z.number().int().min(1),
+  optionChoiceIds: z.array(z.string().uuid()).optional().default([]),
+});
+
+const orderSchema = z.object({
+  fullName: z.string().min(1).max(50).optional(),
+  phone: phoneSchema.optional(),
+  email: z.string().email().optional(),
+  items: z.array(orderItemSchema).min(1),
+});
+
+const updateOrderStatusSchema = z.object({
+  status: z.enum([
+    "PENDING",
+    "IN_PROGRESS",
+    "COMPLETED",
+    "DELIVERED",
+    "CANCELLED",
+  ]),
+});
+
 module.exports = {
   // User
   updateUserSchema,
@@ -106,4 +130,8 @@ module.exports = {
   updateProductOptionGroupSchema,
   productOptionChoiceSchema,
   updateProductOptionChoiceSchema,
+
+  // Orders
+  orderSchema,
+  updateOrderStatusSchema,
 };

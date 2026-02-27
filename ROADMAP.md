@@ -77,12 +77,12 @@
 
 ### Orders (commandes)
 
-- [ ] `POST /api/restaurants/:restaurantId/orders` — Creer une commande (public, pas d'auth requise)
-- [ ] `GET /api/restaurants/:restaurantId/orders` — Lister les commandes (auth, STAFF+)
-- [ ] `GET /api/restaurants/:restaurantId/orders/:orderId` — Detail d'une commande (auth, STAFF+)
-- [ ] `PATCH /api/restaurants/:restaurantId/orders/:orderId/status` — Changer le statut (auth, STAFF+)
-- [ ] Schemas Zod pour les commandes (orderSchema, updateOrderStatusSchema)
-- [ ] Tests d'integration pour les commandes
+- [x] `POST /api/restaurants/:restaurantId/orders` — Creer une commande (public, pas d'auth requise)
+- [x] `GET /api/restaurants/:restaurantId/orders` — Lister les commandes (auth, STAFF+)
+- [x] `GET /api/restaurants/:restaurantId/orders/:orderId` — Detail d'une commande (auth, STAFF+)
+- [x] `PATCH /api/restaurants/:restaurantId/orders/:orderId/status` — Changer le statut (auth, STAFF+)
+- [x] Schemas Zod pour les commandes (orderSchema, updateOrderStatusSchema)
+- [x] Tests unitaires pour les commandes (order.controllers.spec.js)
 
 ### Paiement Stripe
 
