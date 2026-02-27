@@ -91,7 +91,7 @@
 - [x] `POST /api/checkout/create-session` — Créer une session Stripe Checkout
   - _Logique métier_ : Utiliser Stripe Connect (Destination charges). Le paiement arrive sur le compte plateforme, avec reversement automatique au `stripe_account_id` du restaurant, moins la commission (application_fee_amount).
   - _Fallback_ : Si le paiement échoue côté client, permettre la création de la commande avec un statut spécifique (ex: `PENDING_ON_SITE_PAYMENT`) pour que le restaurateur sache que le client paiera sur place.
-- [ ] `POST /api/checkout/webhook` — Handler du webhook Stripe
+- [x] `POST /api/checkout/webhook` — Handler du webhook Stripe
   - _Configuration_ : Modifier `app.js` pour utiliser `express.raw({ type: 'application/json' })` STRICTEMENT sur cette route afin que Stripe puisse lire le buffer brut.
   - _Sécurité_ : Vérification de la signature du webhook avec `STRIPE_WEBHOOK_SECRET`.
   - _Action_ : Sur l'événement `checkout.session.completed`, créer la commande en base de données avec le statut `COMPLETED` (ou `PENDING` côté cuisine) et lier les produits/options.

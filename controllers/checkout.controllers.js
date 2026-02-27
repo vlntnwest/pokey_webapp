@@ -3,6 +3,7 @@ const prisma = require("../lib/prisma");
 const logger = require("../logger");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 // Platform commission: 5% (in cents)
 const PLATFORM_FEE_PERCENT = 0.05;
@@ -179,4 +180,73 @@ module.exports.createCheckoutSession = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+module.exports.handleWebhook = async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, WEBHOOK_SECRET);
+  } catch (err) {
+    logger.warn({ error: err.message }, "Stripe webhook signature verification failed");
+    return res.status(400).json({ error: `Webhook error: ${err.message}` });
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    const { restaurantId, fullName, phone, email } = session.metadata;
+    const items = JSON.parse(session.metadata.items || "[]");
+    const totalPrice = session.amount_total / 100;
+
+    try {
+      const order = await prisma.$transaction(async (tx) => {
+        const created = await tx.order.create({
+          data: {
+            restaurantId,
+            fullName: fullName || null,
+            phone: phone || null,
+            email: email || null,
+            totalPrice,
+            status: "PENDING",
+          },
+        });
+
+        for (const item of items) {
+          const orderProduct = await tx.orderProduct.create({
+            data: {
+              orderId: created.id,
+              productId: item.productId,
+              quantity: item.quantity,
+            },
+          });
+
+          if (item.optionChoiceIds && item.optionChoiceIds.length > 0) {
+            await tx.orderProductOption.createMany({
+              data: item.optionChoiceIds.map((ocId) => ({
+                orderProductId: orderProduct.id,
+                optionChoiceId: ocId,
+              })),
+            });
+          }
+        }
+
+        return created;
+      });
+
+      logger.info(
+        { orderId: order.id, restaurantId, sessionId: session.id },
+        "Order created from Stripe webhook",
+      );
+    } catch (err) {
+      logger.error(
+        { error: err.message, sessionId: session.id, restaurantId },
+        "Failed to create order from webhook",
+      );
+      // Return 500 so Stripe retries the webhook
+      return res.status(500).json({ error: "Failed to create order" });
+    }
+  }
+
+  res.status(200).json({ received: true });
 };

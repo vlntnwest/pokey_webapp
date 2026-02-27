@@ -10,4 +10,7 @@ router.post(
   checkoutControllers.createCheckoutSession,
 );
 
+// express.raw() is applied in app.js before JSON parsing for this route
+router.post("/webhook", checkoutControllers.handleWebhook);
+
 module.exports = router;
