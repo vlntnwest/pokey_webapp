@@ -106,9 +106,9 @@
 
 ### Horaires d'ouverture
 
-- [ ] `GET /api/restaurants/:restaurantId/opening-hours` — Lister les horaires (public)
-- [ ] `PUT /api/restaurants/:restaurantId/opening-hours` — Mettre a jour les horaires (auth, ADMIN+)
-- [ ] Verification "restaurant ouvert" avant de passer commande
+- [x] `GET /api/restaurants/:restaurantId/opening-hours` — Lister les horaires (public)
+- [x] `PUT /api/restaurants/:restaurantId/opening-hours` — Mettre a jour les horaires (auth, ADMIN+)
+- [x] Verification "restaurant ouvert" avant de passer commande
 
 ### Lecture restaurant
 

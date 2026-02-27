@@ -115,6 +115,16 @@ const updateOrderStatusSchema = z.object({
   ]),
 });
 
+// Opening hours schemas
+const openingHourItemSchema = z.object({
+  dayOfWeek: z.number().int().min(0).max(6),
+  openTime: z.string().regex(/^\d{2}:\d{2}$/, "Time must be HH:MM"),
+  closeTime: z.string().regex(/^\d{2}:\d{2}$/, "Time must be HH:MM"),
+  order: z.number().int().min(0),
+});
+
+const openingHoursSchema = z.array(openingHourItemSchema);
+
 // Checkout schemas
 const checkoutSessionSchema = z.object({
   restaurantId: z.string().uuid(),
@@ -144,6 +154,9 @@ module.exports = {
   // Orders
   orderSchema,
   updateOrderStatusSchema,
+
+  // Opening hours
+  openingHoursSchema,
 
   // Checkout
   checkoutSessionSchema,

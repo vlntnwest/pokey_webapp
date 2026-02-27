@@ -2,11 +2,28 @@ const prisma = require("../lib/prisma");
 const logger = require("../logger");
 const { sendOrderConfirmation } = require("../lib/mailer");
 
+function isRestaurantOpen(openingHours) {
+  if (!openingHours || openingHours.length === 0) return true;
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const todayHours = openingHours.find((h) => h.dayOfWeek === dayOfWeek);
+  if (!todayHours) return false;
+  return currentTime >= todayHours.openTime && currentTime < todayHours.closeTime;
+}
+
 module.exports.createOrder = async (req, res, next) => {
   const { restaurantId } = req.params;
   const { fullName, phone, email, items } = req.body;
 
   try {
+    const openingHours = await prisma.openingHour.findMany({
+      where: { restaurantId },
+    });
+    if (!isRestaurantOpen(openingHours)) {
+      return res.status(400).json({ error: "Restaurant is currently closed" });
+    }
+
     const productIds = [...new Set(items.map((i) => i.productId))];
     const products = await prisma.product.findMany({
       where: { id: { in: productIds }, restaurantId },
