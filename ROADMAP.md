@@ -169,7 +169,7 @@
 - [x] Pagination sur les endpoints de liste (menu, commandes, membres)
 - [x] Recherche / filtrage de produits
 - [x] Upload d'images (Supabase Storage ou S3) au lieu d'URL externes
-- [ ] Notifications en temps reel (WebSocket ou Supabase Realtime) pour le dashboard cuisine
+- [x] Notifications en temps reel (WebSocket ou Supabase Realtime) pour le dashboard cuisine
 - [ ] Systeme de promotions / codes promo
 - [ ] Multi-langue pour les menus (i18n)
 - [x] API versioning (`/api/v1/...`)
