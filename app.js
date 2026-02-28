@@ -9,10 +9,23 @@ const cors = require("cors");
 const menuRoutes = require("./routes/menu.routes");
 const userRoutes = require("./routes/user.routes");
 const restaurantRoutes = require("./routes/restaurant.routes");
+const orderRoutes = require("./routes/order.routes");
+const openingHourRoutes = require("./routes/openingHour.routes");
+const memberRoutes = require("./routes/member.routes");
+const statsRoutes = require("./routes/stats.routes");
+const uploadRoutes = require("./routes/upload.routes");
+const checkoutRoutes = require("./routes/checkout.routes");
+const promoCodeRoutes = require("./routes/promoCode.routes");
+const swaggerUi = require("swagger-ui-express");
+const openApiSpec = require("./docs/openapi.json");
 
 const errorHandler = require("./middleware/error.middleware");
+const requestId = require("./middleware/requestId.middleware");
 
 const app = express();
+
+const isLocalhost = (req) =>
+  req.ip === "127.0.0.1" || req.ip === "::1" || req.ip === "::ffff:127.0.0.1";
 
 // Rate limiting configuration
 const globalLimiter = rateLimit({
@@ -20,6 +33,7 @@ const globalLimiter = rateLimit({
   max: 100, // 100 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isLocalhost,
   message: { error: "Too many requests, please try again later." },
 });
 
@@ -28,6 +42,7 @@ const authLimiter = rateLimit({
   max: 15, // 15 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isLocalhost,
   message: {
     error: "Too many authentication attempts, please try again later.",
   },
@@ -42,11 +57,15 @@ const paymentLimiter = rateLimit({
   skip: (req) => req.path === "/webhook", // Skip webhook (Stripe calls)
 });
 
+// Request ID (must be before other middleware)
+app.use(requestId);
+
 // Security headers
 app.use(helmet());
 
 // Webhook route FIRST - before CORS to avoid blocking Stripe requests
 app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
+app.use("/api/v1/checkout/webhook", express.raw({ type: "application/json" }));
 
 // CORS
 const corsOption = {
@@ -60,7 +79,7 @@ const corsOption = {
 
 // Apply CORS to all routes EXCEPT webhook
 app.use((req, res, next) => {
-  if (req.path === "/api/checkout/webhook") {
+  if (req.path.endsWith("/checkout/webhook")) {
     return next();
   }
   cors(corsOption)(req, res, next);
@@ -77,10 +96,23 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// Routes
-app.use("/api/user", authLimiter, userRoutes);
-app.use("/api/restaurants", globalLimiter, restaurantRoutes);
-app.use("/api/menu", globalLimiter, menuRoutes);
+// API documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
+
+// Routes — mounted at both /api (v1 alias) and /api/v1
+const V1_PREFIXES = ["/api", "/api/v1"];
+for (const prefix of V1_PREFIXES) {
+  app.use(`${prefix}/user`, authLimiter, userRoutes);
+  app.use(`${prefix}/restaurants`, globalLimiter, restaurantRoutes);
+  app.use(`${prefix}/menu`, globalLimiter, menuRoutes);
+  app.use(prefix, globalLimiter, orderRoutes);
+  app.use(prefix, globalLimiter, openingHourRoutes);
+  app.use(prefix, globalLimiter, memberRoutes);
+  app.use(prefix, globalLimiter, statsRoutes);
+  app.use(prefix, globalLimiter, uploadRoutes);
+  app.use(`${prefix}/checkout`, paymentLimiter, checkoutRoutes);
+  app.use(prefix, globalLimiter, promoCodeRoutes);
+}
 
 // Error handler
 app.use(errorHandler);

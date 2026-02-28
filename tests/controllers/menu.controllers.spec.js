@@ -39,15 +39,24 @@ describe("menu controllers", () => {
       update: vi.fn(),
       delete: vi.fn(),
       findUnique: vi.fn(),
+      findMany: vi.fn(),
     };
     mockPrisma.optionGroup = {
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
     };
     mockPrisma.optionChoice = {
       create: vi.fn(),
+      createMany: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
+      findMany: vi.fn(),
+    };
+    mockPrisma.productOptionGroup = {
+      createMany: vi.fn(),
       delete: vi.fn(),
     };
   });
@@ -381,12 +390,14 @@ describe("menu controllers", () => {
   // ─── OPTION GROUPS ──────────────────────────────────────────
   describe("createProductOptionGroup", () => {
     test("returns 201 with created option group", async () => {
-      const created = { id: "og-1", name: "Sauces", productId: "prod-1" };
-      mockPrisma.optionGroup.create.mockResolvedValue(created);
+      const created = { id: "og-1", name: "Sauces", optionChoices: [] };
+      mockPrisma.$transaction.mockImplementation((fn) => fn(mockPrisma));
+      mockPrisma.optionGroup.create.mockResolvedValue({ id: "og-1" });
+      mockPrisma.optionGroup.findUnique.mockResolvedValue(created);
 
       const req = {
-        params: { productId: "prod-1" },
-        body: { name: "Sauces" },
+        params: { restaurantId: "rest-1" },
+        body: { name: "Sauces", minQuantity: 1, maxQuantity: 1 },
       };
       const res = mockRes();
       const next = vi.fn();
@@ -399,11 +410,11 @@ describe("menu controllers", () => {
 
     test("calls next on error", async () => {
       const err = new Error("fail");
-      mockPrisma.optionGroup.create.mockRejectedValue(err);
+      mockPrisma.$transaction.mockRejectedValue(err);
 
       const req = {
-        params: { productId: "prod-1" },
-        body: { name: "Sauces" },
+        params: { restaurantId: "rest-1" },
+        body: { name: "Sauces", minQuantity: 1, maxQuantity: 1 },
       };
       const res = mockRes();
       const next = vi.fn();
@@ -416,11 +427,11 @@ describe("menu controllers", () => {
 
   describe("updateProductOptionGroup", () => {
     test("returns 200 with updated option group", async () => {
-      const updated = { id: "og-1", name: "Toppings" };
+      const updated = { id: "og-1", name: "Toppings", optionChoices: [] };
       mockPrisma.optionGroup.update.mockResolvedValue(updated);
 
       const req = {
-        params: { optionGroupId: "og-1" },
+        params: { restaurantId: "rest-1", optionGroupId: "og-1" },
         body: { name: "Toppings" },
       };
       const res = mockRes();
@@ -436,7 +447,7 @@ describe("menu controllers", () => {
       const err = new Error("fail");
       mockPrisma.optionGroup.update.mockRejectedValue(err);
 
-      const req = { params: { optionGroupId: "og-1" }, body: {} };
+      const req = { params: { restaurantId: "rest-1", optionGroupId: "og-1" }, body: {} };
       const res = mockRes();
       const next = vi.fn();
 
@@ -450,23 +461,21 @@ describe("menu controllers", () => {
     test("returns 200 with success message", async () => {
       mockPrisma.optionGroup.delete.mockResolvedValue({ id: "og-1" });
 
-      const req = { params: { optionGroupId: "og-1" } };
+      const req = { params: { restaurantId: "rest-1", optionGroupId: "og-1" } };
       const res = mockRes();
       const next = vi.fn();
 
       await deleteProductOptionGroup(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Option group deleted",
-      });
+      expect(res.json).toHaveBeenCalledWith({ message: "Option group deleted" });
     });
 
     test("calls next on error", async () => {
       const err = new Error("fail");
       mockPrisma.optionGroup.delete.mockRejectedValue(err);
 
-      const req = { params: { optionGroupId: "og-1" } };
+      const req = { params: { restaurantId: "rest-1", optionGroupId: "og-1" } };
       const res = mockRes();
       const next = vi.fn();
 
@@ -479,11 +488,11 @@ describe("menu controllers", () => {
   // ─── OPTION CHOICES ─────────────────────────────────────────
   describe("createProductOptionChoice", () => {
     test("returns 201 with created option choice", async () => {
-      const created = { id: "oc-1", name: "Ketchup", priceModifier: 0 };
+      const created = { id: "oc-1", name: "Ketchup", priceModifier: 0, displayOrder: 0 };
       mockPrisma.optionChoice.create.mockResolvedValue(created);
 
       const req = {
-        params: { optionGroupId: "og-1" },
+        params: { restaurantId: "rest-1", optionGroupId: "og-1" },
         body: { name: "Ketchup", priceModifier: 0 },
       };
       const res = mockRes();
@@ -500,7 +509,7 @@ describe("menu controllers", () => {
       mockPrisma.optionChoice.create.mockRejectedValue(err);
 
       const req = {
-        params: { optionGroupId: "og-1" },
+        params: { restaurantId: "rest-1", optionGroupId: "og-1" },
         body: { name: "Ketchup" },
       };
       const res = mockRes();
@@ -518,7 +527,7 @@ describe("menu controllers", () => {
       mockPrisma.optionChoice.update.mockResolvedValue(updated);
 
       const req = {
-        params: { optionChoiceId: "oc-1" },
+        params: { restaurantId: "rest-1", optionChoiceId: "oc-1" },
         body: { name: "Mayo", priceModifier: 0.5 },
       };
       const res = mockRes();
@@ -534,7 +543,7 @@ describe("menu controllers", () => {
       const err = new Error("fail");
       mockPrisma.optionChoice.update.mockRejectedValue(err);
 
-      const req = { params: { optionChoiceId: "oc-1" }, body: {} };
+      const req = { params: { restaurantId: "rest-1", optionChoiceId: "oc-1" }, body: {} };
       const res = mockRes();
       const next = vi.fn();
 
@@ -548,23 +557,21 @@ describe("menu controllers", () => {
     test("returns 200 with success message", async () => {
       mockPrisma.optionChoice.delete.mockResolvedValue({ id: "oc-1" });
 
-      const req = { params: { optionChoiceId: "oc-1" } };
+      const req = { params: { restaurantId: "rest-1", optionChoiceId: "oc-1" } };
       const res = mockRes();
       const next = vi.fn();
 
       await deleteProductOptionChoice(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Option choice deleted",
-      });
+      expect(res.json).toHaveBeenCalledWith({ message: "Option choice deleted" });
     });
 
     test("calls next on error", async () => {
       const err = new Error("fail");
       mockPrisma.optionChoice.delete.mockRejectedValue(err);
 
-      const req = { params: { optionChoiceId: "oc-1" } };
+      const req = { params: { restaurantId: "rest-1", optionChoiceId: "oc-1" } };
       const res = mockRes();
       const next = vi.fn();
 
@@ -577,7 +584,22 @@ describe("menu controllers", () => {
   // ─── GET MENU ───────────────────────────────────────────────
   describe("getMenu", () => {
     test("returns 200 with menu categories", async () => {
-      const categories = [
+      const rawCategories = [
+        {
+          id: "cat-1",
+          name: "Entrées",
+          productCategories: [
+            {
+              product: {
+                id: "prod-1",
+                name: "Salade",
+                productOptionGroups: [],
+              },
+            },
+          ],
+        },
+      ];
+      const expectedCategories = [
         {
           id: "cat-1",
           name: "Entrées",
@@ -592,9 +614,9 @@ describe("menu controllers", () => {
           ],
         },
       ];
-      mockPrisma.categorie.findMany.mockResolvedValue(categories);
+      mockPrisma.categorie.findMany.mockResolvedValue(rawCategories);
 
-      const req = { params: { restaurantId: "rest-1" } };
+      const req = { params: { restaurantId: "rest-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
@@ -608,7 +630,13 @@ describe("menu controllers", () => {
             include: {
               product: {
                 include: {
-                  optionGroups: { include: { optionChoices: true } },
+                  productOptionGroups: {
+                    include: {
+                      optionGroup: {
+                        include: { optionChoices: { orderBy: { displayOrder: "asc" } } },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -616,14 +644,14 @@ describe("menu controllers", () => {
         },
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ data: categories });
+      expect(res.json).toHaveBeenCalledWith({ data: expectedCategories });
     });
 
     test("calls next on error", async () => {
       const err = new Error("fail");
       mockPrisma.categorie.findMany.mockRejectedValue(err);
 
-      const req = { params: { restaurantId: "rest-1" } };
+      const req = { params: { restaurantId: "rest-1" }, query: { } };
       const res = mockRes();
       const next = vi.fn();
 
@@ -636,22 +664,28 @@ describe("menu controllers", () => {
   // ─── GET PRODUCT ────────────────────────────────────────────
   describe("getProduct", () => {
     test("returns 200 with product data", async () => {
-      const product = {
+      const rawProduct = {
+        id: "prod-1",
+        name: "Burger",
+        productCategories: [],
+        productOptionGroups: [],
+      };
+      const expectedProduct = {
         id: "prod-1",
         name: "Burger",
         productCategories: [],
         optionGroups: [],
       };
-      mockPrisma.product.findUnique.mockResolvedValue(product);
+      mockPrisma.product.findUnique.mockResolvedValue(rawProduct);
 
-      const req = { params: { productId: "prod-1" } };
+      const req = { params: { productId: "prod-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
       await getProduct(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ data: product });
+      expect(res.json).toHaveBeenCalledWith({ data: expectedProduct });
     });
 
     test("returns 404 when product not found", async () => {

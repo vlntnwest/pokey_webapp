@@ -1,6 +1,7 @@
 const { ZodError } = require("zod");
 const { Prisma } = require("@prisma/client");
 const logger = require("../logger");
+const { captureException } = require("../lib/sentry");
 
 const errorHandler = (err, req, res, next) => {
   // Zod validation errors
@@ -29,6 +30,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Default: unexpected error
   logger.error({ error: err.message, stack: err.stack }, "Unexpected error");
+  captureException(err, { requestId: req.requestId, path: req.path });
   return res.status(err.statusCode || 500).json({ error: "Internal server error" });
 };
 

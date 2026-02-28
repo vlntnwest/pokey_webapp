@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm test:*)",
+      "Bash(node:*)",
+      "Bash(npx prisma:*)",
+      "Bash(git:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm install:*)",
+      "Bash(npx eslint:*)",
+      "Bash(curl:*)",
+      "Bash(bash:*)"
     ]
   }
 }

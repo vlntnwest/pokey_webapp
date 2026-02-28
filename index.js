@@ -1,3 +1,7 @@
+require("dotenv").config({ path: "./.env" });
+// Sentry must be initialized before everything else
+require("./lib/sentry");
+
 const app = require("./app");
 const logger = require("./logger");
 
