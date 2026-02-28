@@ -1,7 +1,6 @@
 const prisma = require("../lib/prisma");
 const logger = require("../logger");
 const { sendOrderConfirmation } = require("../lib/mailer");
-const sse = require("../lib/sse");
 
 function isRestaurantOpen(openingHours) {
   if (!openingHours || openingHours.length === 0) return true;
@@ -131,7 +130,6 @@ module.exports.createOrder = async (req, res, next) => {
 
     logger.info({ orderId: data.id, restaurantId }, "Order created");
     sendOrderConfirmation({ to: data.email, order: data });
-    sse.broadcast(restaurantId, "new_order", data);
     return res.status(201).json({ data });
   } catch (error) {
     next(error);
@@ -200,22 +198,6 @@ module.exports.getOrder = async (req, res, next) => {
   }
 };
 
-module.exports.streamOrders = (req, res) => {
-  const { restaurantId } = req.params;
-
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.flushHeaders();
-
-  sse.addClient(restaurantId, res);
-  res.write(`event: connected\ndata: ${JSON.stringify({ restaurantId })}\n\n`);
-
-  req.on("close", () => {
-    sse.removeClient(restaurantId, res);
-  });
-};
-
 module.exports.updateOrderStatus = async (req, res, next) => {
   const { orderId } = req.params;
   const { status } = req.body;
@@ -227,7 +209,6 @@ module.exports.updateOrderStatus = async (req, res, next) => {
     });
 
     logger.info({ orderId, status }, "Order status updated");
-    sse.broadcast(data.restaurantId, "order_status", { orderId, status });
     return res.status(200).json({ data });
   } catch (error) {
     next(error);

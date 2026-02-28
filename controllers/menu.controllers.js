@@ -1,10 +1,5 @@
 const prisma = require("../lib/prisma");
 const logger = require("../logger");
-const cache = require("../lib/cache");
-
-async function invalidateMenuCache(restaurantId) {
-  await cache.del(`menu:${restaurantId}`);
-}
 
 module.exports.createProductCategorie = async (req, res, next) => {
   const { restaurantId } = req.params;
@@ -19,7 +14,6 @@ module.exports.createProductCategorie = async (req, res, next) => {
         displayOrder,
       },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Product categorie created");
     return res.status(201).json({ data });
   } catch (error) {
@@ -42,7 +36,6 @@ module.exports.updateProductCategorie = async (req, res, next) => {
         displayOrder,
       },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Product categorie updated");
     return res.status(200).json({ data });
   } catch (error) {
@@ -59,7 +52,6 @@ module.exports.deleteProductCategorie = async (req, res, next) => {
         id: categorieId,
       },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Product categorie deleted");
     return res.status(200).json({ message: "Product categorie deleted" });
   } catch (error) {
@@ -107,7 +99,6 @@ module.exports.createProduct = async (req, res, next) => {
       return product;
     });
 
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Product created");
     return res.status(201).json({ data });
   } catch (error) {
@@ -172,7 +163,6 @@ module.exports.updateProduct = async (req, res, next) => {
       return product;
     });
 
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Product updated");
     return res.status(200).json({ data });
   } catch (error) {
@@ -189,7 +179,6 @@ module.exports.deleteProduct = async (req, res, next) => {
         id: productId,
       },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Product deleted");
     return res.status(200).json({ message: "Product deleted" });
   } catch (error) {
@@ -237,7 +226,6 @@ module.exports.createProductOptionGroup = async (req, res, next) => {
         include: { optionChoices: { orderBy: { displayOrder: "asc" } } },
       });
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Option group created");
     return res.status(201).json({ data });
   } catch (error) {
@@ -255,7 +243,6 @@ module.exports.updateProductOptionGroup = async (req, res, next) => {
       data: { name, hasMultiple, isRequired, minQuantity, maxQuantity, displayOrder },
       include: { optionChoices: { orderBy: { displayOrder: "asc" } } },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Option group updated");
     return res.status(200).json({ data });
   } catch (error) {
@@ -268,7 +255,6 @@ module.exports.deleteProductOptionGroup = async (req, res, next) => {
 
   try {
     await prisma.optionGroup.delete({ where: { id: optionGroupId } });
-    await invalidateMenuCache(restaurantId);
     logger.info({ optionGroupId }, "Option group deleted");
     return res.status(200).json({ message: "Option group deleted" });
   } catch (error) {
@@ -287,7 +273,6 @@ module.exports.linkOptionGroups = async (req, res, next) => {
       data: optionGroupIds.map((id) => ({ productId, optionGroupId: id })),
       skipDuplicates: true,
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ productId, optionGroupIds }, "Option groups linked to product");
     return res.status(200).json({ message: "Option groups linked" });
   } catch (error) {
@@ -302,7 +287,6 @@ module.exports.unlinkOptionGroup = async (req, res, next) => {
     await prisma.productOptionGroup.delete({
       where: { productId_optionGroupId: { productId, optionGroupId } },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ productId, optionGroupId }, "Option group unlinked from product");
     return res.status(200).json({ message: "Option group unlinked" });
   } catch (error) {
@@ -320,7 +304,6 @@ module.exports.createProductOptionChoice = async (req, res, next) => {
     const data = await prisma.optionChoice.create({
       data: { optionGroupId, name, priceModifier, displayOrder },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Option choice created");
     return res.status(201).json({ data });
   } catch (error) {
@@ -345,7 +328,6 @@ module.exports.createBulkOptionChoices = async (req, res, next) => {
       where: { optionGroupId },
       orderBy: { displayOrder: "asc" },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ optionGroupId, count: choices.length }, "Bulk option choices created");
     return res.status(201).json({ data });
   } catch (error) {
@@ -362,7 +344,6 @@ module.exports.updateProductOptionChoice = async (req, res, next) => {
       where: { id: optionChoiceId },
       data: { name, priceModifier, displayOrder },
     });
-    await invalidateMenuCache(restaurantId);
     logger.info({ responseId: data.id }, "Option choice updated");
     return res.status(200).json({ data });
   } catch (error) {
@@ -375,7 +356,6 @@ module.exports.deleteProductOptionChoice = async (req, res, next) => {
 
   try {
     await prisma.optionChoice.delete({ where: { id: optionChoiceId } });
-    await invalidateMenuCache(restaurantId);
     logger.info({ optionChoiceId }, "Option choice deleted");
     return res.status(200).json({ message: "Option choice deleted" });
   } catch (error) {
@@ -436,29 +416,24 @@ module.exports.getMenu = async (req, res, next) => {
   const { restaurantId } = req.params;
 
   try {
-    const cacheKey = `menu:${restaurantId}`;
-    let data = await cache.get(cacheKey);
-    if (!data) {
-      const categories = await prisma.categorie.findMany({
-        where: { restaurantId },
-        orderBy: { displayOrder: "asc" },
-        include: {
-          productCategories: {
-            include: {
-              product: { include: PRODUCT_OPTION_INCLUDE },
-            },
+    const categories = await prisma.categorie.findMany({
+      where: { restaurantId },
+      orderBy: { displayOrder: "asc" },
+      include: {
+        productCategories: {
+          include: {
+            product: { include: PRODUCT_OPTION_INCLUDE },
           },
         },
-      });
-      data = categories.map((cat) => ({
-        ...cat,
-        productCategories: cat.productCategories.map((pc) => ({
-          ...pc,
-          product: flattenOptionGroups(pc.product),
-        })),
-      }));
-      await cache.set(cacheKey, data);
-    }
+      },
+    });
+    const data = categories.map((cat) => ({
+      ...cat,
+      productCategories: cat.productCategories.map((pc) => ({
+        ...pc,
+        product: flattenOptionGroups(pc.product),
+      })),
+    }));
 
     logger.info({ restaurantId }, "Menu retrieved");
     return res.status(200).json({ data });

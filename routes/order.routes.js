@@ -39,12 +39,4 @@ router.patch(
   orderControllers.updateOrderStatus,
 );
 
-// SSE stream for real-time kitchen notifications (STAFF+)
-router.get(
-  "/restaurants/:restaurantId/orders/stream",
-  checkAuth,
-  isStaff,
-  orderControllers.streamOrders,
-);
-
 module.exports = router;
