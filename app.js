@@ -24,12 +24,16 @@ const requestId = require("./middleware/requestId.middleware");
 
 const app = express();
 
+const isLocalhost = (req) =>
+  req.ip === "127.0.0.1" || req.ip === "::1" || req.ip === "::ffff:127.0.0.1";
+
 // Rate limiting configuration
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // 100 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isLocalhost,
   message: { error: "Too many requests, please try again later." },
 });
 
@@ -38,6 +42,7 @@ const authLimiter = rateLimit({
   max: 15, // 15 requests per window per IP
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isLocalhost,
   message: {
     error: "Too many authentication attempts, please try again later.",
   },
