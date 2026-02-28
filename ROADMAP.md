@@ -175,4 +175,4 @@
 - [x] API versioning (`/api/v1/...`)
 - [x] Request ID dans les logs (middleware `x-request-id`)
 - [x] Cache (Redis) pour les menus publics
-- [ ] Monitoring et alerting (Sentry, Datadog, etc.)
+- [x] Monitoring et alerting (Sentry, Datadog, etc.)
