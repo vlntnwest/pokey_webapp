@@ -304,6 +304,37 @@ module.exports.deleteProductOptionChoice = async (req, res, next) => {
   }
 };
 
+module.exports.searchProducts = async (req, res, next) => {
+  const { restaurantId } = req.params;
+  const { q, isAvailable } = req.query;
+
+  const where = { restaurantId };
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+    ];
+  }
+  if (isAvailable !== undefined) {
+    where.isAvailable = isAvailable === "true";
+  }
+
+  try {
+    const data = await prisma.product.findMany({
+      where,
+      orderBy: { displayOrder: "asc" },
+      include: {
+        optionGroups: { include: { optionChoices: true } },
+      },
+    });
+
+    logger.info({ restaurantId, q }, "Products searched");
+    return res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports.getMenu = async (req, res, next) => {
   const { restaurantId } = req.params;
 

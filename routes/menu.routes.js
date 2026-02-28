@@ -21,6 +21,12 @@ router.get(
   menuControllers.getMenu,
 );
 
+// Product search/filter (public) — ?q=search&isAvailable=true
+router.get(
+  "/restaurants/:restaurantId/products",
+  menuControllers.searchProducts,
+);
+
 // Products (public read)
 router.get(
   "/restaurants/:restaurantId/products/:productId",
