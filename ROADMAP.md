@@ -171,7 +171,7 @@
 - [x] Upload d'images (Supabase Storage ou S3) au lieu d'URL externes
 - [x] Notifications en temps reel (WebSocket ou Supabase Realtime) pour le dashboard cuisine
 - [x] Systeme de promotions / codes promo
-- [ ] Multi-langue pour les menus (i18n)
+- [x] Multi-langue pour les menus (i18n)
 - [x] API versioning (`/api/v1/...`)
 - [x] Request ID dans les logs (middleware `x-request-id`)
 - [ ] Cache (Redis) pour les menus publics

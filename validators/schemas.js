@@ -140,6 +140,19 @@ const openingHourItemSchema = z.object({
 
 const openingHoursSchema = z.array(openingHourItemSchema);
 
+// i18n schemas
+const categorieTranslationSchema = z.object({
+  lang: z.string().min(2).max(5),
+  name: z.string().min(1).max(50).optional(),
+  subHeading: z.string().min(1).max(255).optional(),
+});
+
+const productTranslationSchema = z.object({
+  lang: z.string().min(2).max(5),
+  name: z.string().min(1).max(50).optional(),
+  description: z.string().min(1).max(255).optional(),
+});
+
 // Promo code schemas
 const promoCodeSchema = z.object({
   code: z.string().min(1).max(50),
@@ -196,6 +209,10 @@ module.exports = {
 
   // Checkout
   checkoutSessionSchema,
+
+  // i18n
+  categorieTranslationSchema,
+  productTranslationSchema,
 
   // Promo codes
   promoCodeSchema,

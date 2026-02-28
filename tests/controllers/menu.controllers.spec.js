@@ -594,7 +594,7 @@ describe("menu controllers", () => {
       ];
       mockPrisma.categorie.findMany.mockResolvedValue(categories);
 
-      const req = { params: { restaurantId: "rest-1" } };
+      const req = { params: { restaurantId: "rest-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
@@ -623,7 +623,7 @@ describe("menu controllers", () => {
       const err = new Error("fail");
       mockPrisma.categorie.findMany.mockRejectedValue(err);
 
-      const req = { params: { restaurantId: "rest-1" } };
+      const req = { params: { restaurantId: "rest-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
@@ -644,7 +644,7 @@ describe("menu controllers", () => {
       };
       mockPrisma.product.findUnique.mockResolvedValue(product);
 
-      const req = { params: { productId: "prod-1" } };
+      const req = { params: { productId: "prod-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
@@ -657,7 +657,7 @@ describe("menu controllers", () => {
     test("returns 404 when product not found", async () => {
       mockPrisma.product.findUnique.mockResolvedValue(null);
 
-      const req = { params: { productId: "prod-999" } };
+      const req = { params: { productId: "prod-999" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
@@ -671,7 +671,7 @@ describe("menu controllers", () => {
       const err = new Error("fail");
       mockPrisma.product.findUnique.mockRejectedValue(err);
 
-      const req = { params: { productId: "prod-1" } };
+      const req = { params: { productId: "prod-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
