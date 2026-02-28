@@ -59,6 +59,7 @@ app.use(helmet());
 
 // Webhook route FIRST - before CORS to avoid blocking Stripe requests
 app.use("/api/checkout/webhook", express.raw({ type: "application/json" }));
+app.use("/api/v1/checkout/webhook", express.raw({ type: "application/json" }));
 
 // CORS
 const corsOption = {
@@ -72,7 +73,7 @@ const corsOption = {
 
 // Apply CORS to all routes EXCEPT webhook
 app.use((req, res, next) => {
-  if (req.path === "/api/checkout/webhook") {
+  if (req.path.endsWith("/checkout/webhook")) {
     return next();
   }
   cors(corsOption)(req, res, next);
@@ -92,16 +93,19 @@ app.get("/health", (req, res) => {
 // API documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
-// Routes
-app.use("/api/user", authLimiter, userRoutes);
-app.use("/api/restaurants", globalLimiter, restaurantRoutes);
-app.use("/api/menu", globalLimiter, menuRoutes);
-app.use("/api", globalLimiter, orderRoutes);
-app.use("/api", globalLimiter, openingHourRoutes);
-app.use("/api", globalLimiter, memberRoutes);
-app.use("/api", globalLimiter, statsRoutes);
-app.use("/api", globalLimiter, uploadRoutes);
-app.use("/api/checkout", paymentLimiter, checkoutRoutes);
+// Routes — mounted at both /api (v1 alias) and /api/v1
+const V1_PREFIXES = ["/api", "/api/v1"];
+for (const prefix of V1_PREFIXES) {
+  app.use(`${prefix}/user`, authLimiter, userRoutes);
+  app.use(`${prefix}/restaurants`, globalLimiter, restaurantRoutes);
+  app.use(`${prefix}/menu`, globalLimiter, menuRoutes);
+  app.use(prefix, globalLimiter, orderRoutes);
+  app.use(prefix, globalLimiter, openingHourRoutes);
+  app.use(prefix, globalLimiter, memberRoutes);
+  app.use(prefix, globalLimiter, statsRoutes);
+  app.use(prefix, globalLimiter, uploadRoutes);
+  app.use(`${prefix}/checkout`, paymentLimiter, checkoutRoutes);
+}
 
 // Error handler
 app.use(errorHandler);
