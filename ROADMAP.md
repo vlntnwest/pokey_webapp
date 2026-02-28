@@ -173,6 +173,6 @@
 - [ ] Systeme de promotions / codes promo
 - [ ] Multi-langue pour les menus (i18n)
 - [ ] API versioning (`/api/v1/...`)
-- [ ] Request ID dans les logs (middleware `x-request-id`)
+- [x] Request ID dans les logs (middleware `x-request-id`)
 - [ ] Cache (Redis) pour les menus publics
 - [ ] Monitoring et alerting (Sentry, Datadog, etc.)

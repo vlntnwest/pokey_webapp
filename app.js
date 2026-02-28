@@ -18,6 +18,7 @@ const swaggerUi = require("swagger-ui-express");
 const openApiSpec = require("./docs/openapi.json");
 
 const errorHandler = require("./middleware/error.middleware");
+const requestId = require("./middleware/requestId.middleware");
 
 const app = express();
 
@@ -48,6 +49,9 @@ const paymentLimiter = rateLimit({
   message: { error: "Too many payment attempts, please try again later." },
   skip: (req) => req.path === "/webhook", // Skip webhook (Stripe calls)
 });
+
+// Request ID (must be before other middleware)
+app.use(requestId);
 
 // Security headers
 app.use(helmet());
