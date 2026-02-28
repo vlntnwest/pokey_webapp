@@ -160,7 +160,7 @@
 
 - [x] Documentation API pour le menu (`docs/menu.md`)
 - [x] Documentation API pour les commandes (`docs/orders.md`)
-- [ ] Swagger / OpenAPI spec auto-generee ou manuelle
+- [x] Swagger / OpenAPI spec auto-generee ou manuelle
 
 ## Phase 5 — Ameliorations futures
 

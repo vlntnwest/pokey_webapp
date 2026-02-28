@@ -14,6 +14,8 @@ const openingHourRoutes = require("./routes/openingHour.routes");
 const memberRoutes = require("./routes/member.routes");
 const statsRoutes = require("./routes/stats.routes");
 const checkoutRoutes = require("./routes/checkout.routes");
+const swaggerUi = require("swagger-ui-express");
+const openApiSpec = require("./docs/openapi.json");
 
 const errorHandler = require("./middleware/error.middleware");
 
@@ -81,6 +83,9 @@ app.use(globalLimiter);
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
+
+// API documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
 // Routes
 app.use("/api/user", authLimiter, userRoutes);
