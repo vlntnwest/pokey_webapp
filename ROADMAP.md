@@ -137,11 +137,11 @@
 
 ### Tests
 
-- [ ] Tests d'integration pour le menu (categories, produits, options)
-- [ ] Tests d'integration pour les commandes
-- [ ] Tests unitaires pour les middlewares (auth, role, validate, error)
-- [ ] Tester les cas limites (UUID invalide, ressource inexistante, permissions)
-- [ ] Coverage report (vitest --coverage)
+- [x] Tests d'integration pour le menu (categories, produits, options)
+- [x] Tests d'integration pour les commandes
+- [x] Tests unitaires pour les middlewares (auth, role, validate, error)
+- [x] Tester les cas limites (UUID invalide, ressource inexistante, permissions)
+- [x] Coverage report (vitest --coverage)
 
 ### CI/CD
 

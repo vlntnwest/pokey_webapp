@@ -28,6 +28,7 @@ describe("order controllers", () => {
     mockPrisma.$transaction = vi.fn();
     mockPrisma.product = { findMany: vi.fn() };
     mockPrisma.optionChoice = { findMany: vi.fn() };
+    mockPrisma.openingHour = { findMany: vi.fn().mockResolvedValue([]) };
     mockPrisma.order = {
       create: vi.fn(),
       findMany: vi.fn(),
