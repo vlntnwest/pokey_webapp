@@ -11,7 +11,8 @@
     "dev": "nodemon index.js",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
