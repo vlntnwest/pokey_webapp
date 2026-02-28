@@ -154,7 +154,7 @@
 - [x] Dockerfile + docker-compose (app + PostgreSQL local)
 - [x] Fichier `.env.example` commite
 - [x] Script de seed pour la base de donnees (donnees de dev)
-- [ ] Migrations Prisma versionnees dans le repo
+- [x] Migrations Prisma versionnees dans le repo
 
 ### Documentation
 
