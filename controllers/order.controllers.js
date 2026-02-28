@@ -15,7 +15,7 @@ function isRestaurantOpen(openingHours) {
 
 module.exports.createOrder = async (req, res, next) => {
   const { restaurantId } = req.params;
-  const { fullName, phone, email, items } = req.body;
+  const { fullName, phone, email, items, promoCode } = req.body;
 
   try {
     const openingHours = await prisma.openingHour.findMany({
@@ -58,10 +58,44 @@ module.exports.createOrder = async (req, res, next) => {
       totalPrice += (basePrice + optionsPrice) * item.quantity;
     }
 
+    let appliedPromoCode = null;
+    if (promoCode) {
+      appliedPromoCode = await prisma.promoCode.findUnique({
+        where: { restaurantId_code: { restaurantId, code: promoCode.toUpperCase() } },
+      });
+      if (!appliedPromoCode || !appliedPromoCode.isActive) {
+        return res.status(400).json({ error: "Invalid or inactive promo code" });
+      }
+      if (appliedPromoCode.expiresAt && appliedPromoCode.expiresAt < new Date()) {
+        return res.status(400).json({ error: "Promo code has expired" });
+      }
+      if (appliedPromoCode.maxUses !== null && appliedPromoCode.usedCount >= appliedPromoCode.maxUses) {
+        return res.status(400).json({ error: "Promo code usage limit reached" });
+      }
+      if (appliedPromoCode.minOrderAmount !== null && totalPrice < parseFloat(appliedPromoCode.minOrderAmount)) {
+        return res.status(400).json({ error: `Minimum order amount of ${appliedPromoCode.minOrderAmount} required` });
+      }
+
+      const discountValue = parseFloat(appliedPromoCode.discountValue);
+      if (appliedPromoCode.discountType === "PERCENTAGE") {
+        totalPrice = totalPrice * (1 - discountValue / 100);
+      } else {
+        totalPrice = Math.max(0, totalPrice - discountValue);
+      }
+      totalPrice = Math.round(totalPrice * 100) / 100;
+    }
+
     const data = await prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: { restaurantId, fullName, phone, email, totalPrice },
       });
+
+      if (appliedPromoCode) {
+        await tx.promoCode.update({
+          where: { id: appliedPromoCode.id },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
 
       for (const item of items) {
         const orderProduct = await tx.orderProduct.create({

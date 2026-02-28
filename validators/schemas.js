@@ -102,6 +102,7 @@ const orderSchema = z.object({
   phone: phoneSchema.optional(),
   email: z.string().email().optional(),
   items: z.array(orderItemSchema).min(1),
+  promoCode: z.string().min(1).max(50).optional(),
 });
 
 const updateOrderStatusSchema = z.object({
@@ -138,6 +139,22 @@ const openingHourItemSchema = z.object({
 });
 
 const openingHoursSchema = z.array(openingHourItemSchema);
+
+// Promo code schemas
+const promoCodeSchema = z.object({
+  code: z.string().min(1).max(50),
+  discountType: z.enum(["PERCENTAGE", "FIXED"]),
+  discountValue: z.number().positive(),
+  minOrderAmount: z.number().positive().optional(),
+  maxUses: z.number().int().positive().optional(),
+  expiresAt: z.string().datetime().optional(),
+  isActive: z.boolean().default(true),
+});
+
+const validatePromoCodeSchema = z.object({
+  code: z.string().min(1),
+  orderTotal: z.number().positive(),
+});
 
 // Checkout schemas
 const checkoutSessionSchema = z.object({
@@ -179,4 +196,8 @@ module.exports = {
 
   // Checkout
   checkoutSessionSchema,
+
+  // Promo codes
+  promoCodeSchema,
+  validatePromoCodeSchema,
 };
