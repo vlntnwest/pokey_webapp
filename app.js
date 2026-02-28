@@ -13,6 +13,7 @@ const orderRoutes = require("./routes/order.routes");
 const openingHourRoutes = require("./routes/openingHour.routes");
 const memberRoutes = require("./routes/member.routes");
 const statsRoutes = require("./routes/stats.routes");
+const uploadRoutes = require("./routes/upload.routes");
 const checkoutRoutes = require("./routes/checkout.routes");
 const swaggerUi = require("swagger-ui-express");
 const openApiSpec = require("./docs/openapi.json");
@@ -99,6 +100,7 @@ app.use("/api", globalLimiter, orderRoutes);
 app.use("/api", globalLimiter, openingHourRoutes);
 app.use("/api", globalLimiter, memberRoutes);
 app.use("/api", globalLimiter, statsRoutes);
+app.use("/api", globalLimiter, uploadRoutes);
 app.use("/api/checkout", paymentLimiter, checkoutRoutes);
 
 // Error handler
