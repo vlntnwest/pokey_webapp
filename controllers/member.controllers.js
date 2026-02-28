@@ -5,20 +5,31 @@ const { sendInvitationEmail } = require("../lib/mailer");
 
 module.exports.getMembers = async (req, res, next) => {
   const { restaurantId } = req.params;
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  const skip = (page - 1) * limit;
 
   try {
-    const data = await prisma.restaurantMember.findMany({
-      where: { restaurantId },
-      include: {
-        user: {
-          select: { id: true, email: true, fullName: true, phone: true },
+    const [data, total] = await Promise.all([
+      prisma.restaurantMember.findMany({
+        where: { restaurantId },
+        include: {
+          user: {
+            select: { id: true, email: true, fullName: true, phone: true },
+          },
         },
-      },
-      orderBy: { createdAt: "asc" },
-    });
+        orderBy: { createdAt: "asc" },
+        skip,
+        take: limit,
+      }),
+      prisma.restaurantMember.count({ where: { restaurantId } }),
+    ]);
 
-    logger.info({ restaurantId }, "Members retrieved");
-    return res.status(200).json({ data });
+    logger.info({ restaurantId, page, limit }, "Members retrieved");
+    return res.status(200).json({
+      data,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     next(error);
   }

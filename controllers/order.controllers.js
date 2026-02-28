@@ -104,23 +104,34 @@ module.exports.createOrder = async (req, res, next) => {
 
 module.exports.getOrders = async (req, res, next) => {
   const { restaurantId } = req.params;
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  const skip = (page - 1) * limit;
 
   try {
-    const data = await prisma.order.findMany({
-      where: { restaurantId },
-      orderBy: { createdAt: "desc" },
-      include: {
-        orderProducts: {
-          include: {
-            product: true,
-            orderProductOptions: { include: { optionChoice: true } },
+    const [data, total] = await Promise.all([
+      prisma.order.findMany({
+        where: { restaurantId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          orderProducts: {
+            include: {
+              product: true,
+              orderProductOptions: { include: { optionChoice: true } },
+            },
           },
         },
-      },
-    });
+      }),
+      prisma.order.count({ where: { restaurantId } }),
+    ]);
 
-    logger.info({ restaurantId }, "Orders retrieved");
-    return res.status(200).json({ data });
+    logger.info({ restaurantId, page, limit }, "Orders retrieved");
+    return res.status(200).json({
+      data,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     next(error);
   }

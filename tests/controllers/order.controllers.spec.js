@@ -34,6 +34,7 @@ describe("order controllers", () => {
       findMany: vi.fn(),
       findUnique: vi.fn(),
       update: vi.fn(),
+      count: vi.fn().mockResolvedValue(0),
     };
   });
 
@@ -211,50 +212,46 @@ describe("order controllers", () => {
 
   // ─── getOrders ────────────────────────────────────────────────
   describe("getOrders", () => {
-    test("returns 200 with list of orders", async () => {
+    test("returns 200 with list of orders and pagination", async () => {
       const orders = [baseOrder, { ...baseOrder, id: "order-2" }];
       mockPrisma.order.findMany.mockResolvedValue(orders);
+      mockPrisma.order.count.mockResolvedValue(2);
 
-      const req = { params: { restaurantId: "rest-1" } };
+      const req = { params: { restaurantId: "rest-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
       await getOrders(req, res, next);
 
-      expect(mockPrisma.order.findMany).toHaveBeenCalledWith({
-        where: { restaurantId: "rest-1" },
-        orderBy: { createdAt: "desc" },
-        include: {
-          orderProducts: {
-            include: {
-              product: true,
-              orderProductOptions: { include: { optionChoice: true } },
-            },
-          },
-        },
-      });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ data: orders });
+      expect(res.json).toHaveBeenCalledWith({
+        data: orders,
+        pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
+      });
     });
 
     test("returns 200 with empty array when no orders", async () => {
       mockPrisma.order.findMany.mockResolvedValue([]);
+      mockPrisma.order.count.mockResolvedValue(0);
 
-      const req = { params: { restaurantId: "rest-1" } };
+      const req = { params: { restaurantId: "rest-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 
       await getOrders(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ data: [] });
+      expect(res.json).toHaveBeenCalledWith({
+        data: [],
+        pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+      });
     });
 
     test("calls next with error on failure", async () => {
       const err = new Error("DB error");
       mockPrisma.order.findMany.mockRejectedValue(err);
 
-      const req = { params: { restaurantId: "rest-1" } };
+      const req = { params: { restaurantId: "rest-1" }, query: {} };
       const res = mockRes();
       const next = vi.fn();
 

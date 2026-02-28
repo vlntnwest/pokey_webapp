@@ -166,7 +166,7 @@
 
 > Nice-to-have, a traiter quand le core est stable.
 
-- [ ] Pagination sur les endpoints de liste (menu, commandes, membres)
+- [x] Pagination sur les endpoints de liste (menu, commandes, membres)
 - [ ] Recherche / filtrage de produits
 - [ ] Upload d'images (Supabase Storage ou S3) au lieu d'URL externes
 - [ ] Notifications en temps reel (WebSocket ou Supabase Realtime) pour le dashboard cuisine
