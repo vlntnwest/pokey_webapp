@@ -174,5 +174,5 @@
 - [x] Multi-langue pour les menus (i18n)
 - [x] API versioning (`/api/v1/...`)
 - [x] Request ID dans les logs (middleware `x-request-id`)
-- [ ] Cache (Redis) pour les menus publics
+- [x] Cache (Redis) pour les menus publics
 - [ ] Monitoring et alerting (Sentry, Datadog, etc.)
