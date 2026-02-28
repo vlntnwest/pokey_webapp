@@ -13,8 +13,6 @@ const {
   updateProductOptionGroupSchema,
   productOptionChoiceSchema,
   updateProductOptionChoiceSchema,
-  categorieTranslationSchema,
-  productTranslationSchema,
 } = require("../validators/schemas");
 
 // Menu (public)
@@ -56,13 +54,6 @@ router.delete(
   isAdmin,
   menuControllers.deleteProductCategorie,
 );
-router.patch(
-  "/restaurants/:restaurantId/categories/:categorieId/translations",
-  checkAuth,
-  isAdmin,
-  validate({ body: categorieTranslationSchema }),
-  menuControllers.updateCategorieTranslations,
-);
 
 // Products
 router.post(
@@ -84,13 +75,6 @@ router.delete(
   checkAuth,
   isAdmin,
   menuControllers.deleteProduct,
-);
-router.patch(
-  "/restaurants/:restaurantId/products/:productId/translations",
-  checkAuth,
-  isAdmin,
-  validate({ body: productTranslationSchema }),
-  menuControllers.updateProductTranslations,
 );
 
 // Option groups

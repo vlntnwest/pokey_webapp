@@ -6,13 +6,6 @@ async function invalidateMenuCache(restaurantId) {
   await cache.del(`menu:${restaurantId}`);
 }
 
-function applyTranslation(item, lang) {
-  if (!item || !lang || !item.translations) return item;
-  const t = item.translations[lang];
-  if (!t) return item;
-  return { ...item, ...t };
-}
-
 module.exports.createProductCategorie = async (req, res, next) => {
   const { restaurantId } = req.params;
   const { name, subHeading, displayOrder } = req.body;
@@ -328,50 +321,6 @@ module.exports.deleteProductOptionChoice = async (req, res, next) => {
   }
 };
 
-module.exports.updateCategorieTranslations = async (req, res, next) => {
-  const { restaurantId, categorieId } = req.params;
-  const { lang, name, subHeading } = req.body;
-
-  try {
-    const existing = await prisma.categorie.findUnique({ where: { id: categorieId } });
-    if (!existing) return res.status(404).json({ error: "Category not found" });
-
-    const translations = { ...(existing.translations || {}), [lang]: { name, subHeading } };
-    const data = await prisma.categorie.update({
-      where: { id: categorieId },
-      data: { translations },
-    });
-
-    await invalidateMenuCache(restaurantId);
-    logger.info({ categorieId, lang }, "Category translation updated");
-    return res.status(200).json({ data });
-  } catch (error) {
-    next(error);
-  }
-};
-
-module.exports.updateProductTranslations = async (req, res, next) => {
-  const { restaurantId, productId } = req.params;
-  const { lang, name, description } = req.body;
-
-  try {
-    const existing = await prisma.product.findUnique({ where: { id: productId } });
-    if (!existing) return res.status(404).json({ error: "Product not found" });
-
-    const translations = { ...(existing.translations || {}), [lang]: { name, description } };
-    const data = await prisma.product.update({
-      where: { id: productId },
-      data: { translations },
-    });
-
-    await invalidateMenuCache(restaurantId);
-    logger.info({ productId, lang }, "Product translation updated");
-    return res.status(200).json({ data });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports.searchProducts = async (req, res, next) => {
   const { restaurantId } = req.params;
   const { q, isAvailable } = req.query;
@@ -405,13 +354,12 @@ module.exports.searchProducts = async (req, res, next) => {
 
 module.exports.getMenu = async (req, res, next) => {
   const { restaurantId } = req.params;
-  const { lang } = req.query;
 
   try {
     const cacheKey = `menu:${restaurantId}`;
-    let categories = await cache.get(cacheKey);
-    if (!categories) {
-      categories = await prisma.categorie.findMany({
+    let data = await cache.get(cacheKey);
+    if (!data) {
+      data = await prisma.categorie.findMany({
         where: { restaurantId },
         orderBy: { displayOrder: "asc" },
         include: {
@@ -430,20 +378,10 @@ module.exports.getMenu = async (req, res, next) => {
           },
         },
       });
-      await cache.set(cacheKey, categories);
+      await cache.set(cacheKey, data);
     }
 
-    const data = lang
-      ? categories.map((cat) => ({
-          ...applyTranslation(cat, lang),
-          productCategories: cat.productCategories.map((pc) => ({
-            ...pc,
-            product: applyTranslation(pc.product, lang),
-          })),
-        }))
-      : categories;
-
-    logger.info({ restaurantId, lang }, "Menu retrieved");
+    logger.info({ restaurantId }, "Menu retrieved");
     return res.status(200).json({ data });
   } catch (error) {
     next(error);
@@ -452,10 +390,9 @@ module.exports.getMenu = async (req, res, next) => {
 
 module.exports.getProduct = async (req, res, next) => {
   const { productId } = req.params;
-  const { lang } = req.query;
 
   try {
-    const product = await prisma.product.findUnique({
+    const data = await prisma.product.findUnique({
       where: { id: productId },
       include: {
         productCategories: {
@@ -469,13 +406,11 @@ module.exports.getProduct = async (req, res, next) => {
       },
     });
 
-    if (!product) {
+    if (!data) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    const data = lang ? applyTranslation(product, lang) : product;
-
-    logger.info({ responseId: product.id }, "Product retrieved");
+    logger.info({ responseId: data.id }, "Product retrieved");
     return res.status(200).json({ data });
   } catch (error) {
     next(error);
