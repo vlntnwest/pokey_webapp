@@ -145,9 +145,9 @@
 
 ### CI/CD
 
-- [ ] GitHub Actions : lint + tests sur chaque PR
+- [x] GitHub Actions : lint + tests sur chaque PR
 - [ ] GitHub Actions : deploy automatique sur merge dans main
-- [ ] Linter (ESLint) + formatter (Prettier) avec config committee
+- [x] Linter (ESLint) + formatter (Prettier) avec config committee
 
 ### Infrastructure
 
