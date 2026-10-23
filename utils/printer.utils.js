@@ -29,6 +29,7 @@ module.exports.printText = (orderData) => {
       console.log("[🧾 THERMAL] Connected to printer");
       const now = new Date();
       const time = now.toLocaleString("fr-FR", {
+        timeZone: "Europe/Paris",
         day: "numeric",
         month: "numeric",
         hour: "2-digit",
